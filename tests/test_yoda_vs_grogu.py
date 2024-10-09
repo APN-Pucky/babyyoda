@@ -2,7 +2,7 @@ import babyyoda as by
 from babyyoda.grogu.grogu_histo1d_v2 import GROGU_HISTO1D_V2
 
 
-def compare_histo1d(gh1, yh1):
+def assert_histo1d(gh1, yh1):
     assert gh1.name() == yh1.name()
     assert gh1.path() == yh1.path()
     assert gh1.title() == yh1.title()
@@ -87,6 +87,8 @@ def test_create_histo1d():
         d_bins=[
             GROGU_HISTO1D_V2.Bin(d_xmin=hb.xMin(), d_xmax=hb.xMax()) for hb in h.bins()
         ],
+        d_underflow=GROGU_HISTO1D_V2.Bin(),
+        d_overflow=GROGU_HISTO1D_V2.Bin(),
     )
 
     for i in range(12):
@@ -98,4 +100,4 @@ def test_create_histo1d():
     h.fill(10)
     g.fill(10)
 
-    compare_histo1d(g, h)
+    assert_histo1d(g, h)

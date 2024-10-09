@@ -9,8 +9,8 @@ from babyyoda.grogu.grogu_analysis_object import GROGU_ANALYSIS_OBJECT
 class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
     @dataclass
     class Bin:
-        d_xmin: Optional[float]
-        d_xmax: Optional[float]
+        d_xmin: Optional[float] = None
+        d_xmax: Optional[float] = None
         d_sumw: float = 0.0
         d_sumw2: float = 0.0
         d_sumwx: float = 0.0
@@ -51,6 +51,18 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
         def numEntries(self):
             return self.d_numentries
 
+        def __eq__(self, other):
+            return (
+                isinstance(other, GROGU_HISTO1D_V2.Bin)
+                and self.d_xmin == other.d_xmin
+                and self.d_xmax == other.d_xmax
+                and self.d_sumw == other.d_sumw
+                and self.d_sumw2 == other.d_sumw2
+                and self.d_sumwx == other.d_sumwx
+                and self.d_sumwx2 == other.d_sumwx2
+                and self.d_numentries == other.d_numentries
+            )
+
         def __add__(self, other):
             assert isinstance(other, GROGU_HISTO1D_V2.Bin)
             nxhigh = None
@@ -83,11 +95,17 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
     # YODA compatibilty code
     ############################################
 
+    def underflow(self):
+        return self.d_underflow
+
+    def overflow(self):
+        return self.d_overflow
+
     def fill(self, x, weight=1.0, fraction=1.0):
         for b in self.d_bins:
             if b.xMin() <= x < b.xMax():
                 b.fill(x, weight, fraction)
-        if x > self.xMax() and self.d_overflow is not None:
+        if x >= self.xMax() and self.d_overflow is not None:
             self.d_overflow.fill(x, weight, fraction)
         if x < self.xMin() and self.d_underflow is not None:
             self.d_underflow.fill(x, weight, fraction)
