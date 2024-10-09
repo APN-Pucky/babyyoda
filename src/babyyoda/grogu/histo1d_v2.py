@@ -48,6 +48,39 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
         def sumWX2(self):
             return self.d_sumwx2
 
+        def variance(self):
+            if self.d_sumw**2 - self.d_sumw2 == 0:
+                return 0
+            return abs(
+                (self.d_sumw2 * self.d_sumw - self.d_sumw**2)
+                / (self.d_sumw**2 - self.d_sumw2)
+            )
+            # return self.d_sumw2/self.d_numentries - (self.d_sumw/self.d_numentries)**2
+
+        def errW(self):
+            return self.d_sumw2**0.5
+
+        def stdDev(self):
+            return self.variance() ** 0.5
+
+        def effNumEntries(self):
+            return self.sumW() ** 2 / self.sumW2()
+
+        def stdErr(self):
+            return self.stdDev() / self.effNumEntries() ** 0.5
+
+        def dVol(self):
+            return self.d_xmax - self.d_xmin
+
+        def xVariance(self):
+            # return self.d_sumwx2/self.d_sumw - (self.d_sumwx/self.d_sumw)**2
+            if self.d_sumw**2 - self.d_sumw2 == 0:
+                return 0
+            return abs(
+                (self.d_sumwx2 * self.d_sumw - self.d_sumwx**2)
+                / (self.d_sumw**2 - self.d_sumw2)
+            )
+
         def numEntries(self):
             return self.d_numentries
 

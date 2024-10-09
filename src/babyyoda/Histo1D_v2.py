@@ -48,12 +48,16 @@ class HISTO1D_V2:
     ########################################################
 
     def overflow(self):
-        # This is a YODA-1 feature that is not present in YODA-2
-        return self.bins()[-1]
+        # if target has overflow method, call it
+        if hasattr(self.target, "overflow"):
+            return self.target.overflow()
+        return self.bins(includeOverflows=True)[-1]
 
     def underflow(self):
-        # This is a YODA-1 feature that is not present in YODA-2
-        return self.bins()[0]
+        # if target has underflow method, call it
+        if hasattr(self.target, "underflow"):
+            return self.target.underflow()
+        return self.bins(includeOverflows=True)[0]
 
     def xMins(self):
         return np.array([b.xMin() for b in self.bins()])
@@ -63,6 +67,9 @@ class HISTO1D_V2:
 
     def sumWs(self):
         return np.array([b.sumW() for b in self.bins()])
+
+    def sumW2s(self):
+        return np.array([b.sumW2() for b in self.bins()])
 
     ########################################################
     # Generic UHI code
@@ -74,7 +81,7 @@ class HISTO1D_V2:
 
     @property
     def kind(self):
-        return "COUNT"
+        return "MEAN"
 
     def counts(self):
         return np.array([b.numEntries() for b in self.bins()])
@@ -83,7 +90,7 @@ class HISTO1D_V2:
         return np.array([b.sumW() for b in self.bins()])
 
     def variances(self):
-        return np.array([b.sumW2() for b in self.bins()])
+        return np.array([(b.sumW2()) for b in self.bins()])
 
     def __setitem__(self, slices, value):
         # integer index
@@ -150,10 +157,12 @@ class HISTO1D_V2:
             index = overflow
         return index
 
-    def plot(self, *args, w2method="sqrt", **kwargs):
+    def plot(self, *args, binwnorm=1.0, **kwargs):
         import mplhep as hep
 
-        hep.histplot(self, w2=self.variances(), *args, w2method=w2method, **kwargs)
+        hep.histplot(
+            self, *args, yerr=self.variances() ** 0.5, binwnorm=binwnorm, **kwargs
+        )
 
     def _ipython_display_(self):
         try:

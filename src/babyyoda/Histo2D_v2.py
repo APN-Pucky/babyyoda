@@ -46,13 +46,20 @@ class HISTO2D_V2:
     # YODA compatibility code (dropped legacy code?)
     ########################################################
 
-    def overflow(self):
-        # This is a YODA-1 feature that is not present in YODA-2
-        return self.bins(includeOverflows=True)[-1]
+    def bins(self):
+        # fix order
+        return np.array(sorted(self.target.bins(), key=lambda b: (b.xMin(), b.yMin())))
 
-    def underflow(self):
-        # This is a YODA-1 feature that is not present in YODA-2
-        return self.bins(includeOverflows=True)[0]
+    def bin(self, *indices):
+        return self.bins()[indices]
+
+    # def overflow(self):
+    #    # This is a YODA-1 feature that is not present in YODA-2
+    #    return self.bins(includeOverflows=True)[-1]
+
+    # def underflow(self):
+    #    # This is a YODA-1 feature that is not present in YODA-2
+    #    return self.bins(includeOverflows=True)[0]
 
     def xMins(self):
         return np.array(sorted(list(set([b.xMin() for b in self.bins()]))))
@@ -141,7 +148,17 @@ class HISTO2D_V2:
     def plot(self, *args, **kwargs):
         import mplhep as hep
 
+        # Hack in the temporary division by dVol
+        saved_values = self.values
+
+        def temp_values():
+            return np.array([b.sumW() / b.dVol() for b in self.bins()]).reshape(
+                (len(self.axes[0]), len(self.axes[1]))
+            )
+
+        self.values = temp_values
         hep.hist2dplot(self, *args, **kwargs)
+        self.values = saved_values
 
     def _ipython_display_(self):
         try:

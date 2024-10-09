@@ -70,6 +70,9 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
         def sumWXY(self):
             return self.d_sumwxy
 
+        def dVol(self):
+            return (self.d_xmax - self.d_xmin) * (self.d_ymax - self.d_ymin)
+
         def crossTerm(self, x, y):
             assert (x == 0 and y == 1) or (x == 1 and y == 0)
             return self.sumWXY()

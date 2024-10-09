@@ -39,7 +39,7 @@ def test_access_index():
     assert_bin2d(h[0, 2], h.bin(2))
 
     assert_bin2d(g[1, 0], g.bin(10))
-    assert_bin2d(g[0, 2], h.bin(2))
+    assert_bin2d(g[0, 2], g.bin(2))
 
 
 def test_access_loc():
