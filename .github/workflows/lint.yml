@@ -1,0 +1,36 @@
+name: Lint
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+
+    name: Lint Codebase
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Lint with flake8
+      run: |
+        pipx run flake8 .
+
+    - name: Lint with Black
+      run: |
+        pipx run black --check --diff --verbose .
