@@ -159,7 +159,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
     # YODA compatibilty code
     ############################################
 
-    def copy(self):
+    def clone(self):
         return GROGU_HISTO1D_V2(
             d_key=self.d_key,
             d_path=self.d_path,

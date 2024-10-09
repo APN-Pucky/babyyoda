@@ -62,8 +62,8 @@ class HISTO1D_V2:
     # YODA compatibility code (dropped legacy code?)
     ########################################################
 
-    def copy(self):
-        return HISTO1D_V2(self.target.copy())
+    def clone(self):
+        return HISTO1D_V2(self.target.clone())
 
     def overflow(self):
         # if target has overflow method, call it
@@ -143,14 +143,14 @@ class HISTO1D_V2:
             if isinstance(step, rebin):
                 if start is None:
                     start = 0
-                cs = self.copy()
+                cs = self.clone()
                 cs.rebinBy(step.factor, start, stop)
                 return cs
 
             print(f" {start} {stop} {step}")
             if stop is not None:
                 stop += 1
-            sc = self.copy()
+            sc = self.clone()
             sc.rebinTo(self.xEdges()[start:stop])
             return sc
 

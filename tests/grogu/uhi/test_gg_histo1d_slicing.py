@@ -16,16 +16,16 @@ def get_histo1d():
 
 def test_slicing_everything():
     yuhi1d = get_histo1d()
-    assert yuhi1d.copy() != yuhi1d
-    assert_histo1d(yuhi1d.copy(), yuhi1d)
+    assert yuhi1d.clone() != yuhi1d
+    assert_histo1d(yuhi1d.clone(), yuhi1d)
     assert yuhi1d[:] != yuhi1d
     assert_histo1d(yuhi1d[:], yuhi1d)
-    assert yuhi1d.copy()[:] != yuhi1d
+    assert yuhi1d.clone()[:] != yuhi1d
 
 
 def test_slicing_subset():
     yuhi1d = get_histo1d()
-    assert yuhi1d.copy()[1:3] != yuhi1d
+    assert yuhi1d.clone()[1:3] != yuhi1d
     assert yuhi1d[1:3] != yuhi1d[1:3]
     assert_histo1d(yuhi1d[1:3], yuhi1d[1:3])
     assert yuhi1d[1:3][0].sumW() == yuhi1d[1].sumW()
