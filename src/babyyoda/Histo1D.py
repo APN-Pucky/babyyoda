@@ -89,7 +89,7 @@ class HISTO1D_V2:
         if index == overflow:
             self.overflow = value
             return
-        self.bins[index] = value
+        self.bins()[index] = value
 
     def __getitem__(self, slices):
         index = self.__get_index(slices)
