@@ -141,7 +141,8 @@ class HISTO2D_V2:
         if isinstance(slices, tuple):
             if len(slices) == 2:
                 ix, iy = self.__get_indices(slices)
-                return self.__get_by_indices(ix, iy)
+                if isinstance(ix, int) and isinstance(iy, int):
+                    return self.__get_by_indices(ix, iy)
         # TODO implement slice
         raise TypeError("Invalid argument type")
 
