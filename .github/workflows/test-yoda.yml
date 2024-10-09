@@ -35,7 +35,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install --system '.[test]' --break-system-packages
+        pip install '.[test]' --break-system-packages
         pip list
 
     - name: Test with pytest
