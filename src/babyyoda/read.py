@@ -38,9 +38,9 @@ def read_grogu(file_path: str):
     """
     ret = {}
     for k, v in grogu.read(file_path).items():
-        if isinstance(v, grogu.histo1d_v2.HISTO1D_V2):
+        if isinstance(v, grogu.histo1d_v2.GROGU_HISTO1D_V2):
             ret[k] = HISTO1D_V2(v)
-        elif isinstance(v, grogu.histo2d_v2.Histo2D):
+        elif isinstance(v, grogu.histo2d_v2.GROGU_HISTO2D_V2):
             ret[k] = HISTO2D_V2(v)
         else:
             ret[k] = v
