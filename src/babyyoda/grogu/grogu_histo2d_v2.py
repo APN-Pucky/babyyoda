@@ -9,22 +9,33 @@ from babyyoda.grogu.grogu_analysis_object import GROGU_ANALYSIS_OBJECT
 class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
     @dataclass
     class Bin:
-        d_xmin: float
-        d_xmax: float
-        d_ymin: float
-        d_ymax: float
-        d_sumw: float
-        d_sumw2: float
-        d_sumwx: float
-        d_sumwx2: float
-        d_sumwy: float
-        d_sumwy2: float
-        d_sumwxy: float
-        d_numentries: float
+        d_xmin: Optional[float] = None
+        d_xmax: Optional[float] = None
+        d_ymin: Optional[float] = None
+        d_ymax: Optional[float] = None
+        d_sumw: float = 0.0
+        d_sumw2: float = 0.0
+        d_sumwx: float = 0.0
+        d_sumwx2: float = 0.0
+        d_sumwy: float = 0.0
+        d_sumwy2: float = 0.0
+        d_sumwxy: float = 0.0
+        d_numentries: float = 0.0
 
         ########################################################
         # YODA compatibilty code
         ########################################################
+
+        def fill(self, x: float, y: float, weight: float = 1.0, fraction=1.0):
+            sf = fraction * weight
+            self.d_sumw += sf
+            self.d_sumw2 += sf * weight
+            self.d_sumwx += sf * x
+            self.d_sumwx2 += sf * x**2
+            self.d_sumwy += sf * y
+            self.d_sumwy2 += sf * y**2
+            self.d_sumwxy += sf * x * y
+            self.d_numentries += fraction
 
         def xMin(self):
             return self.d_xmin
@@ -44,6 +55,21 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
         def sumW2(self):
             return self.d_sumw2
 
+        def sumWX(self):
+            return self.d_sumwx
+
+        def sumWX2(self):
+            return self.d_sumwx2
+
+        def sumWY(self):
+            return self.d_sumwy
+
+        def sumWY2(self):
+            return self.d_sumwy2
+
+        def sumWXY(self):
+            return self.d_sumwxy
+
         def numEntries(self):
             return self.d_numentries
 
@@ -58,9 +84,33 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
     # YODA compatibilty code
     #
 
+    def fill(self, x, y, weight=1.0, fraction=1.0):
+        for b in self.d_bins:
+            if b.d_xmin <= x < b.d_xmax and b.d_ymin <= y < b.d_ymax:
+                b.fill(x, y, weight, fraction)
+        if x >= self.xMax() and self.d_overflow is not None:
+            self.d_overflow.fill(x, y, weight, fraction)
+        if x < self.xMin() and self.d_underflow is not None:
+            self.d_underflow.fill(x, y, weight, fraction)
+
+    def xMin(self):
+        return min(b.d_xmin for b in self.d_bins)
+
+    def xMax(self):
+        return max(b.d_xmax for b in self.d_bins)
+
     def bins(self):
         # sort the bins by xlow, then ylow
         return sorted(self.d_bins, key=lambda b: (b.d_xmin, b.d_ymin))
+
+    def bin(self, index):
+        return self.bins()[index]
+
+    def binAt(self, x, y):
+        for b in self.bins():
+            if b.d_xmin <= x < b.d_xmax and b.d_ymin <= y < b.d_ymax:
+                return b
+        return None
 
 
 def parse_histo2d_v2(file_content: str, name: str = "") -> GROGU_HISTO2D_V2:
