@@ -1,5 +1,5 @@
 import numpy as np
-from babyyoda.util import loc, overflow, rebin, underflow
+from babyyoda.util import loc, overflow, underflow
 
 
 class HISTO2D_V2:
@@ -8,20 +8,21 @@ class HISTO2D_V2:
         target is either a yoda or grogu HISTO2D_V2
         """
         # Store the target object where calls and attributes will be forwarded
-        super().__setattr__('target', target)
+        super().__setattr__("target", target)
 
     ########################################################
     # Relay all attribute access to the target object
     ########################################################
 
     def __getattr__(self, name):
-        # First, check if the Forwarder object itself has the attribute
+        # yoda-1 has overflow but yoda-2 does not so we patch it in here
         if name in self.__dict__ or hasattr(type(self), name):
             return object.__getattribute__(self, name)
-        # If not, forward attribute access to the target
         elif hasattr(self.target, name):
             return getattr(self.target, name)
-        raise AttributeError(f"'{type(self).__name__}' object and target have no attribute '{name}'")
+        raise AttributeError(
+            f"'{type(self).__name__}' object and target have no attribute '{name}'"
+        )
 
     def __setattr__(self, name, value):
         # First, check if the attribute belongs to the Forwarder itself
@@ -31,7 +32,9 @@ class HISTO2D_V2:
         elif hasattr(self.target, name):
             setattr(self.target, name, value)
         else:
-            raise AttributeError(f"Cannot set attribute '{name}'; it does not exist in target or Forwarder.")
+            raise AttributeError(
+                f"Cannot set attribute '{name}'; it does not exist in target or Forwarder."
+            )
 
     def __call__(self, *args, **kwargs):
         # If the target is callable, forward the call, otherwise raise an error
@@ -39,25 +42,35 @@ class HISTO2D_V2:
             return self.target(*args, **kwargs)
         raise TypeError(f"'{type(self.target).__name__}' object is not callable")
 
-
     ########################################################
     # YODA compatibility code (dropped legacy code?)
     ########################################################
 
+    def overflow(self):
+        # This is a YODA-1 feature that is not present in YODA-2
+        return self.bins()[-1]
+
+    def underflow(self):
+        # This is a YODA-1 feature that is not present in YODA-2
+        return self.bins()[0]
+
     def xMins(self):
         return np.array(sorted(list(set([b.xMin() for b in self.bins()]))))
-    
+
     def xMaxs(self):
-        return np.array(sorted(list(set([b.xMax() for b in self.bins()])))) 
+        return np.array(sorted(list(set([b.xMax() for b in self.bins()]))))
 
     def yMins(self):
         return np.array(sorted(list(set([b.yMin() for b in self.bins()]))))
-    
+
     def yMaxs(self):
         return np.array(sorted(list(set([b.yMax() for b in self.bins()]))))
 
     def sumWs(self):
         return np.array([b.sumW() for b in self.bins()])
+
+    def sumWXYs(self):
+        return [b.crossTerm(0, 1) for b in self.bins()]
 
     ########################################################
     # Generic UHI code
@@ -87,7 +100,6 @@ class HISTO2D_V2:
             (len(self.axes[0]), len(self.axes[1]))
         )
 
-    
     def __single_index(self, ix, iy):
         return ix * len(self.axes[1]) + iy
 

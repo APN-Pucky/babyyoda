@@ -70,6 +70,10 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
         def sumWXY(self):
             return self.d_sumwxy
 
+        def crossTerm(self, x, y):
+            assert (x == 0 and y == 1) or (x == 1 and y == 0)
+            return self.sumWXY()
+
         def numEntries(self):
             return self.d_numentries
 
@@ -101,7 +105,10 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
 
     def bins(self):
         # sort the bins by xlow, then ylow
-        return sorted(self.d_bins, key=lambda b: (b.d_xmin, b.d_ymin))
+        # YODA-1
+        # return sorted(self.d_bins, key=lambda b: (b.d_xmin, b.d_ymin))
+        # YODA-2
+        return sorted(self.d_bins, key=lambda b: (b.d_ymin, b.d_xmin))
 
     def bin(self, index):
         return self.bins()[index]

@@ -49,7 +49,10 @@ def assert_value2d(gb, yb):
     assert gb.sumWX2() == yb.sumWX2()
     assert gb.sumWY() == yb.sumWY()
     assert gb.sumWY2() == yb.sumWY2()
-    assert gb.sumWXY() == yb.sumWXY()
+    if hasattr(gb, "crossTerm") and hasattr(yb, "crossTerm"):
+        assert gb.crossTerm(0, 1) == yb.crossTerm(0, 1)
+    if hasattr(gb, "sumWXY") and hasattr(yb, "sumWXY"):
+        assert gb.sumWXY() == yb.sumWXY()
     assert gb.numEntries() == yb.numEntries()
 
 

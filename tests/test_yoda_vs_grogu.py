@@ -1,4 +1,6 @@
 import babyyoda as by
+from babyyoda.Histo1D import HISTO1D_V2
+from babyyoda.Histo2D import HISTO2D_V2
 from babyyoda.grogu.grogu_histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.grogu.grogu_histo2d_v2 import GROGU_HISTO2D_V2
 from babyyoda.test import assert_ao, assert_histo1d, assert_histo2d
@@ -40,13 +42,13 @@ def test_histo2():
 
     assert len(gh2.bins()) == len(yh2.bins())
 
-    for gb, yb in zip(gh2.bins(), yh2.bins()):
+    for i, (gb, yb) in enumerate(zip(gh2.bins(), yh2.bins())):
         assert gb.xMin() == yb.xMin()
         assert gb.xMax() == yb.xMax()
         assert gb.yMin() == yb.yMin()
         assert gb.yMax() == yb.yMax()
 
-        assert gb.sumW() == yb.sumW()
+        assert gb.sumW() == yb.sumW(), f"at index {i}"
         assert gb.sumW2() == yb.sumW2()
         assert gb.numEntries() == yb.numEntries()
 
@@ -76,7 +78,7 @@ def test_create_histo1d():
     h.fill(10)
     g.fill(10)
 
-    assert_histo1d(g, h)
+    assert_histo1d(HISTO1D_V2(g), HISTO1D_V2(h))
 
 
 def test_create_histo2d():
@@ -102,4 +104,4 @@ def test_create_histo2d():
                 h.fill(i, j)
                 g.fill(i, j)
 
-    assert_histo2d(g, h)
+    assert_histo2d(HISTO2D_V2(g), HISTO2D_V2(h))

@@ -32,13 +32,15 @@ lint = [
     "ruff",
 ]
 test = [
+    "uhi",
+    "histoprint",
+    "mplhep",
     "pydocstyle",
     "pytest-cov>=2.5.1",
     "pytest>=6.0",
 ]
-full =[ "histoprint",  "mplhep" ]
 develop = [
-    "pylhe[full,test,lint]",
+    "pylhe[test,lint]",
     "pre-commit",
     "tbump>=6.7.0",
 ]

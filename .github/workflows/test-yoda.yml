@@ -35,8 +35,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        uv pip install --system '.[test]'
-        uv pip list
+        pip install --system '.[test]' --break-system-packages
+        pip list
 
     - name: Test with pytest
       run: |
