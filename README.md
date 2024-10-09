@@ -28,6 +28,24 @@ and the disadvantages to `yoda` are that it
 pip install babyyoda
 ```
 
+## Design
+
+`babyyoda` is designed to be a drop-in replacement for `yoda` with a few key differences:
+
+```python
+import babyyoda as yoda
+```
+
+with UHI support.
+It can use either `yoda` (C++) or `babyyoda.grogu` (Python) as backend.
+At some point the UHI support might be adapted by the original `yoda` package.
+
+For a less feature complete version, `babyyoda.grogu` is a simpler python drop-in replacement for `yoda`:
+
+```python
+import babyyoda.grogu as yoda
+```
+
 ## License
 
 `babyyoda` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.

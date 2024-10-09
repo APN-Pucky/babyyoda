@@ -2,7 +2,7 @@ import re
 from typing import Optional
 from dataclasses import dataclass, field
 
-from babyyoda.grogu.grogu_analysis_object import GROGU_ANALYSIS_OBJECT
+from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
 
 
 @dataclass

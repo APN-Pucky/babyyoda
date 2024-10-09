@@ -1,8 +1,5 @@
-import pytest
 import babyyoda as by
 import uhi.typing.plottable as uhit
-
-pytest.importorskip("yoda")
 
 
 def load_histos():

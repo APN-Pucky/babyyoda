@@ -1,8 +1,8 @@
 import babyyoda as by
-from babyyoda.Histo1D import HISTO1D_V2
-from babyyoda.Histo2D import HISTO2D_V2
-from babyyoda.grogu.grogu_histo1d_v2 import GROGU_HISTO1D_V2
-from babyyoda.grogu.grogu_histo2d_v2 import GROGU_HISTO2D_V2
+from babyyoda.Histo1D_v2 import HISTO1D_V2
+from babyyoda.Histo2D_v2 import HISTO2D_V2
+from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
+from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
 from babyyoda.test import assert_ao, assert_histo1d, assert_histo2d
 
 
