@@ -6,11 +6,14 @@ def set_bin(target, source):
     # TODO allow modify those?
     # self.d_xmin = bin.xMin()
     # self.d_xmax = bin.xMax()
-    target.set(
-        source.numEntries(),
-        [source.sumW(), source.sumWX()],
-        [source.sumW2(), source.sumWX2()],
-    )
+    if hasattr(target, "set"):
+        target.set(
+            source.numEntries(),
+            [source.sumW(), source.sumWX()],
+            [source.sumW2(), source.sumWX2()],
+        )
+    else:
+        raise NotImplementedError("YODA1 backend can not set bin values")
 
 
 # TODO make this implementation independent (no V2 or V3...)
@@ -59,6 +62,9 @@ class HISTO1D_V2:
     # YODA compatibility code (dropped legacy code?)
     ########################################################
 
+    def copy(self):
+        return HISTO1D_V2(self.target.copy())
+
     def overflow(self):
         # if target has overflow method, call it
         if hasattr(self.target, "overflow"):
@@ -71,6 +77,9 @@ class HISTO1D_V2:
             return self.target.underflow()
         return self.bins(includeOverflows=True)[0]
 
+    def errWs(self):
+        return np.sqrt(np.array([b.sumW2() for b in self.bins()]))
+
     def xMins(self):
         return np.array([b.xMin() for b in self.bins()])
 
@@ -82,6 +91,12 @@ class HISTO1D_V2:
 
     def sumW2s(self):
         return np.array([b.sumW2() for b in self.bins()])
+
+    def rebinBy(self, *args, **kwargs):
+        self.rebinXBy(*args, **kwargs)
+
+    def rebinTo(self, *args, **kwargs):
+        self.rebinXTo(*args, **kwargs)
 
     ########################################################
     # Generic UHI code
@@ -128,11 +143,16 @@ class HISTO1D_V2:
             if isinstance(step, rebin):
                 if start is None:
                     start = 0
-                return self.rebinBy(step.factor, start, stop)
+                cs = self.copy()
+                cs.rebinBy(step.factor, start, stop)
+                return cs
 
-            # print(f" {start} {stop} {step}")
-
-            return self.rebinTo(self.bins()[start:stop])
+            print(f" {start} {stop} {step}")
+            if stop is not None:
+                stop += 1
+            sc = self.copy()
+            sc.rebinTo(self.xEdges()[start:stop])
+            return sc
 
         raise TypeError("Invalid argument type")
 
@@ -141,7 +161,7 @@ class HISTO1D_V2:
         if isinstance(slices, int):
             index = slices
             while index < 0:
-                index = len(self.bins) + index
+                index = len(self.bins()) + index
         if isinstance(slices, loc):
             # TODO cyclic maybe
             idx = None

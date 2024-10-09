@@ -21,6 +21,17 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
         # YODA compatibilty code
         ########################################################
 
+        def copy(self):
+            return GROGU_HISTO1D_V2.Bin(
+                d_xmin=self.d_xmin,
+                d_xmax=self.d_xmax,
+                d_sumw=self.d_sumw,
+                d_sumw2=self.d_sumw2,
+                d_sumwx=self.d_sumwx,
+                d_sumwx2=self.d_sumwx2,
+                d_numentries=self.d_numentries,
+            )
+
         def fill(self, x: float, weight: float = 1.0, fraction: float = 1.0) -> bool:
             # if (self.d_xmin is None or x > self.d_xmin) and (self.d_xmax is None or x < self.d_xmax):
             sf = fraction * weight
@@ -54,6 +65,9 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
 
         def xMax(self):
             return self.d_xmax
+
+        def xMid(self):
+            return (self.d_xmin + self.d_xmax) / 2
 
         def sumW(self):
             return self.d_sumw
@@ -117,18 +131,16 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
 
         def __add__(self, other):
             assert isinstance(other, GROGU_HISTO1D_V2.Bin)
-            nxhigh = None
-            nxlow = None
-            # combine if the bins are adjacent
-            if self.d_xmax == other.d_xmin:
-                nxlow = self.d_xmin
-                nxhigh = other.d_xmax
-            elif self.d_xmin == other.d_xmax:
-                nxlow = other.d_xmin
-                nxhigh = self.d_xmax
+            ## combine if the bins are adjacent
+            # if self.d_xmax == other.d_xmin:
+            #    nxlow = self.d_xmin
+            #    nxhigh = other.d_xmax
+            # elif self.d_xmin == other.d_xmax:
+            #    nxlow = other.d_xmin
+            #    nxhigh = self.d_xmax
             return GROGU_HISTO1D_V2.Bin(
-                nxlow,
-                nxhigh,
+                self.d_xmin,
+                self.d_xmax,
                 self.d_sumw + other.d_sumw,
                 self.d_sumw2 + other.d_sumw2,
                 self.d_sumwx + other.d_sumwx,
@@ -146,6 +158,16 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
     ############################################
     # YODA compatibilty code
     ############################################
+
+    def copy(self):
+        return GROGU_HISTO1D_V2(
+            d_key=self.d_key,
+            d_path=self.d_path,
+            d_title=self.d_title,
+            d_bins=[b.copy() for b in self.d_bins],
+            d_underflow=self.d_underflow,
+            d_overflow=self.d_overflow,
+        )
 
     def underflow(self):
         return self.d_underflow
@@ -183,28 +205,57 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
     def binDim(self):
         return 1
 
-    def rebinBy(self, factor: int, start: None, stop: None):
+    def rebinXBy(self, factor: int, start: None, stop: None):
+        # TODO what about not fitting start stop with factor?!
         if start is None:
             start = 0
         if stop is None:
             stop = len(self.bins())
         new_bins = []
         for i in range(start, stop, factor):
-            nb = self.bins[i]
-            for j in range(1, factor):
+            nb = GROGU_HISTO1D_V2.Bin(
+                d_xmin=self.bins[i].xMin(), d_xmax=self.bins[i].xMax()
+            )
+            for j in range(0, factor):
                 nb += self.bins[i + j]
-            new_bins.append(nb)
-        return GROGU_HISTO1D_V2(
-            d_key=self.d_key,
-            d_path=self.d_path,
-            d_title=self.d_title,
-            d_bins=new_bins,
-            d_underflow=self.d_underflow,
-            d_overflow=self.d_overflow,
-        )
+                nb.d_xmin = min(nb.d_xmin, self.bins[i + j].xMin())
+                nb.d_xmax = max(nb.d_xmax, self.bins[i + j].xMax())
 
-    def rebinTo(bins):
-        raise NotImplementedError
+            new_bins.append(nb)
+        self.d_bins = new_bins
+        # return self
+        # not inplace
+        # return GROGU_HISTO1D_V2(
+        #    d_key=self.d_key,
+        #    d_path=self.d_path,
+        #    d_title=self.d_title,
+        #    d_bins=new_bins,
+        #    d_underflow=self.d_underflow,
+        #    d_overflow=self.d_overflow,
+        # )
+
+    def xEdges(self):
+        return [b.xMin() for b in self.d_bins] + [self.xMax()]
+
+    def rebinXTo(self, edges: List[float]):
+        own_edges = self.xEdges()
+        for e in edges:
+            assert e in own_edges, f"Edge {e} not found in own edges {own_edges}"
+
+        new_bins = []
+        for i in range(len(edges) - 1):
+            new_bins.append(GROGU_HISTO1D_V2.Bin(d_xmin=edges[i], d_xmax=edges[i + 1]))
+        for b in self.bins():
+            if b.xMid() < min(edges):
+                self.d_underflow += b
+            elif b.xMid() > max(edges):
+                self.d_overflow += b
+            else:
+                for i in range(len(edges) - 1):
+                    if edges[i] <= b.xMid() and b.xMid() <= edges[i + 1]:
+                        new_bins[i] += b
+        self.d_bins = new_bins
+        # return self
 
 
 def parse_histo1d_v2(file_content: str, key: str = "") -> GROGU_HISTO1D_V2:
