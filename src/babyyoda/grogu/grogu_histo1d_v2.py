@@ -11,15 +11,24 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
     class Bin:
         d_xmin: Optional[float]
         d_xmax: Optional[float]
-        d_sumw: float
-        d_sumw2: float
-        d_sumwx: float
-        d_sumwx2: float
-        d_numentries: float
+        d_sumw: float = 0.0
+        d_sumw2: float = 0.0
+        d_sumwx: float = 0.0
+        d_sumwx2: float = 0.0
+        d_numentries: float = 0.0
 
         ########################################################
         # YODA compatibilty code
         ########################################################
+
+        def fill(self, x: float, weight: float = 1.0, fraction: float = 1.0) -> bool:
+            # if (self.d_xmin is None or x > self.d_xmin) and (self.d_xmax is None or x < self.d_xmax):
+            sf = fraction * weight
+            self.d_sumw += sf
+            self.d_sumw2 += sf * weight
+            self.d_sumwx += sf * x
+            self.d_sumwx2 += sf * x**2
+            self.d_numentries += fraction
 
         def xMin(self):
             return self.d_xmin
@@ -73,6 +82,21 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
     ############################################
     # YODA compatibilty code
     ############################################
+
+    def fill(self, x, weight=1.0, fraction=1.0):
+        for b in self.d_bins:
+            if b.xMin() <= x < b.xMax():
+                b.fill(x, weight, fraction)
+        if x > self.xMax() and self.d_overflow is not None:
+            self.d_overflow.fill(x, weight, fraction)
+        if x < self.xMin() and self.d_underflow is not None:
+            self.d_underflow.fill(x, weight, fraction)
+
+    def xMax(self):
+        return max([b.xMax() for b in self.d_bins])
+
+    def xMin(self):
+        return min([b.xMin() for b in self.d_bins])
 
     def bins(self):
         return sorted(self.d_bins, key=lambda b: b.d_xmin)
