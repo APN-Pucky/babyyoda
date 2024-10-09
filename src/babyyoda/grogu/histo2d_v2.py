@@ -108,7 +108,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
         # YODA-1
         # return sorted(self.d_bins, key=lambda b: (b.d_xmin, b.d_ymin))
         # YODA-2
-        return sorted(self.d_bins, key=lambda b: (b.d_ymin, b.d_xmin))
+        return sorted(self.d_bins, key=lambda b: (b.d_xmin, b.d_ymin))
 
     def bin(self, index):
         return self.bins()[index]

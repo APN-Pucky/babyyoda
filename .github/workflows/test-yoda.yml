@@ -42,14 +42,14 @@ jobs:
       run: |
         pytest -r sx tests/
 
-    - name: Report core project coverage with Codecov
-      if: >-
-        github.event_name != 'schedule' &&
-        matrix.os == 'ubuntu-latest'
-      uses: codecov/codecov-action@v4
-      with:
-        fail_ci_if_error: true
-        files: ./coverage.xml
-        flags: unittests-${{ matrix.python-version }}
-        name: pylhe
-        token: ${{ secrets.CODECOV_TOKEN }}
+#    - name: Report core project coverage with Codecov
+#      if: >-
+#        github.event_name != 'schedule' &&
+#        matrix.os == 'ubuntu-latest'
+#      uses: codecov/codecov-action@v4
+#      with:
+#        fail_ci_if_error: true
+#        files: ./coverage.xml
+#        flags: unittests-${{ matrix.python-version }}
+#        name: pylhe
+#        token: ${{ secrets.CODECOV_TOKEN }}

@@ -48,11 +48,11 @@ class HISTO2D_V2:
 
     def overflow(self):
         # This is a YODA-1 feature that is not present in YODA-2
-        return self.bins()[-1]
+        return self.bins(includeOverflows=True)[-1]
 
     def underflow(self):
         # This is a YODA-1 feature that is not present in YODA-2
-        return self.bins()[0]
+        return self.bins(includeOverflows=True)[0]
 
     def xMins(self):
         return np.array(sorted(list(set([b.xMin() for b in self.bins()]))))
