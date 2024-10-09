@@ -1,12 +1,15 @@
-import yoda as yd
-
+import pytest
 from babyyoda.Histo2D import HISTO2D_V2
 from babyyoda.grogu.grogu_histo2d_v2 import GROGU_HISTO2D_V2
 from babyyoda.test import assert_bin2d
 from babyyoda.util import loc
 
+pytest.importorskip("yoda")
+
 
 def create_histo2d():
+    import yoda as yd
+
     h = yd.Histo2D(10, 0, 10, 10, 0, 10, title="test")
 
     g = GROGU_HISTO2D_V2(

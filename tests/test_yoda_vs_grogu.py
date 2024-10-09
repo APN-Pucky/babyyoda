@@ -7,20 +7,20 @@ from babyyoda.test import assert_ao, assert_histo1d, assert_histo2d
 
 
 def test_ao():
-    gh1 = next(iter(by.read_grogu("tests/test1d.yoda").values()))
-    yh1 = next(iter(by.read_yoda("tests/test1d.yoda").values()))
+    gh1 = next(iter(by.read_grogu("tests/test_histo1d_v2.yoda").values()))
+    yh1 = next(iter(by.read_yoda("tests/test_histo1d_v2.yoda").values()))
 
     assert_ao(gh1, yh1)
 
-    gh2 = next(iter(by.read_grogu("tests/test2d.yoda").values()))
-    yh2 = next(iter(by.read_yoda("tests/test2d.yoda").values()))
+    gh2 = next(iter(by.read_grogu("tests/test_histo2d_v2.yoda").values()))
+    yh2 = next(iter(by.read_yoda("tests/test_histo2d_v2.yoda").values()))
 
     assert_ao(gh2, yh2)
 
 
 def test_histo1():
-    gh1 = next(iter(by.read_grogu("tests/test1d.yoda").values()))
-    yh1 = next(iter(by.read_yoda("tests/test1d.yoda").values()))
+    gh1 = next(iter(by.read_grogu("tests/test_histo1d_v2.yoda").values()))
+    yh1 = next(iter(by.read_yoda("tests/test_histo1d_v2.yoda").values()))
 
     assert len(gh1.bins()) == len(yh1.bins())
 
@@ -37,8 +37,8 @@ def test_histo1():
 
 
 def test_histo2():
-    gh2 = next(iter(by.read_grogu("tests/test2d.yoda").values()))
-    yh2 = next(iter(by.read_yoda("tests/test2d.yoda").values()))
+    gh2 = next(iter(by.read_grogu("tests/test_histo2d_v2.yoda").values()))
+    yh2 = next(iter(by.read_yoda("tests/test_histo2d_v2.yoda").values()))
 
     assert len(gh2.bins()) == len(yh2.bins())
 
