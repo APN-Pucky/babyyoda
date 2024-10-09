@@ -27,6 +27,11 @@ classifiers = [
 dependencies = [
   "numpy"
 ]
+[project.optional-dependencies]
+full =[ "histoprint",  "mplhep" ]
+
+[project.scripts]
+babyyoda = "babyyoda.cli.main:main"
 
 [project.urls]
 Documentation = "https://github.com/APN-Pucky/babyyoda#readme"
