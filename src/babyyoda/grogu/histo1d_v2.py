@@ -1,5 +1,5 @@
 import re
-from typing import Optional
+from typing import List, Optional
 from dataclasses import dataclass, field
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
@@ -29,6 +29,25 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
             self.d_sumwx += sf * x
             self.d_sumwx2 += sf * x**2
             self.d_numentries += fraction
+
+        def set_bin(self, bin):
+            # TODO allow modify those?
+            # self.d_xmin = bin.xMin()
+            # self.d_xmax = bin.xMax()
+            self.d_sumw = bin.sumW()
+            self.d_sumw2 = bin.sumW2()
+            self.d_sumwx = bin.sumWX()
+            self.d_sumwx2 = bin.sumWX2()
+            self.d_numentries = bin.numEntries()
+
+        def set(self, numEntries: float, sumW: List[float], sumW2: List[float]):
+            assert len(sumW) == 2
+            assert len(sumW2) == 2
+            self.d_sumw = sumW[0]
+            self.d_sumw2 = sumW2[0]
+            self.d_sumwx = sumW[1]
+            self.d_sumwx2 = sumW2[1]
+            self.d_numentries = numEntries
 
         def xMin(self):
             return self.d_xmin

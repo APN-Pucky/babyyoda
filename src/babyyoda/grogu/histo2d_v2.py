@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import List, Optional
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
 
@@ -36,6 +36,40 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
             self.d_sumwy2 += sf * y**2
             self.d_sumwxy += sf * x * y
             self.d_numentries += fraction
+
+        def set_bin(self, bin):
+            # TODO allow modify those?
+            # self.d_xmin = bin.xMin()
+            # self.d_xmax = bin.xMax()
+            # self.d_ymin = bin.yMin()
+            # self.d_ymax = bin.yMax()
+            self.d_sumw = bin.sumW()
+            self.d_sumw2 = bin.sumW2()
+            self.d_sumwx = bin.sumWX()
+            self.d_sumwx2 = bin.sumWX2()
+            self.d_sumwy = bin.sumWY()
+            self.d_sumwy2 = bin.sumWY2()
+            self.d_sumwxy = bin.sumWXY()
+            self.d_numentries = bin.numEntries()
+
+        def set(
+            self,
+            numEntries: float,
+            sumW: List[float],
+            sumW2: List[float],
+            sumWcross: List[float],
+        ):
+            assert len(sumW) == 3
+            assert len(sumW2) == 3
+            assert len(sumWcross) == 1
+            self.d_sumw = sumW[0]
+            self.d_sumw2 = sumW2[0]
+            self.d_sumwx = sumW[1]
+            self.d_sumwx2 = sumW2[1]
+            self.d_sumwy = sumW[2]
+            self.d_sumwy2 = sumW2[2]
+            self.d_sumwxy = sumWcross[0]
+            self.d_numentries = numEntries
 
         def xMin(self):
             return self.d_xmin

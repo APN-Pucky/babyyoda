@@ -2,6 +2,18 @@ import numpy as np
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
+def set_bin(target, source):
+    # TODO allow modify those?
+    # self.d_xmin = bin.xMin()
+    # self.d_xmax = bin.xMax()
+    target.set(
+        source.numEntries(),
+        [source.sumW(), source.sumWX()],
+        [source.sumW2(), source.sumWX2()],
+    )
+
+
+# TODO make this implementation independent (no V2 or V3...)
 class HISTO1D_V2:
     def __init__(self, target):
         """
@@ -92,20 +104,6 @@ class HISTO1D_V2:
     def variances(self):
         return np.array([(b.sumW2()) for b in self.bins()])
 
-    def __setitem__(self, slices, value):
-        # integer index
-        index = self.__get_index(slices)
-        self.__set_by_index(index, value)
-
-    def __set_by_index(self, index, value):
-        if index == underflow:
-            self.underflow = value
-            return
-        if index == overflow:
-            self.overflow = value
-            return
-        self.bins()[index] = value
-
     def __getitem__(self, slices):
         index = self.__get_index(slices)
         # integer index
@@ -156,6 +154,20 @@ class HISTO1D_V2:
         if slices is overflow:
             index = overflow
         return index
+
+    def __set_by_index(self, index, value):
+        if index == underflow:
+            set_bin(self.underflow(), value)
+            return
+        if index == overflow:
+            set_bin(self.overflow(), value)
+            return
+        set_bin(self.bins()[index], value)
+
+    def __setitem__(self, slices, value):
+        # integer index
+        index = self.__get_index(slices)
+        self.__set_by_index(index, value)
 
     def plot(self, *args, binwnorm=1.0, **kwargs):
         import mplhep as hep
