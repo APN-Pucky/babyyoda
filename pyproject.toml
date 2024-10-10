@@ -39,7 +39,8 @@ test = [
     "pytest>=6.0",
 ]
 develop = [
-    "pylhe[test,lint]",
+    "babyyoda[test,lint]",
+    "jupyter-notebook",
     "pre-commit",
     "tbump>=6.7.0",
 ]

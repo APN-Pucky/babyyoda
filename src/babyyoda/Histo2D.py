@@ -2,7 +2,7 @@ import numpy as np
 from babyyoda.util import loc, overflow, underflow
 
 
-class HISTO2D_V2:
+class HISTO2D:
     def __init__(self, target):
         """
         target is either a yoda or grogu HISTO2D_V2

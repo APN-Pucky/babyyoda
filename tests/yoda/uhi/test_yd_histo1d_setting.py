@@ -1,5 +1,5 @@
 import pytest
-from babyyoda.Histo1D_v2 import HISTO1D_V2
+from babyyoda.Histo1D import HISTO1D
 from babyyoda.util import loc, overflow, underflow
 
 # YODA1 does not support setting
@@ -13,7 +13,7 @@ def get_histo1d():
     for i in range(12):
         for _ in range(i):
             h.fill(i)
-    h = HISTO1D_V2(h)
+    h = HISTO1D(h)
     h.underflow().fill(-1)
     h.overflow().fill(10)
     return h

@@ -1,7 +1,8 @@
 import re
 
-from babyyoda.grogu.histo1d_v2 import parse_histo1d_v2
-from babyyoda.grogu.histo2d_v2 import parse_histo2d_v2
+from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
+from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
+from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
 
 
 def read(file_path: str):
@@ -15,10 +16,13 @@ def read(file_path: str):
 
     for hist_type, name, body in matches:
         if hist_type == "YODA_HISTO1D_V2":
-            hist = parse_histo1d_v2(body, name)
+            hist = GROGU_HISTO1D_V2.from_string(body, name)
+            histograms[name] = hist
+        elif hist_type == "YODA_HISTO1D_V3":
+            hist = GROGU_HISTO1D_V3.from_string(body, name)
             histograms[name] = hist
         elif hist_type == "YODA_HISTO2D_V2":
-            hist = parse_histo2d_v2(body, name)
+            hist = GROGU_HISTO2D_V2.from_string(body, name)
             histograms[name] = hist
         else:
             # Add other parsing logic for different types if necessary

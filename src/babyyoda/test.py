@@ -27,8 +27,11 @@ def assert_histo1d(gh1, yh1):
 
     assert len(gh1.bins()) == len(yh1.bins())
 
+    for ge, ye in zip(gh1.xEdges(), yh1.xEdges()):
+        assert ge == ye
+
     for gb, yb in zip(gh1.bins(), yh1.bins()):
-        assert_bin1d(gb, yb)
+        assert_value1d(gb, yb)
 
     assert_value1d(gh1.overflow(), yh1.overflow())
     assert_value1d(gh1.underflow(), gh1.underflow())

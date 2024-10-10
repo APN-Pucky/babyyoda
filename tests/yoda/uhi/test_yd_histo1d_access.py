@@ -1,5 +1,5 @@
 import pytest
-from babyyoda.Histo1D_v2 import HISTO1D_V2
+from babyyoda.Histo1D import HISTO1D
 from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.util import loc, overflow, underflow
 
@@ -29,7 +29,7 @@ def create_linear_histo1ds():
     h.fill(10)
     g.fill(10)
 
-    return HISTO1D_V2(h), HISTO1D_V2(g)
+    return HISTO1D(h), HISTO1D(g)
 
 
 def assert_bin(gb, yb):

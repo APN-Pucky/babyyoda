@@ -114,7 +114,14 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
         def numEntries(self):
             return self.d_numentries
 
-    d_bins: list[Bin] = field(default_factory=list)
+        def to_string(self) -> str:
+            return (
+                f"{self.d_xmin:.6e}\t{self.d_xmax:.6e}\t{self.d_ymin:.6e}\t{self.d_ymax:.6e}\t"
+                f"{self.d_sumw:.6e}\t{self.d_sumw2:.6e}\t{self.d_sumwx:.6e}\t{self.d_sumwx2:.6e}\t"
+                f"{self.d_sumwy:.6e}\t{self.d_sumwy2:.6e}\t{self.d_sumwxy:.6e}\t{self.d_numentries:.6e}"
+            )
+
+    d_bins: List[Bin] = field(default_factory=list)
     d_overflow: Optional[Bin] = None
     d_underflow: Optional[Bin] = None
 
@@ -156,84 +163,92 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
                 return b
         return None
 
+    def to_string(self) -> str:
+        """Convert a YODA_HISTO2D_V2 object to a formatted string."""
+        header = (
+            f"BEGIN YODA_HISTO2D_V2 {self.d_key}\n"
+            f"Path: {self.d_path}\n"
+            f"Title: {self.d_title}\n"
+            f"Type: {self.d_type}\n"
+            f"---\n"
+        )
 
-def parse_histo2d_v2(file_content: str, name: str = "") -> GROGU_HISTO2D_V2:
-    lines = file_content.strip().splitlines()
+        # TODO stats
+        stats = ""
+        # stats= (
+        #    f"# Mean: {self.mean()}\n"
+        #    f"# Area: {self.area()}\n"
+        # )
 
-    # Extract metadata (path, title)
-    path = ""
-    title = ""
-    for line in lines:
-        if line.startswith("Path:"):
-            path = line.split(":")[1].strip()
-        elif line.startswith("Title:"):
-            title = line.split(":")[1].strip()
-        elif line.startswith("---"):
-            break
+        legend = "# xlow\t xhigh\t ylow\t yhigh\t sumw\t sumw2\t sumwx\t sumwx2\t sumwy\t sumwy2\t sumwxy\t numEntries\n"
+        bin_data = "\n".join(b.to_string() for b in self.d_bins)
+        footer = "END YODA_HISTO2D_V2\n"
 
-    bins = []
-    underflow = overflow = None
-    data_section_started = False
+        return f"{header}{stats}{legend}{bin_data}{footer}"
 
-    for line in lines:
-        if line.startswith("#"):
-            continue
-        if line.startswith("---"):
-            data_section_started = True
-            continue
-        if not data_section_started:
-            continue
+    @classmethod
+    def from_string(cls, file_content: str, name: str = "") -> "GROGU_HISTO2D_V2":
+        lines = file_content.strip().splitlines()
 
-        values = re.split(r"\s+", line.strip())
-        if values[0] == "Underflow":
-            underflow = GROGU_HISTO2D_V2.Bin(
-                None,
-                None,
-                None,
-                None,
-                float(values[2]),
-                float(values[3]),
-                float(values[4]),
-                float(values[5]),
-                float(values[6]),
-                float(values[7]),
-                float(values[8]),
-                float(values[9]),
-            )
-        elif values[0] == "Overflow":
-            overflow = GROGU_HISTO2D_V2.Bin(
-                None,
-                None,
-                None,
-                None,
-                float(values[2]),
-                float(values[3]),
-                float(values[4]),
-                float(values[5]),
-                float(values[6]),
-                float(values[7]),
-                float(values[8]),
-                float(values[9]),
-            )
-        elif values[0] == "Total":
-            pass
-        else:
-            (
-                xlow,
-                xhigh,
-                ylow,
-                yhigh,
-                sumw,
-                sumw2,
-                sumwx,
-                sumwx2,
-                sumwy,
-                sumwy2,
-                sumwxy,
-                numEntries,
-            ) = map(float, values)
-            bins.append(
-                GROGU_HISTO2D_V2.Bin(
+        # Extract metadata (path, title)
+        path = ""
+        title = ""
+        for line in lines:
+            if line.startswith("Path:"):
+                path = line.split(":")[1].strip()
+            elif line.startswith("Title:"):
+                title = line.split(":")[1].strip()
+            elif line.startswith("---"):
+                break
+
+        bins = []
+        underflow = overflow = None
+        data_section_started = False
+
+        for line in lines:
+            if line.startswith("#"):
+                continue
+            if line.startswith("---"):
+                data_section_started = True
+                continue
+            if not data_section_started:
+                continue
+
+            values = re.split(r"\s+", line.strip())
+            if values[0] == "Underflow":
+                underflow = GROGU_HISTO2D_V2.Bin(
+                    None,
+                    None,
+                    None,
+                    None,
+                    float(values[2]),
+                    float(values[3]),
+                    float(values[4]),
+                    float(values[5]),
+                    float(values[6]),
+                    float(values[7]),
+                    float(values[8]),
+                    float(values[9]),
+                )
+            elif values[0] == "Overflow":
+                overflow = GROGU_HISTO2D_V2.Bin(
+                    None,
+                    None,
+                    None,
+                    None,
+                    float(values[2]),
+                    float(values[3]),
+                    float(values[4]),
+                    float(values[5]),
+                    float(values[6]),
+                    float(values[7]),
+                    float(values[8]),
+                    float(values[9]),
+                )
+            elif values[0] == "Total":
+                pass
+            else:
+                (
                     xlow,
                     xhigh,
                     ylow,
@@ -246,14 +261,29 @@ def parse_histo2d_v2(file_content: str, name: str = "") -> GROGU_HISTO2D_V2:
                     sumwy2,
                     sumwxy,
                     numEntries,
+                ) = map(float, values)
+                bins.append(
+                    GROGU_HISTO2D_V2.Bin(
+                        xlow,
+                        xhigh,
+                        ylow,
+                        yhigh,
+                        sumw,
+                        sumw2,
+                        sumwx,
+                        sumwx2,
+                        sumwy,
+                        sumwy2,
+                        sumwxy,
+                        numEntries,
+                    )
                 )
-            )
 
-    return GROGU_HISTO2D_V2(
-        d_key=name,
-        d_path=path,
-        d_title=title,
-        d_bins=bins,
-        d_underflow=underflow,
-        d_overflow=overflow,
-    )
+        return GROGU_HISTO2D_V2(
+            d_key=name,
+            d_path=path,
+            d_title=title,
+            d_bins=bins,
+            d_underflow=underflow,
+            d_overflow=overflow,
+        )

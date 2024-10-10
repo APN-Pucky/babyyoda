@@ -148,7 +148,39 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
                 self.d_numentries + other.d_numentries,
             )
 
-    d_bins: list[Bin] = field(default_factory=list)
+        @classmethod
+        def from_string(cls, line: str) -> "GROGU_HISTO1D_V2.Bin":
+            values = re.split(r"\s+", line.strip())
+            assert len(values) == 7
+            if values[0] == "Underflow" or values[0] == "Overflow":
+                return cls(
+                    None,
+                    None,
+                    float(values[2]),
+                    float(values[3]),
+                    float(values[4]),
+                    float(values[5]),
+                    float(values[6]),
+                )
+            else:
+                return cls(
+                    float(values[0]),
+                    float(values[1]),
+                    float(values[2]),
+                    float(values[3]),
+                    float(values[4]),
+                    float(values[5]),
+                    float(values[6]),
+                )
+
+        def to_string(bin, label=None) -> str:
+            """Convert a Histo1DBin object to a formatted string."""
+            if label is None:
+                return f"{bin.d_xmin:.6e}\t{bin.d_xmax:.6e}\t{bin.d_sumw:.6e}\t{bin.d_sumw2:.6e}\t{bin.d_sumwx:.6e}\t{bin.d_sumwx2:.6e}\t{bin.d_numentries:.6e}"
+            else:
+                return f"{label}\t{label}\t{bin.d_sumw:.6e}\t{bin.d_sumw2:.6e}\t{bin.d_sumwx:.6e}\t{bin.d_sumwx2:.6e}\t{bin.d_numentries:.6e}"
+
+    d_bins: List[Bin] = field(default_factory=list)
     d_overflow: Optional[Bin] = None
     d_underflow: Optional[Bin] = None
 
@@ -257,111 +289,80 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
         self.d_bins = new_bins
         # return self
 
+    def to_string(histo) -> str:
+        """Convert a YODA_HISTO1D_V2 object to a formatted string."""
+        header = (
+            f"BEGIN YODA_HISTO1D_V2 {histo.d_key}\n"
+            f"Path: {histo.d_path}\n"
+            f"Title: {histo.d_title}\n"
+            f"Type: Histo1D\n"
+            "---\n"
+        )
 
-def parse_histo1d_v2(file_content: str, key: str = "") -> GROGU_HISTO1D_V2:
-    lines = file_content.strip().splitlines()
+        # Add the sumw and other info (we assume it's present in the metadata but you could also compute)
+        stats = (
+            f"# Mean: {sum(b.d_sumwx for b in histo.d_bins) / sum(b.d_sumw for b in histo.d_bins):.6e}\n"
+            f"# Area: {sum(b.d_sumw for b in histo.d_bins):.6e}\n"
+        )
 
-    # Extract metadata (path, title)
-    path = ""
-    title = ""
-    for line in lines:
-        if line.startswith("Path:"):
-            path = line.split(":")[1].strip()
-        elif line.startswith("Title:"):
-            title = line.split(":")[1].strip()
-        elif line.startswith("---"):
-            break
+        underflow = histo.d_underflow.to_string("Underflow")
+        overflow = histo.d_overflow.to_string("Overflow")
 
-    # Extract bins and overflow/underflow
-    bins = []
-    underflow = overflow = None
-    data_section_started = False
+        legend = "# xlow\t xhigh\t sumw\t sumw2\t sumwx\t sumwx2\t numEntries\n"
+        # Add the bin data
+        bin_data = "\n".join(b.to_string() for b in histo.bins())
 
-    for line in lines:
-        if line.startswith("#"):
-            continue
-        if line.startswith("---"):
-            data_section_started = True
-            continue
-        if not data_section_started:
-            continue
+        footer = "END YODA_HISTO1D_V2\n"
 
-        values = re.split(r"\s+", line.strip())
-        if values[0] == "Underflow":
-            underflow = GROGU_HISTO1D_V2.Bin(
-                None,
-                None,
-                float(values[2]),
-                float(values[3]),
-                float(values[4]),
-                float(values[5]),
-                float(values[6]),
-            )
-        elif values[0] == "Overflow":
-            overflow = GROGU_HISTO1D_V2.Bin(
-                None,
-                None,
-                float(values[2]),
-                float(values[3]),
-                float(values[4]),
-                float(values[5]),
-                float(values[6]),
-            )
-        elif values[0] == "Total":
-            # ignore for now
-            pass
-        else:
-            # Regular bin
-            xlow, xhigh, sumw, sumw2, sumwx, sumwx2, numEntries = map(float, values)
-            bins.append(
-                GROGU_HISTO1D_V2.Bin(
-                    xlow, xhigh, sumw, sumw2, sumwx, sumwx2, numEntries
-                )
-            )
+        return f"{header}{stats}{underflow}\n{overflow}\n{legend}{bin_data}\n{footer}"
 
-    # Create and return the YODA_HISTO1D_V2 object
-    return GROGU_HISTO1D_V2(
-        d_key=key,
-        d_path=path,
-        d_title=title,
-        d_bins=bins,
-        d_underflow=underflow,
-        d_overflow=overflow,
-    )
+    @classmethod
+    def from_string(cls, file_content: str, key: str = "") -> "GROGU_HISTO1D_V2":
+        lines = file_content.strip().splitlines()
 
+        # Extract metadata (path, title)
+        path = ""
+        title = ""
+        for line in lines:
+            if line.startswith("Path:"):
+                path = line.split(":")[1].strip()
+            elif line.startswith("Title:"):
+                title = line.split(":")[1].strip()
+            elif line.startswith("---"):
+                break
 
-def histo1dbin_to_str(bin: GROGU_HISTO1D_V2.Bin) -> str:
-    """Convert a Histo1DBin object to a formatted string."""
-    return f"{bin.xlow:.6e}\t{bin.xhigh:.6e}\t{bin.sumw:.6e}\t{bin.sumw2:.6e}\t{bin.sumwx:.6e}\t{bin.sumwx2:.6e}\t{bin.numEntries:.6e}"
+        # Extract bins and overflow/underflow
+        bins = []
+        underflow = overflow = None
+        data_section_started = False
 
+        for line in lines:
+            if line.startswith("#"):
+                continue
+            if line.startswith("---"):
+                data_section_started = True
+                continue
+            if not data_section_started:
+                continue
 
-def underflow_overflow_to_str(bin: GROGU_HISTO1D_V2.Bin, label: str) -> str:
-    """Convert an underflow or overflow bin to a formatted string."""
-    return f"{label}\t{label}\t{bin.sumw:.6e}\t{bin.sumw2:.6e}\t{bin.sumwx:.6e}\t{bin.sumwx2:.6e}\t{bin.numEntries:.6e}"
+            values = re.split(r"\s+", line.strip())
+            if values[0] == "Underflow":
+                underflow = GROGU_HISTO1D_V2.Bin.from_string(line)
+            elif values[0] == "Overflow":
+                overflow = GROGU_HISTO1D_V2.Bin.from_string(line)
+            elif values[0] == "Total":
+                # ignore for now
+                pass
+            else:
+                # Regular bin
+                bins.append(GROGU_HISTO1D_V2.Bin.from_string(line))
 
-
-def yoda_histo1d_to_str(histo: GROGU_HISTO1D_V2) -> str:
-    """Convert a YODA_HISTO1D_V2 object to a formatted string."""
-    header = (
-        f"BEGIN YODA_HISTO1D_V2 {histo.d_key}\n"
-        f"Path: {histo.d_path}\n"
-        f"Title: {histo.d_title}\n"
-        f"Type: Histo1D\n"
-        "---\n"
-    )
-
-    # Add the sumw and other info (we assume it's present in the metadata but you could also compute)
-    stats = (
-        f"# Mean: {sum(b.d_sumwx for b in histo.d_bins) / sum(b.sumw for b in histo.d_bins):.6e}\n"
-        f"# Area: {sum(b.d_sumw for b in histo.d_bins):.6e}\n"
-    )
-
-    underflow = underflow_overflow_to_str(histo.underflow_value, "Underflow")
-    overflow = underflow_overflow_to_str(histo.overflow_value, "Overflow")
-
-    # Add the bin data
-    bin_data = "\n".join(histo1dbin_to_str(b) for b in histo.bins())
-
-    footer = "END YODA_HISTO1D_V2\n"
-
-    return f"{header}{stats}{underflow}\n{overflow}\n# xlow\t xhigh\t sumw\t sumw2\t sumwx\t sumwx2\t numEntries\n{bin_data}\n{footer}"
+        # Create and return the YODA_HISTO1D_V2 object
+        return GROGU_HISTO1D_V2(
+            d_key=key,
+            d_path=path,
+            d_title=title,
+            d_bins=bins,
+            d_underflow=underflow,
+            d_overflow=overflow,
+        )

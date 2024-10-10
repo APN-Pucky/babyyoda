@@ -17,7 +17,7 @@ def set_bin(target, source):
 
 
 # TODO make this implementation independent (no V2 or V3...)
-class HISTO1D_V2:
+class HISTO1D:
     def __init__(self, target):
         """
         target is either a yoda or grogu HISTO1D_V2
@@ -63,7 +63,7 @@ class HISTO1D_V2:
     ########################################################
 
     def clone(self):
-        return HISTO1D_V2(self.target.clone())
+        return HISTO1D(self.target.clone())
 
     def overflow(self):
         # if target has overflow method, call it

@@ -1,4 +1,4 @@
-from babyyoda.Histo1D_v2 import HISTO1D_V2
+from babyyoda.Histo1D import HISTO1D
 import babyyoda.grogu as yoda
 from babyyoda.test import assert_histo1d
 from babyyoda.util import loc, overflow, underflow
@@ -11,7 +11,7 @@ def get_histo1d():
             h.fill(i)
     h.underflow().fill(-1)
     h.overflow().fill(10)
-    return HISTO1D_V2(h)
+    return HISTO1D(h)
 
 
 def test_slicing_everything():

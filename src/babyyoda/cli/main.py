@@ -4,8 +4,8 @@ import argparse
 import re
 from histoprint import print_hist
 
-from babyyoda.Histo1D_v2 import HISTO1D_V2
-from babyyoda.Histo2D_v2 import HISTO2D_V2
+from babyyoda.Histo1D import HISTO1D
+from babyyoda.Histo2D import HISTO2D
 
 
 def main():
@@ -35,7 +35,7 @@ def main():
             ):
                 continue
 
-            if isinstance(v, HISTO1D_V2) or isinstance(v, HISTO2D_V2):
+            if isinstance(v, HISTO1D) or isinstance(v, HISTO2D):
                 if args.operation == "print":
                     print(k)
                     print_hist(v, summary=True, title=v.title())
