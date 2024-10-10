@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import babyyoda
 from babyyoda.util import loc, overflow, rebin, underflow
@@ -36,6 +37,11 @@ class Histo1D:
                 except ImportError:
                     backend = babyyoda.grogu.histo1d_v3
             target = backend(*args, **kwargs)
+
+        # unwrap target
+        while isinstance(target, Histo1D):
+            target = target.target
+
         super().__setattr__("target", target)
 
     ########################################################
@@ -106,6 +112,51 @@ class Histo1D:
 
     def sumW2s(self):
         return np.array([b.sumW2() for b in self.bins()])
+
+    def rebinXBy(self, factor: int, begin=1, end=sys.maxsize):
+        if hasattr(self.target, "rebinXBy"):
+            self.target.rebinXBy(factor, begin, end)
+        else:
+            # Just compute the new edges and call rebinXTo
+            start = begin - 1
+            stop = end
+            if start is None:
+                start = 0
+            if stop >= sys.maxsize:
+                stop = len(self.bins())
+            else:
+                stop = stop - 1
+            new_edges = []
+            # new_bins = []
+            # new_bins += [self.underflow()]
+            for i in range(0, start):
+                # new_bins.append(self.bins()[i].clone())
+                new_edges.append(self.xEdges()[i])
+                new_edges.append(self.xEdges()[i + 1])
+            last = None
+            for i in range(start, stop, factor):
+                if i + factor <= len(self.bins()):
+                    xmin = self.xEdges()[i]
+                    xmax = self.xEdges()[i + 1]
+                    # nb = GROGU_HISTO1D_V3.Bin()
+                    for j in range(0, factor):
+                        last = i + j
+                        # nb += self.bins()[i + j]
+                        xmin = min(xmin, self.xEdges()[i + j])
+                        xmax = max(xmax, self.xEdges()[i + j + 1])
+                    # new_bins.append(nb)
+                    # add both edges
+                    new_edges.append(xmin)
+                    new_edges.append(xmax)
+            for j in range(last + 1, len(self.bins())):
+                # new_bins.append(self.bins()[j].clone())
+                new_edges.append(self.xEdges()[j])
+                new_edges.append(self.xEdges()[j + 1])
+            # new_bins += [self.overflow()]
+            # self.d_bins = new_bins
+            # drop duplicate edges
+            self.rebinXTo(list(set(new_edges)))
+            return
 
     def rebinBy(self, *args, **kwargs):
         self.rebinXBy(*args, **kwargs)

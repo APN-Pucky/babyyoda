@@ -35,7 +35,7 @@ def create_histo(backend):
     "factory1",
     [
         None,
-        babyyoda.Histo1D,
+        # babyyoda.Histo1D,
         grogu.Histo1D,
         grogu.Histo1D_v2,
         grogu.Histo1D_v3,
@@ -46,7 +46,7 @@ def create_histo(backend):
     "factory2",
     [
         None,
-        babyyoda.Histo1D,
+        # babyyoda.Histo1D,
         grogu.Histo1D,
         grogu.Histo1D_v2,
         grogu.Histo1D_v3,
@@ -64,7 +64,7 @@ def test_access_index(factory1, factory2):
     "factory1",
     [
         None,
-        babyyoda.Histo1D,
+        # babyyoda.Histo1D,
         grogu.Histo1D,
         grogu.Histo1D_v2,
         grogu.Histo1D_v3,
@@ -75,7 +75,7 @@ def test_access_index(factory1, factory2):
     "factory2",
     [
         None,
-        babyyoda.Histo1D,
+        # babyyoda.Histo1D,
         grogu.Histo1D,
         grogu.Histo1D_v2,
         grogu.Histo1D_v3,

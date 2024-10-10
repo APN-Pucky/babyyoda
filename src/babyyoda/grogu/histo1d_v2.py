@@ -249,50 +249,6 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
     def binDim(self):
         return 1
 
-    def rebinXBy(self, factor: int, begin=1, end=None):
-        start = begin - 1
-        stop = end
-        # TODO what about not fitting start stop with factor?!
-        if stop is None:
-            stop = len(self.bins())
-        else:
-            stop = stop - 1
-
-        new_bins = []
-        for i in range(0, start):
-            print("start")
-            new_bins.append(self.bins()[i].clone())
-        last = None
-        for i in range(start, stop, factor):
-            print(f"i: {i}, factor: {factor}, len: {len(self.bins())}")
-            if i + factor <= len(self.bins()):
-                nb = GROGU_HISTO1D_V2.Bin(
-                    d_xmin=self.bins()[i].xMin(), d_xmax=self.bins()[i].xMax()
-                )
-                for j in range(0, factor):
-                    last = i + j
-                    nb += self.bins()[i + j]
-                    nb.d_xmin = min(nb.d_xmin, self.bins()[i + j].xMin())
-                    nb.d_xmax = max(nb.d_xmax, self.bins()[i + j].xMax())
-                new_bins.append(nb)
-        for j in range(last + 1, len(self.bins())):
-            print(f"stop {i}")
-            new_bins.append(self.bins()[j].clone())
-
-        self.d_bins = new_bins
-
-        assert len(self.d_bins) == len(self.xEdges()) - 1
-        # return self
-        # not inplace
-        # return GROGU_HISTO1D_V2(
-        #    d_key=self.d_key,
-        #    d_path=self.d_path,
-        #    d_title=self.d_title,
-        #    d_bins=new_bins,
-        #    d_underflow=self.d_underflow,
-        #    d_overflow=self.d_overflow,
-        # )
-
     def xEdges(self):
         return [b.xMin() for b in self.d_bins] + [self.xMax()]
 
@@ -314,6 +270,8 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
                     if edges[i] <= b.xMid() and b.xMid() <= edges[i + 1]:
                         new_bins[i] += b
         self.d_bins = new_bins
+
+        assert len(self.d_bins) == len(self.xEdges()) - 1
         # return self
 
     def to_string(histo) -> str:
