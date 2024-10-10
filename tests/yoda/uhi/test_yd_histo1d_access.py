@@ -32,26 +32,12 @@ def create_linear_histo1ds():
     return Histo1D(h), Histo1D(g)
 
 
-def assert_bin(gb, yb):
-    assert gb.xMin() == yb.xMin()
-    assert gb.xMax() == yb.xMax()
-    assert_value(gb, yb)
-
-
-def assert_value(gb, yb):
-    assert gb.sumW() == yb.sumW()
-    assert gb.sumW2() == yb.sumW2()
-    assert gb.sumWX() == yb.sumWX()
-    assert gb.sumWX2() == yb.sumWX2()
-    assert gb.numEntries() == yb.numEntries()
-
-
 def test_access_index():
     h, g = create_linear_histo1ds()
     i = 2
     assert g[i] == g.bins()[i]
 
-    assert_bin(g[i], h[i])
+    assert_bin1d(g[i], h[i])
 
 
 def test_access_loc():
@@ -60,23 +46,23 @@ def test_access_loc():
     assert h[loc(x)].xMax() >= x >= h[loc(x)].xMin()
     assert g[loc(x)].xMax() >= x >= g[loc(x)].xMin()
 
-    assert_bin(g[loc(x)], h[loc(x)])
-    assert_bin(g[loc(x)], g[5])
-    assert_bin(h[loc(x)], h[5])
+    assert_bin1d(g[loc(x)], h[loc(x)])
+    assert_bin1d(g[loc(x)], g[5])
+    assert_bin1d(h[loc(x)], h[5])
 
 
 def test_access_offset():
     h, g = create_linear_histo1ds()
     x = 5
-    assert_bin(g[loc(x) + 1], h[loc(x) + 1])
-    assert_bin(g[loc(x) + 1], g[6])
+    assert_bin1d(g[loc(x) + 1], h[loc(x) + 1])
+    assert_bin1d(g[loc(x) + 1], g[6])
 
 
 def test_access_overflow():
     h, g = create_linear_histo1ds()
-    assert_value(g[overflow], h[overflow])
+    assert_value1d(g[overflow], h[overflow])
 
 
 def test_access_underflow():
     h, g = create_linear_histo1ds()
-    assert_value(g[underflow], h[underflow])
+    assert_value1d(g[underflow], h[underflow])
