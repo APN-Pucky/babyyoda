@@ -204,6 +204,9 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
     def binDim(self):
         return 1
 
+    def xEdges(self):
+        return self.d_edges
+
     def rebinXBy(self, factor: int, begin=1, end=None):
         start = begin - 1
         stop = end
@@ -244,8 +247,30 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
         self.d_edges = list(set(new_edges))
         self.d_bins = new_bins
 
-    def xEdges(self):
-        return self.d_edges
+    def xMid(self, i):
+        return (self.xEdges()[i] + self.xEdges()[i + 1]) / 2
+
+    def rebinXTo(self, edges: List[float]):
+        own_edges = self.xEdges()
+        for e in edges:
+            assert e in own_edges, f"Edge {e} not found in own edges {own_edges}"
+
+        new_bins = []
+        of = self.overflow()
+        uf = self.underflow()
+        for i in range(len(edges) - 1):
+            new_bins.append(GROGU_HISTO1D_V3.Bin())
+        for i, b in enumerate(self.bins()):
+            if self.xMid(i) < min(edges):
+                uf += b
+            elif self.xMid(i) > max(edges):
+                of += b
+            else:
+                for j in range(len(edges) - 1):
+                    if edges[j] <= self.xMid(i) and self.xMid(i) <= edges[j + 1]:
+                        new_bins[j] += b
+        self.d_bins = [uf] + new_bins + [of]
+        self.d_edges = edges
 
     @classmethod
     def from_string(cls, file_content: str, key: str = "") -> "GROGU_HISTO1D_V3":
