@@ -58,6 +58,8 @@ class HISTO1D:
             return self.target(*args, **kwargs)
         raise TypeError(f"'{type(self.target).__name__}' object is not callable")
 
+    # TODO __eq__ from test here?
+
     ########################################################
     # YODA compatibility code (dropped legacy code?)
     ########################################################

@@ -155,9 +155,8 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
             d_key=self.d_key,
             d_path=self.d_path,
             d_title=self.d_title,
+            d_edges=self.d_edges.copy(),
             d_bins=[b.copy() for b in self.d_bins],
-            d_underflow=self.d_underflow,
-            d_overflow=self.d_overflow,
         )
 
     def underflow(self):
@@ -195,6 +194,31 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
 
     def binDim(self):
         return 1
+
+    def rebinXBy(self, factor: int, start=None, stop=None):
+        if start is None:
+            start = 0
+        if stop is None:
+            stop = len(self.bins())
+        new_edges = []
+        new_bins = []
+        new_bins += [self.underflow()]
+        for i in range(start, stop, factor):
+            xmin = self.xEdges()[i]
+            xmax = self.xEdges()[i + 1]
+            nb = GROGU_HISTO1D_V3.Bin()
+            for j in range(0, factor):
+                nb += self.bins()[i + j]
+                xmin = min(xmin, self.xEdges()[i + j])
+                xmax = max(xmax, self.xEdges()[i + j + 1])
+            new_bins.append(nb)
+            # add both edges
+            new_edges.append(xmin)
+            new_edges.append(xmax)
+        new_bins += [self.overflow()]
+        # drop duplicate edges
+        self.d_edges = list(set(new_edges))
+        self.d_bins = new_bins
 
     def xEdges(self):
         return self.d_edges

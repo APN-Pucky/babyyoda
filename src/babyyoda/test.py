@@ -1,6 +1,43 @@
 # TODO maybe promote all these to __eq__
 
 
+def equal_ao(g, y):
+    return (
+        g.name() == y.name()
+        and g.path() == y.path()
+        and g.title() == y.title()
+        and g.type() == y.type()
+    )
+
+
+def equal_bin1d(gb, yb):
+    return gb.xMin() == yb.xMin() and gb.xMax() == yb.xMax() and equal_value1d(gb, yb)
+
+
+def equal_value1d(gb, yb):
+    return (
+        gb.sumW() == yb.sumW()
+        and gb.sumW2() == yb.sumW2()
+        and gb.sumWX() == yb.sumWX()
+        and gb.sumWX2() == yb.sumWX2()
+        and gb.numEntries() == yb.numEntries()
+    )
+
+
+def equal_edges1d(ge, ye):
+    return ge.xEdges() == ye.xEdges()
+
+
+def equal_histo1d(gh1, yh1):
+    return (
+        equal_ao(gh1, yh1)
+        and all(equal_bin1d(gb, yb) for gb, yb in zip(gh1.bins(), yh1.bins()))
+        and equal_value1d(gh1.overflow(), yh1.overflow())
+        and equal_value1d(gh1.underflow(), gh1.underflow())
+        and equal_edges1d(gh1, yh1)
+    )
+
+
 def assert_ao(g, y):
     assert g.name() == y.name()
     assert g.path() == y.path()
@@ -22,10 +59,10 @@ def assert_value1d(gb, yb):
     assert gb.numEntries() == yb.numEntries()
 
 
-def assert_histo1d(gh1, yh1):
+def assert_equal_histo1d(gh1, yh1):
     assert_ao(gh1, yh1)
 
-    assert len(gh1.bins()) == len(yh1.bins())
+    assert len(gh1.bins()) == len(yh1.bins()), f"{gh1.bins()} != {yh1.bins()}"
 
     for ge, ye in zip(gh1.xEdges(), yh1.xEdges()):
         assert ge == ye

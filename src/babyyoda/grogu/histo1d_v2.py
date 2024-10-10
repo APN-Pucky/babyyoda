@@ -237,7 +237,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
     def binDim(self):
         return 1
 
-    def rebinXBy(self, factor: int, start: None, stop: None):
+    def rebinXBy(self, factor: int, start=None, stop=None):
         # TODO what about not fitting start stop with factor?!
         if start is None:
             start = 0
@@ -246,12 +246,12 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
         new_bins = []
         for i in range(start, stop, factor):
             nb = GROGU_HISTO1D_V2.Bin(
-                d_xmin=self.bins[i].xMin(), d_xmax=self.bins[i].xMax()
+                d_xmin=self.bins()[i].xMin(), d_xmax=self.bins()[i].xMax()
             )
             for j in range(0, factor):
-                nb += self.bins[i + j]
-                nb.d_xmin = min(nb.d_xmin, self.bins[i + j].xMin())
-                nb.d_xmax = max(nb.d_xmax, self.bins[i + j].xMax())
+                nb += self.bins()[i + j]
+                nb.d_xmin = min(nb.d_xmin, self.bins()[i + j].xMin())
+                nb.d_xmax = max(nb.d_xmax, self.bins()[i + j].xMax())
 
             new_bins.append(nb)
         self.d_bins = new_bins

@@ -1,6 +1,6 @@
 import pytest
 from babyyoda.Histo1D import HISTO1D
-from babyyoda.test import assert_histo1d
+from babyyoda.test import assert_equal_histo1d
 
 import babyyoda.grogu as grogu
 
@@ -44,4 +44,29 @@ def test_histos_equal(factory1, factory2):
     h1 = create_histo(factory1)
     h2 = create_histo(factory2)
 
-    assert_histo1d(h1, h2)
+    assert_equal_histo1d(h1, h2)
+
+
+@pytest.mark.parametrize(
+    "factory1", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+)
+@pytest.mark.parametrize(
+    "factory2", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+)
+def test_histos_rebinby(factory1, factory2):
+    h1 = create_histo(factory1)
+    h2 = create_histo(factory2)
+
+    o1 = h1.clone()
+    o2 = h2.clone()
+
+    h1.rebinBy(2)
+    h2.rebinBy(2)
+
+    # check that modifications happen
+    with pytest.raises(AssertionError):
+        assert_equal_histo1d(o1, h1)
+    with pytest.raises(AssertionError):
+        assert_equal_histo1d(o2, h2)
+
+    assert_equal_histo1d(h1, h2)
