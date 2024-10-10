@@ -62,10 +62,10 @@ def assert_value1d(gb, yb):
 def assert_equal_histo1d(gh1, yh1):
     assert_ao(gh1, yh1)
 
-    assert len(gh1.bins()) == len(yh1.bins()), f"{gh1.bins()} != {yh1.bins()}"
+    assert len(gh1.bins()) == len(yh1.bins()), f"{len(gh1.bins())} != {len(yh1.bins())}"
 
     for ge, ye in zip(gh1.xEdges(), yh1.xEdges()):
-        assert ge == ye
+        assert ge == ye, f"{gh1.xEdges()} != {yh1.xEdges()}"
 
     for gb, yb in zip(gh1.bins(), yh1.bins()):
         assert_value1d(gb, yb)

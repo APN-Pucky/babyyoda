@@ -21,6 +21,18 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
         # YODA compatibilty code
         ########################################################
 
+        # TODO drop either clone or copy
+        def clone(self):
+            return GROGU_HISTO1D_V2.Bin(
+                d_xmin=self.d_xmin,
+                d_xmax=self.d_xmax,
+                d_sumw=self.d_sumw,
+                d_sumw2=self.d_sumw2,
+                d_sumwx=self.d_sumwx,
+                d_sumwx2=self.d_sumwx2,
+                d_numentries=self.d_numentries,
+            )
+
         def copy(self):
             return GROGU_HISTO1D_V2.Bin(
                 d_xmin=self.d_xmin,
@@ -237,24 +249,39 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
     def binDim(self):
         return 1
 
-    def rebinXBy(self, factor: int, start=None, stop=None):
+    def rebinXBy(self, factor: int, begin=1, end=None):
+        start = begin - 1
+        stop = end
         # TODO what about not fitting start stop with factor?!
-        if start is None:
-            start = 0
         if stop is None:
             stop = len(self.bins())
-        new_bins = []
-        for i in range(start, stop, factor):
-            nb = GROGU_HISTO1D_V2.Bin(
-                d_xmin=self.bins()[i].xMin(), d_xmax=self.bins()[i].xMax()
-            )
-            for j in range(0, factor):
-                nb += self.bins()[i + j]
-                nb.d_xmin = min(nb.d_xmin, self.bins()[i + j].xMin())
-                nb.d_xmax = max(nb.d_xmax, self.bins()[i + j].xMax())
+        else:
+            stop = stop - 1
 
-            new_bins.append(nb)
+        new_bins = []
+        for i in range(0, start):
+            print("start")
+            new_bins.append(self.bins()[i].clone())
+        last = None
+        for i in range(start, stop, factor):
+            print(f"i: {i}, factor: {factor}, len: {len(self.bins())}")
+            if i + factor <= len(self.bins()):
+                nb = GROGU_HISTO1D_V2.Bin(
+                    d_xmin=self.bins()[i].xMin(), d_xmax=self.bins()[i].xMax()
+                )
+                for j in range(0, factor):
+                    last = i + j
+                    nb += self.bins()[i + j]
+                    nb.d_xmin = min(nb.d_xmin, self.bins()[i + j].xMin())
+                    nb.d_xmax = max(nb.d_xmax, self.bins()[i + j].xMax())
+                new_bins.append(nb)
+        for j in range(last + 1, len(self.bins())):
+            print(f"stop {i}")
+            new_bins.append(self.bins()[j].clone())
+
         self.d_bins = new_bins
+
+        assert len(self.d_bins) == len(self.xEdges()) - 1
         # return self
         # not inplace
         # return GROGU_HISTO1D_V2(

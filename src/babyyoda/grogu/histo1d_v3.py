@@ -19,6 +19,15 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
         # YODA compatibilty code
         ########################################################
 
+        def clone(self):
+            return GROGU_HISTO1D_V3.Bin(
+                d_sumw=self.d_sumw,
+                d_sumw2=self.d_sumw2,
+                d_sumwx=self.d_sumwx,
+                d_sumwx2=self.d_sumwx2,
+                d_numentries=self.d_numentries,
+            )
+
         def copy(self):
             return GROGU_HISTO1D_V3.Bin(
                 d_sumw=self.d_sumw,
@@ -195,26 +204,41 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
     def binDim(self):
         return 1
 
-    def rebinXBy(self, factor: int, start=None, stop=None):
+    def rebinXBy(self, factor: int, begin=1, end=None):
+        start = begin - 1
+        stop = end
         if start is None:
             start = 0
         if stop is None:
             stop = len(self.bins())
+        else:
+            stop = stop - 1
         new_edges = []
         new_bins = []
         new_bins += [self.underflow()]
+        for i in range(0, start):
+            new_bins.append(self.bins()[i].clone())
+            new_edges.append(self.xEdges()[i])
+            new_edges.append(self.xEdges()[i + 1])
+        last = None
         for i in range(start, stop, factor):
-            xmin = self.xEdges()[i]
-            xmax = self.xEdges()[i + 1]
-            nb = GROGU_HISTO1D_V3.Bin()
-            for j in range(0, factor):
-                nb += self.bins()[i + j]
-                xmin = min(xmin, self.xEdges()[i + j])
-                xmax = max(xmax, self.xEdges()[i + j + 1])
-            new_bins.append(nb)
-            # add both edges
-            new_edges.append(xmin)
-            new_edges.append(xmax)
+            if i + factor <= len(self.bins()):
+                xmin = self.xEdges()[i]
+                xmax = self.xEdges()[i + 1]
+                nb = GROGU_HISTO1D_V3.Bin()
+                for j in range(0, factor):
+                    last = i + j
+                    nb += self.bins()[i + j]
+                    xmin = min(xmin, self.xEdges()[i + j])
+                    xmax = max(xmax, self.xEdges()[i + j + 1])
+                new_bins.append(nb)
+                # add both edges
+                new_edges.append(xmin)
+                new_edges.append(xmax)
+        for j in range(last + 1, len(self.bins())):
+            new_bins.append(self.bins()[j].clone())
+            new_edges.append(self.xEdges()[j])
+            new_edges.append(self.xEdges()[j + 1])
         new_bins += [self.overflow()]
         # drop duplicate edges
         self.d_edges = list(set(new_edges))
