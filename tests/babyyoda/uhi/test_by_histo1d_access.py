@@ -2,6 +2,7 @@ import pytest
 from babyyoda.Histo1D import Histo1D
 from babyyoda.test import assert_value1d
 
+import babyyoda
 import babyyoda.grogu as grogu
 from babyyoda.util import loc, overflow, underflow
 
@@ -29,10 +30,26 @@ def create_histo(backend):
 
 
 @pytest.mark.parametrize(
-    "factory1", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+    "factory1",
+    [
+        None,
+        babyyoda.Histo1D,
+        grogu.Histo1D,
+        grogu.Histo1D_v2,
+        grogu.Histo1D_v3,
+        yoda.Histo1D,
+    ],
 )
 @pytest.mark.parametrize(
-    "factory2", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+    "factory2",
+    [
+        None,
+        babyyoda.Histo1D,
+        grogu.Histo1D,
+        grogu.Histo1D_v2,
+        grogu.Histo1D_v3,
+        yoda.Histo1D,
+    ],
 )
 def test_access_index(factory1, factory2):
     h = create_histo(factory1)
@@ -42,10 +59,26 @@ def test_access_index(factory1, factory2):
 
 
 @pytest.mark.parametrize(
-    "factory1", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+    "factory1",
+    [
+        None,
+        babyyoda.Histo1D,
+        grogu.Histo1D,
+        grogu.Histo1D_v2,
+        grogu.Histo1D_v3,
+        yoda.Histo1D,
+    ],
 )
 @pytest.mark.parametrize(
-    "factory2", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+    "factory2",
+    [
+        None,
+        babyyoda.Histo1D,
+        grogu.Histo1D,
+        grogu.Histo1D_v2,
+        grogu.Histo1D_v3,
+        yoda.Histo1D,
+    ],
 )
 def test_access_loc(factory1, factory2):
     h = create_histo(factory1)
@@ -58,10 +91,26 @@ def test_access_loc(factory1, factory2):
 
 
 @pytest.mark.parametrize(
-    "factory1", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+    "factory1",
+    [
+        None,
+        babyyoda.Histo1D,
+        grogu.Histo1D,
+        grogu.Histo1D_v2,
+        grogu.Histo1D_v3,
+        yoda.Histo1D,
+    ],
 )
 @pytest.mark.parametrize(
-    "factory2", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+    "factory2",
+    [
+        None,
+        babyyoda.Histo1D,
+        grogu.Histo1D,
+        grogu.Histo1D_v2,
+        grogu.Histo1D_v3,
+        yoda.Histo1D,
+    ],
 )
 def test_access_loc_offset(factory1, factory2):
     h = create_histo(factory1)
@@ -73,10 +122,26 @@ def test_access_loc_offset(factory1, factory2):
 
 
 @pytest.mark.parametrize(
-    "factory1", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+    "factory1",
+    [
+        None,
+        babyyoda.Histo1D,
+        grogu.Histo1D,
+        grogu.Histo1D_v2,
+        grogu.Histo1D_v3,
+        yoda.Histo1D,
+    ],
 )
 @pytest.mark.parametrize(
-    "factory2", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+    "factory2",
+    [
+        None,
+        babyyoda.Histo1D,
+        grogu.Histo1D,
+        grogu.Histo1D_v2,
+        grogu.Histo1D_v3,
+        yoda.Histo1D,
+    ],
 )
 def test_access_overflow(factory1, factory2):
     h = create_histo(factory1)
@@ -86,10 +151,26 @@ def test_access_overflow(factory1, factory2):
 
 
 @pytest.mark.parametrize(
-    "factory1", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+    "factory1",
+    [
+        None,
+        babyyoda.Histo1D,
+        grogu.Histo1D,
+        grogu.Histo1D_v2,
+        grogu.Histo1D_v3,
+        yoda.Histo1D,
+    ],
 )
 @pytest.mark.parametrize(
-    "factory2", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+    "factory2",
+    [
+        None,
+        babyyoda.Histo1D,
+        grogu.Histo1D,
+        grogu.Histo1D_v2,
+        grogu.Histo1D_v3,
+        yoda.Histo1D,
+    ],
 )
 def test_access_underflow(factory1, factory2):
     h = create_histo(factory1)

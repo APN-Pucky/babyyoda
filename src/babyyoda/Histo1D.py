@@ -19,7 +19,7 @@ def set_bin(target, source):
 
 # TODO make this implementation independent (no V2 or V3...)
 class Histo1D:
-    def __init__(self, *args, backend=babyyoda.grogu.Histo1D_v3, **kwargs):
+    def __init__(self, *args, backend=None, **kwargs):
         """
         target is either a yoda or grogu HISTO1D_V2
         """
@@ -27,6 +27,14 @@ class Histo1D:
             target = args[0]
             # Store the target object where calls and attributes will be forwarded
         else:
+            # Pick faster backend if possible
+            if backend is None:
+                try:
+                    import yoda
+
+                    backend = yoda.Histo1D
+                except ImportError:
+                    backend = babyyoda.grogu.histo1d_v3
             target = backend(*args, **kwargs)
         super().__setattr__("target", target)
 
