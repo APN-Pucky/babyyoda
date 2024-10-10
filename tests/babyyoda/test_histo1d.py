@@ -1,5 +1,5 @@
 import pytest
-from babyyoda.Histo1D import HISTO1D
+from babyyoda.Histo1D import Histo1D
 from babyyoda.test import assert_equal_histo1d
 
 import babyyoda.grogu as grogu
@@ -21,7 +21,7 @@ def create_histo(factory):
         for _ in range(i):
             h.fill(i)
     # do we already want to use HISTO1D here?
-    h = HISTO1D(h)
+    h = Histo1D(h)
     h.underflow().fill(-1)
     h.overflow().fill(10)
     return h

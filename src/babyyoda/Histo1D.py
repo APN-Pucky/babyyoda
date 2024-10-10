@@ -1,4 +1,5 @@
 import numpy as np
+import babyyoda
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
@@ -17,12 +18,16 @@ def set_bin(target, source):
 
 
 # TODO make this implementation independent (no V2 or V3...)
-class HISTO1D:
-    def __init__(self, target):
+class Histo1D:
+    def __init__(self, *args, backend=babyyoda.grogu.Histo1D_v3, **kwargs):
         """
         target is either a yoda or grogu HISTO1D_V2
         """
-        # Store the target object where calls and attributes will be forwarded
+        if len(args) == 1:
+            target = args[0]
+            # Store the target object where calls and attributes will be forwarded
+        else:
+            target = backend(*args, **kwargs)
         super().__setattr__("target", target)
 
     ########################################################
@@ -65,7 +70,7 @@ class HISTO1D:
     ########################################################
 
     def clone(self):
-        return HISTO1D(self.target.clone())
+        return Histo1D(self.target.clone())
 
     def overflow(self):
         # if target has overflow method, call it
@@ -168,7 +173,10 @@ class HISTO1D:
             # TODO cyclic maybe
             idx = None
             for i, b in enumerate(self.bins()):
-                if slices.value >= b.xMin() and slices.value < b.xMax():
+                if (
+                    slices.value >= self.xEdges()[i]
+                    and slices.value < self.xEdges()[i + 1]
+                ):
                     idx = i
             index = idx + slices.offset
         if slices is underflow:

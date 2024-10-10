@@ -1,4 +1,4 @@
-from babyyoda.Histo1D import HISTO1D
+from babyyoda.Histo1D import Histo1D
 import babyyoda.grogu as yoda
 from babyyoda.util import loc, overflow, underflow
 
@@ -10,7 +10,7 @@ def get_histo1d():
             h.fill(i)
     h.underflow().fill(-1)
     h.overflow().fill(10)
-    return HISTO1D(h)
+    return Histo1D(h)
 
 
 def test_setting_index():
