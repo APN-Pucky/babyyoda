@@ -1,13 +1,32 @@
 import sys
 import numpy as np
+import babyyoda
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
 class Histo2D:
-    def __init__(self, target):
+    def __init__(self, *args, backend=None, **kwargs):
         """
         target is either a yoda or grogu HISTO2D_V2
         """
+        if len(args) == 1:
+            target = args[0]
+            # Store the target object where calls and attributes will be forwarded
+        else:
+            # Pick faster backend if possible
+            if backend is None:
+                try:
+                    import yoda
+
+                    backend = yoda.Histo2D
+                except ImportError:
+                    backend = babyyoda.grogu.Histo2D_v3
+            target = backend(*args, **kwargs)
+
+        # unwrap target
+        while isinstance(target, Histo2D):
+            target = target.target
+
         # Store the target object where calls and attributes will be forwarded
         super().__setattr__("target", target)
 
@@ -50,12 +69,17 @@ class Histo2D:
     def clone(self):
         return Histo2D(self.target.clone())
 
-    def bins(self):
+    def bins(self, *args, **kwargs):
         # fix order
-        return np.array(sorted(self.target.bins(), key=lambda b: (b.xMin(), b.yMin())))
+        return self.target.bins(*args, **kwargs)
+        return np.array(
+            sorted(
+                self.target.bins(*args, **kwargs), key=lambda b: (b.xMin(), b.yMin())
+            )
+        )
 
-    def bin(self, *indices):
-        return self.bins()[indices]
+    # def bin(self, *indices):
+    #    return self.bins()[indices]
 
     # def overflow(self):
     #    # This is a YODA-1 feature that is not present in YODA-2
@@ -100,26 +124,34 @@ class Histo2D:
 
     @property
     def kind(self):
+        # TODO reeavaluate this
         return "COUNT"
 
     def values(self):
-        return self.sumWs().reshape((len(self.axes[0]), len(self.axes[1])))
+        return self.sumWs().reshape((len(self.axes[1]), len(self.axes[0]))).T
 
     def variances(self):
-        return np.array([b.sumW2() for b in self.bins()]).reshape(
-            (len(self.axes[0]), len(self.axes[1]))
+        return (
+            np.array([b.sumW2() for b in self.bins()])
+            .reshape((len(self.axes[1]), len(self.axes[0])))
+            .T
         )
 
     def counts(self):
-        return np.array([b.numEntries() for b in self.bins()]).reshape(
-            (len(self.axes[0]), len(self.axes[1]))
+        return (
+            np.array([b.numEntries() for b in self.bins()])
+            .reshape((len(self.axes[1]), len(self.axes[0])))
+            .T
         )
 
     def __single_index(self, ix, iy):
-        return ix * len(self.axes[1]) + iy
+        return iy * len(self.axes[0]) + ix
+        # return ix * len(self.axes[1]) + iy
 
     def __get_by_indices(self, ix, iy):
-        return self.bin(self.__single_index(ix, iy))
+        return self.bins()[
+            self.__single_index(ix, iy)
+        ]  # THIS is the fault with/without overflows!
 
     def __get_index_by_loc(self, loc, bins):
         # find the index in bin where loc is
@@ -217,8 +249,10 @@ class Histo2D:
         saved_values = self.values
 
         def temp_values():
-            return np.array([b.sumW() / b.dVol() for b in self.bins()]).reshape(
-                (len(self.axes[0]), len(self.axes[1]))
+            return (
+                np.array([b.sumW() / b.dVol() for b in self.bins()])
+                .reshape((len(self.axes[1]), len(self.axes[0])))
+                .T
             )
 
         self.values = temp_values

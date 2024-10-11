@@ -38,11 +38,6 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
             self.d_numentries += fraction
 
         def set_bin(self, bin):
-            # TODO allow modify those?
-            # self.d_xmin = bin.xMin()
-            # self.d_xmax = bin.xMax()
-            # self.d_ymin = bin.yMin()
-            # self.d_ymax = bin.yMax()
             self.d_sumw = bin.sumW()
             self.d_sumw2 = bin.sumW2()
             self.d_sumwx = bin.sumWX()
@@ -178,7 +173,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
         # YODA-1
         # return sorted(self.d_bins, key=lambda b: (b.d_xmin, b.d_ymin))
         # YODA-2
-        return sorted(self.d_bins, key=lambda b: (b.d_xmin, b.d_ymin))
+        return sorted(self.d_bins, key=lambda b: (b.d_ymin, b.d_xmin))
 
     def bin(self, index):
         return self.bins()[index]

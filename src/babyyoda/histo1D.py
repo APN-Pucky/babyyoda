@@ -176,7 +176,8 @@ class Histo1D:
 
     @property
     def kind(self):
-        return "MEAN"
+        # TODO reeavaluate this
+        return "COUNT"
 
     def counts(self):
         return np.array([b.numEntries() for b in self.bins()])

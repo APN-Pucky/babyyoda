@@ -3,6 +3,7 @@ import re
 from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
+from babyyoda.grogu.histo2d_v3 import GROGU_HISTO2D_V3
 
 
 def read(file_path: str):
@@ -23,6 +24,9 @@ def read(file_path: str):
             histograms[name] = hist
         elif hist_type == "YODA_HISTO2D_V2":
             hist = GROGU_HISTO2D_V2.from_string(body, name)
+            histograms[name] = hist
+        elif hist_type == "YODA_HISTO2D_V3":
+            hist = GROGU_HISTO2D_V3.from_string(body, name)
             histograms[name] = hist
         else:
             # Add other parsing logic for different types if necessary

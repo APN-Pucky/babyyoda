@@ -85,7 +85,7 @@ def assert_bin2d(gb, yb):
 def assert_value2d(gb, yb):
     assert gb.sumW() == yb.sumW()
     assert gb.sumW2() == yb.sumW2()
-    assert gb.sumWX() == yb.sumWX()
+    assert gb.sumWX() == yb.sumWX(), f"{gb.sumWX()} != {yb.sumWX()}"
     assert gb.sumWX2() == yb.sumWX2()
     assert gb.sumWY() == yb.sumWY()
     assert gb.sumWY2() == yb.sumWY2()

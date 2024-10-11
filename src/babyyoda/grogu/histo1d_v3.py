@@ -154,6 +154,8 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
 
     def __post_init__(self):
         self.d_type = "Histo1D"
+        # one more edge than bins, subtract 2 for underflow and overflow
+        assert len(self.d_edges) == len(self.d_bins) + 1 - 2
 
     ############################################
     # YODA compatibilty code
@@ -265,7 +267,10 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
                 continue
 
             if line.startswith("Edges"):
-                numbers_as_strings = re.findall(r"[-+]?\d*\.\d+e[+-]?\d+|\d+", line)
+                content = re.findall(r"\[(.*?)\]", line)
+                numbers_as_strings = re.findall(
+                    r"[-+]?\d*\.\d+e[+-]?\d+|\d+", content[0]
+                )
                 edges = [float(i) for i in numbers_as_strings]
                 continue
 

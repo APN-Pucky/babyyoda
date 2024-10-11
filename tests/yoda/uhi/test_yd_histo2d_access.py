@@ -1,7 +1,7 @@
 import pytest
 from babyyoda.histo2D import Histo2D
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
-from babyyoda.test import assert_bin2d
+from babyyoda.test import assert_value2d
 from babyyoda.util import loc
 
 pytest.importorskip("yoda")
@@ -35,15 +35,21 @@ def create_histo2d():
 def test_access_index():
     h, g = create_histo2d()
 
-    assert_bin2d(h[1, 0], h.bin(10))
-    assert_bin2d(h[0, 2], h.bin(2))
+    assert_value2d(h[1, 0], h.bin(10))
+    assert_value2d(h[0, 2], h.bin(2))
 
-    assert_bin2d(g[1, 0], g.bin(10))
-    assert_bin2d(g[0, 2], g.bin(2))
+    assert_value2d(g[1, 0], g.bin(10))
+    assert_value2d(g[0, 2], g.bin(2))
 
 
 def test_access_loc():
     h, g = create_histo2d()
 
-    assert_bin2d(h[loc(3), loc(4)], h.binAt(3, 4))
-    assert_bin2d(g[loc(3), loc(4)], g.binAt(3, 4))
+    (
+        assert_value2d(h[loc(3), loc(4)], h.binAt(3, 4)),
+        f"{h[loc(3),loc(4)]} != {h.binAt(3, 4)}",
+    )
+    (
+        assert_value2d(g[loc(3), loc(4)], g.binAt(3, 4)),
+        f"{g[loc(3),loc(4)]} != {g.binAt(3, 4)}",
+    )
