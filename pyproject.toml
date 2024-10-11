@@ -40,9 +40,15 @@ test = [
 ]
 develop = [
     "babyyoda[test,lint]",
-    "jupyter-notebook",
+    "boost_histogram",
+    "notebook",
     "pre-commit",
     "tbump>=6.7.0",
+]
+
+[tool.hatch.envs.develop]
+features = [
+  "develop",
 ]
 
 
