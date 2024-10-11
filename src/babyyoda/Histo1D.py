@@ -208,7 +208,9 @@ class Histo1D:
             )
             if isinstance(step, rebin):
                 if start is None:
-                    start = 0
+                    start = 1  # weird yoda default
+                if stop is None:
+                    stop = sys.maxsize  # weird yoda default
                 cs = self.clone()
                 cs.rebinBy(step.factor, start, stop)
                 return cs

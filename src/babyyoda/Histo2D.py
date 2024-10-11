@@ -1,5 +1,5 @@
 import numpy as np
-from babyyoda.util import loc, overflow, underflow
+from babyyoda.util import loc, overflow, rebin, underflow
 
 
 class HISTO2D:
@@ -143,6 +143,17 @@ class HISTO2D:
                 ix, iy = self.__get_indices(slices)
                 if isinstance(ix, int) and isinstance(iy, int):
                     return self.__get_by_indices(ix, iy)
+                sc = self.clone()
+                if isinstance(ix, slice):
+                    start, stop, step = (
+                        self.__get_index_by_loc(ix.start, self.axes[0]),
+                        self.__get_index_by_loc(ix.stop, self.axes[0]),
+                        ix.step,
+                    )
+                    if isinstance(step, rebin):
+                        raise NotImplementedError("Rebin not implemented")
+                    raise NotImplementedError("Slice not implemented")
+
         # TODO implement slice
         raise TypeError("Invalid argument type")
 
