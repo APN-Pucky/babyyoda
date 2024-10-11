@@ -5,10 +5,12 @@
 from .read import read, read_grogu, read_yoda
 from .util import loc, overflow, underflow, rebin
 
-from .Histo1D import Histo1D
+from .histo1D import Histo1D
+from .histo2D import Histo2D
 
 __all__ = [
     "Histo1D",
+    "Histo2D",
     "read",
     "loc",
     "overflow",

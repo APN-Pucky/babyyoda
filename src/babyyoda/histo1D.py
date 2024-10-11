@@ -35,7 +35,7 @@ class Histo1D:
 
                     backend = yoda.Histo1D
                 except ImportError:
-                    backend = babyyoda.grogu.histo1d_v3
+                    backend = babyyoda.grogu.Histo1D_v3
             target = backend(*args, **kwargs)
 
         # unwrap target
@@ -269,7 +269,12 @@ class Histo1D:
         import mplhep as hep
 
         hep.histplot(
-            self, *args, yerr=self.variances() ** 0.5, binwnorm=binwnorm, **kwargs
+            self,
+            *args,
+            yerr=self.variances() ** 0.5,
+            w2method="sqrt",
+            binwnorm=binwnorm,
+            **kwargs,
         )
 
     def _ipython_display_(self):

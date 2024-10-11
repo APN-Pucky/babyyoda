@@ -1,5 +1,5 @@
 import pytest
-from babyyoda.Histo1D import Histo1D
+from babyyoda.histo1D import Histo1D
 from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.test import assert_bin1d, assert_value1d
 from babyyoda.util import loc, overflow, underflow

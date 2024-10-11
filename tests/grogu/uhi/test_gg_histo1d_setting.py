@@ -1,4 +1,4 @@
-from babyyoda.Histo1D import Histo1D
+from babyyoda.histo1D import Histo1D
 import babyyoda.grogu as yoda
 from babyyoda.util import loc, overflow, underflow
 

@@ -1,5 +1,5 @@
 import pytest
-from babyyoda.Histo2D import Histo2D
+from babyyoda.histo2D import Histo2D
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
 from babyyoda.test import assert_bin2d
 from babyyoda.util import loc

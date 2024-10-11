@@ -1,8 +1,8 @@
 import warnings
 
 from babyyoda import grogu
-from babyyoda.Histo1D import Histo1D
-from babyyoda.Histo2D import Histo2D
+from babyyoda.histo1D import Histo1D
+from babyyoda.histo2D import Histo2D
 
 
 def read(file_path: str):

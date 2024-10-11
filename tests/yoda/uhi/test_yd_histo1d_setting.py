@@ -1,5 +1,5 @@
 import pytest
-from babyyoda.Histo1D import Histo1D
+from babyyoda.histo1D import Histo1D
 from babyyoda.util import loc, overflow, underflow
 
 # YODA1 does not support setting

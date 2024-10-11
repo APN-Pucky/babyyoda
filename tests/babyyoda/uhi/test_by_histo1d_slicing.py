@@ -1,5 +1,5 @@
 import pytest
-from babyyoda.Histo1D import Histo1D
+from babyyoda.histo1D import Histo1D
 from babyyoda.test import assert_equal_histo1d
 
 import babyyoda

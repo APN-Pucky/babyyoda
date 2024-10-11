@@ -1,7 +1,7 @@
 import pytest
 import babyyoda as by
-from babyyoda.Histo1D import Histo1D
-from babyyoda.Histo2D import Histo2D
+from babyyoda.histo1D import Histo1D
+from babyyoda.histo2D import Histo2D
 from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
 from babyyoda.test import assert_ao, assert_equal_histo1d, assert_histo2d
