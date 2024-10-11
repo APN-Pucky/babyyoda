@@ -186,7 +186,6 @@ class Histo2D:
                     else:
                         if ystop is not None:
                             ystop += 1
-                        print("new y axis", self.yEdges()[ystart:ystop])
                         sc.rebinYTo(self.yEdges()[ystart:ystop])
 
                     if isinstance(xstep, rebin):
@@ -203,7 +202,6 @@ class Histo2D:
                     else:
                         if xstop is not None:
                             xstop += 1
-                        print("new x axis", self.xEdges()[xstart:xstop])
                         sc.rebinXTo(self.xEdges()[xstart:xstop])
 
                     return sc

@@ -141,11 +141,37 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
         if x < self.xMin() and self.d_underflow is not None:
             self.d_underflow.fill(x, y, weight, fraction)
 
+    def xEdges(self):
+        assert all(
+            x == y
+            for x, y in zip(
+                sorted(list(set([b.d_xmin for b in self.d_bins])))[1:],
+                sorted(list(set([b.d_xmax for b in self.d_bins])))[:-1],
+            )
+        )
+        return sorted(list(set([b.d_xmin for b in self.d_bins])) + [self.xMax()])
+
+    def yEdges(self):
+        assert all(
+            x == y
+            for x, y in zip(
+                sorted(list(set([b.d_ymin for b in self.d_bins])))[1:],
+                sorted(list(set([b.d_ymax for b in self.d_bins])))[:-1],
+            )
+        )
+        return sorted(list(set([b.d_ymin for b in self.d_bins])) + [self.yMax()])
+
     def xMin(self):
         return min(b.d_xmin for b in self.d_bins)
 
+    def yMin(self):
+        return min(b.d_ymin for b in self.d_bins)
+
     def xMax(self):
         return max(b.d_xmax for b in self.d_bins)
+
+    def yMax(self):
+        return max(b.d_ymax for b in self.d_bins)
 
     def bins(self):
         # sort the bins by xlow, then ylow
