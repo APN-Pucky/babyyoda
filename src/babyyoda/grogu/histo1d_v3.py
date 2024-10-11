@@ -196,8 +196,9 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
         return [self.bins()[i] for i in indices]
 
     def binAt(self, x):
-        for b in self.bins():
-            if b.d_xmin <= x < b.d_xmax:
+        # TODO add tests for binAt
+        for i, b in enumerate(self.bins()):
+            if self.xEdges()[i] <= x < self.xEdges()[i + 1]:
                 return b
         return None
 

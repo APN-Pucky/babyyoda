@@ -1,5 +1,5 @@
 import pytest
-from babyyoda.Histo2D import HISTO2D
+from babyyoda.Histo2D import Histo2D
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
 from babyyoda.test import assert_bin2d
 from babyyoda.util import loc
@@ -29,7 +29,7 @@ def create_histo2d():
             for _ in range(i * j):
                 h.fill(i, j)
                 g.fill(i, j)
-    return HISTO2D(h), HISTO2D(g)
+    return Histo2D(h), Histo2D(g)
 
 
 def test_access_index():

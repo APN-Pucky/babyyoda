@@ -3,8 +3,17 @@
 # SPDX-License-Identifier: MIT
 
 from .read import read, read_grogu, read_yoda
-from .util import loc, overflow, underflow
+from .util import loc, overflow, underflow, rebin
 
 from .Histo1D import Histo1D
 
-__all__ = ["Histo1D", "read", "loc", "overflow", "underflow", "read_grogu", "read_yoda"]
+__all__ = [
+    "Histo1D",
+    "read",
+    "loc",
+    "overflow",
+    "underflow",
+    "read_grogu",
+    "read_yoda",
+    "rebin",
+]

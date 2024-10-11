@@ -5,7 +5,7 @@ import re
 from histoprint import print_hist
 
 from babyyoda.Histo1D import Histo1D
-from babyyoda.Histo2D import HISTO2D
+from babyyoda.Histo2D import Histo2D
 
 
 def main():
@@ -35,7 +35,7 @@ def main():
             ):
                 continue
 
-            if isinstance(v, Histo1D) or isinstance(v, HISTO2D):
+            if isinstance(v, Histo1D) or isinstance(v, Histo2D):
                 if args.operation == "print":
                     print(k)
                     print_hist(v, summary=True, title=v.title())

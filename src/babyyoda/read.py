@@ -2,7 +2,7 @@ import warnings
 
 from babyyoda import grogu
 from babyyoda.Histo1D import Histo1D
-from babyyoda.Histo2D import HISTO2D
+from babyyoda.Histo2D import Histo2D
 
 
 def read(file_path: str):
@@ -26,7 +26,7 @@ def read_yoda(file_path: str):
         if isinstance(v, yd.Histo1D):
             ret[k] = Histo1D(v)
         elif isinstance(v, yd.Histo2D):
-            ret[k] = HISTO2D(v)
+            ret[k] = Histo2D(v)
         else:
             ret[k] = v
     return ret
@@ -41,7 +41,7 @@ def read_grogu(file_path: str):
         if isinstance(v, grogu.histo1d_v2.GROGU_HISTO1D_V2):
             ret[k] = Histo1D(v)
         elif isinstance(v, grogu.histo2d_v2.GROGU_HISTO2D_V2):
-            ret[k] = HISTO2D(v)
+            ret[k] = Histo2D(v)
         else:
             ret[k] = v
     return ret

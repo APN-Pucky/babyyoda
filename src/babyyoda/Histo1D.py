@@ -102,10 +102,12 @@ class Histo1D:
         return np.sqrt(np.array([b.sumW2() for b in self.bins()]))
 
     def xMins(self):
-        return np.array([b.xMin() for b in self.bins()])
+        return self.xEdges()[:-1]
+        # return np.array([b.xMin() for b in self.bins()])
 
     def xMaxs(self):
-        return np.array([b.xMax() for b in self.bins()])
+        return self.xEdges()[1:]
+        # return np.array([b.xMax() for b in self.bins()])
 
     def sumWs(self):
         return np.array([b.sumW() for b in self.bins()])
@@ -206,20 +208,23 @@ class Histo1D:
                 self.__get_index(item.stop),
                 item.step,
             )
-            if isinstance(step, rebin):
-                if start is None:
-                    start = 1  # weird yoda default
-                if stop is None:
-                    stop = sys.maxsize  # weird yoda default
-                cs = self.clone()
-                cs.rebinBy(step.factor, start, stop)
-                return cs
 
-            print(f" {start} {stop} {step}")
-            if stop is not None:
-                stop += 1
             sc = self.clone()
-            sc.rebinTo(self.xEdges()[start:stop])
+            if isinstance(step, rebin):
+                # weird yoda default
+                if start is None:
+                    start = 1
+                else:
+                    start += 1
+                if stop is None:
+                    stop = sys.maxsize
+                else:
+                    stop += 1
+                sc.rebinBy(step.factor, start, stop)
+            else:
+                if stop is not None:
+                    stop += 1
+                sc.rebinTo(self.xEdges()[start:stop])
             return sc
 
         raise TypeError("Invalid argument type")

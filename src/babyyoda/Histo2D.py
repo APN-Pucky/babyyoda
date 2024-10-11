@@ -1,8 +1,9 @@
+import sys
 import numpy as np
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
-class HISTO2D:
+class Histo2D:
     def __init__(self, target):
         """
         target is either a yoda or grogu HISTO2D_V2
@@ -46,6 +47,9 @@ class HISTO2D:
     # YODA compatibility code (dropped legacy code?)
     ########################################################
 
+    def clone(self):
+        return Histo2D(self.target.clone())
+
     def bins(self):
         # fix order
         return np.array(sorted(self.target.bins(), key=lambda b: (b.xMin(), b.yMin())))
@@ -62,16 +66,20 @@ class HISTO2D:
     #    return self.bins(includeOverflows=True)[0]
 
     def xMins(self):
-        return np.array(sorted(list(set([b.xMin() for b in self.bins()]))))
+        return self.xEdges()[:-1]
+        # return np.array(sorted(list(set([b.xMin() for b in self.bins()]))))
 
     def xMaxs(self):
-        return np.array(sorted(list(set([b.xMax() for b in self.bins()]))))
+        return self.xEdges()[1:]
+        # return np.array(sorted(list(set([b.xMax() for b in self.bins()]))))
 
     def yMins(self):
-        return np.array(sorted(list(set([b.yMin() for b in self.bins()]))))
+        return self.yEdges()[:-1]
+        # return np.array(sorted(list(set([b.yMin() for b in self.bins()]))))
 
     def yMaxs(self):
-        return np.array(sorted(list(set([b.yMax() for b in self.bins()]))))
+        return self.yEdges()[1:]
+        # return np.array(sorted(list(set([b.yMax() for b in self.bins()]))))
 
     def sumWs(self):
         return np.array([b.sumW() for b in self.bins()])
@@ -117,20 +125,27 @@ class HISTO2D:
         # find the index in bin where loc is
         for a, b in bins:
             if a <= loc.value and loc.value < b:
-                return bins.index((a, b))
+                return bins.index((a, b)) + loc.offset
         raise ValueError(f"loc {loc.value} is not in the range of {bins}")
 
+    def __get_x_index(self, slices):
+        ix = None
+        if isinstance(slices, int):
+            ix = slices
+        if isinstance(slices, loc):
+            ix = self.__get_index_by_loc(slices, self.axes[0])
+        return ix
+
+    def __get_y_index(self, slices):
+        iy = None
+        if isinstance(slices, int):
+            iy = slices
+        if isinstance(slices, loc):
+            iy = self.__get_index_by_loc(slices, self.axes[1])
+        return iy
+
     def __get_indices(self, slices):
-        ix, iy = None, None
-        if isinstance(slices[0], int):
-            ix = slices[0]
-        if isinstance(slices[0], loc):
-            ix = self.__get_index_by_loc(slices[0], self.axes[0]) + slices[0].offset
-        if isinstance(slices[1], int):
-            iy = slices[1]
-        if isinstance(slices[1], loc):
-            iy = self.__get_index_by_loc(slices[1], self.axes[1]) + slices[1].offset
-        return ix, iy
+        return self.__get_x_index(slices[0]), self.__get_y_index(slices[1])
 
     def __getitem__(self, slices):
         # integer index
@@ -143,16 +158,56 @@ class HISTO2D:
                 ix, iy = self.__get_indices(slices)
                 if isinstance(ix, int) and isinstance(iy, int):
                     return self.__get_by_indices(ix, iy)
+                ix, iy = slices
                 sc = self.clone()
-                if isinstance(ix, slice):
-                    start, stop, step = (
-                        self.__get_index_by_loc(ix.start, self.axes[0]),
-                        self.__get_index_by_loc(ix.stop, self.axes[0]),
+                if isinstance(ix, slice) and isinstance(iy, slice):
+                    xstart, xstop, xstep = (
+                        self.__get_x_index(ix.start),
+                        self.__get_x_index(ix.stop),
                         ix.step,
                     )
-                    if isinstance(step, rebin):
-                        raise NotImplementedError("Rebin not implemented")
-                    raise NotImplementedError("Slice not implemented")
+                    ystart, ystop, ystep = (
+                        self.__get_y_index(iy.start),
+                        self.__get_y_index(iy.stop),
+                        iy.step,
+                    )
+
+                    if isinstance(ystep, rebin):
+                        # weird yoda default
+                        if ystart is None:
+                            ystart = 1
+                        else:
+                            ystart += 1
+                        if ystop is None:
+                            ystop = sys.maxsize
+                        else:
+                            ystop += 1
+                        sc.rebinYBy(ystep.factor, ystart, ystop)
+                    else:
+                        if ystop is not None:
+                            ystop += 1
+                        print("new y axis", self.yEdges()[ystart:ystop])
+                        sc.rebinYTo(self.yEdges()[ystart:ystop])
+
+                    if isinstance(xstep, rebin):
+                        # weird yoda default
+                        if xstart is None:
+                            xstart = 1
+                        else:
+                            xstart += 1
+                        if xstop is None:
+                            xstop = sys.maxsize
+                        else:
+                            xstop += 1
+                        sc.rebinXBy(xstep.factor, xstart, xstop)
+                    else:
+                        if xstop is not None:
+                            xstop += 1
+                        print("new x axis", self.xEdges()[xstart:xstop])
+                        sc.rebinXTo(self.xEdges()[xstart:xstop])
+
+                    return sc
+                raise NotImplementedError("Slice with Index not implemented")
 
         # TODO implement slice
         raise TypeError("Invalid argument type")
