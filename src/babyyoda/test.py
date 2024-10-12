@@ -101,5 +101,14 @@ def assert_histo2d(gh1, yh1):
 
     assert len(gh1.bins()) == len(yh1.bins())
 
+    for ge, ye in zip(gh1.xEdges(), yh1.xEdges()):
+        assert ge == ye, f"{gh1.xEdges()} != {yh1.xEdges()}"
+
+    for ge, ye in zip(gh1.yEdges(), yh1.yEdges()):
+        assert ge == ye, f"{gh1.yEdges()} != {yh1.yEdges()}"
+
+    for gb, yb in zip(gh1.bins(True), yh1.bins(True)):
+        assert_value2d(gb, yb)
+
     for gb, yb in zip(gh1.bins(), yh1.bins()):
-        assert_bin1d(gb, yb)
+        assert_value2d(gb, yb)
