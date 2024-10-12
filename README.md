@@ -13,7 +13,7 @@
 - makes it easy to manipulate the bin contents (compared to YODA-1).
 - tries to adhere to the UHI standard.
 - is easy to plot in a Jupyter notebook.
-- keeps representation close to the yoda file format.
+- keeps data representation close to the yoda file format.
 
 and the disadvantages to `yoda` are that it
 
