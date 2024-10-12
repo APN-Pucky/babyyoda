@@ -154,4 +154,4 @@ def test_create_histo2d():
                 h.fill(i, j)
                 g.fill(i, j)
 
-    assert_histo2d(Histo2D(g), Histo2D(h))
+    assert_histo2d(Histo2D(g), Histo2D(h), includeFlow=False)

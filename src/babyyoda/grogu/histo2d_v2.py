@@ -168,7 +168,9 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
     def yMax(self):
         return max(b.d_ymax for b in self.d_bins)
 
-    def bins(self):
+    def bins(self, includeFlow=False):
+        if includeFlow:
+            raise NotImplementedError("includeFlow=True not supported")
         # sort the bins by xlow, then ylow
         # YODA-1
         # return sorted(self.d_bins, key=lambda b: (b.d_xmin, b.d_ymin))

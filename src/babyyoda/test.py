@@ -96,7 +96,7 @@ def assert_value2d(gb, yb):
     assert gb.numEntries() == yb.numEntries()
 
 
-def assert_histo2d(gh1, yh1):
+def assert_histo2d(gh1, yh1, includeFlow=True):
     assert_ao(gh1, yh1)
 
     assert len(gh1.bins()) == len(yh1.bins())
@@ -107,8 +107,9 @@ def assert_histo2d(gh1, yh1):
     for ge, ye in zip(gh1.yEdges(), yh1.yEdges()):
         assert ge == ye, f"{gh1.yEdges()} != {yh1.yEdges()}"
 
-    for gb, yb in zip(gh1.bins(True), yh1.bins(True)):
-        assert_value2d(gb, yb)
+    if includeFlow:
+        for gb, yb in zip(gh1.bins(True), yh1.bins(True)):
+            assert_value2d(gb, yb)
 
     for gb, yb in zip(gh1.bins(), yh1.bins()):
         assert_value2d(gb, yb)

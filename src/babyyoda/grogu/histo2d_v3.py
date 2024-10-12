@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass, field
+import sys
 from typing import List
 
 import numpy as np
@@ -124,20 +125,15 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT):
         return self.d_edges[1]
 
     def fill(self, x, y, weight=1.0, fraction=1.0):
-        for i, b in enumerate(self.bins()):
-            if (
-                self.xEdges()[i] <= x < self.xEdges()[i + 1]
-                and self.yEdges()[i] <= y < self.yEdges()[i + 1]
-            ):
-                b.fill(x, y, weight, fraction)
-                return  # should be done here
-        raise ValueError(
-            f"fill({x}, {y}, ...) out of range, Overflow not implemented yet"
-        )
-        if x >= self.xMax() and self.d_overflow is not None:
-            self.d_overflow.fill(x, y, weight, fraction)
-        if x < self.xMin() and self.d_underflow is not None:
-            self.d_underflow.fill(x, y, weight, fraction)
+        # get ix and iy to map to correct bin
+        for ix, xEdge in enumerate(self.xEdges() + [sys.float_info.max]):
+            if x < xEdge:
+                break
+        for iy, yEdge in enumerate(self.yEdges() + [sys.float_info.max]):
+            if y < yEdge:
+                break
+        # Also fill overflow bins
+        self.bins(True)[iy * (len(self.xEdges()) + 1) + ix].fill(x, y, weight, fraction)
 
     def xMax(self):
         assert max(self.xEdges()) == self.xEdges()[-1], "xMax is not the last edge"

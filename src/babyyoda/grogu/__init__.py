@@ -51,7 +51,7 @@ def Histo2D(
     title=None,
     **kwargs,
 ):
-    return Histo2D_v2(
+    return Histo2D_v3(
         nxbins=nxbins,
         xstart=xstart,
         xend=xend,
@@ -106,7 +106,7 @@ def Histo2D_v3(
         ],
         d_bins=[
             GROGU_HISTO2D_V3.Bin()
-            for _ in range((nxbins + 1) * (nybins + 1))  # add overflow and underflow
+            for _ in range((nxbins + 2) * (nybins + 2))  # add overflow and underflow
         ],
         d_title=title,
         **kwargs,
