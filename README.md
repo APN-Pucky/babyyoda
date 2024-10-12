@@ -41,7 +41,7 @@ with UHI support.
 It can use either `yoda` (C++) or `babyyoda.grogu` (Python) as backend.
 At some point the UHI support might be adapted by the original `yoda` package.
 
-For a less feature complete version, `babyyoda.grogu` is a simpler python drop-in replacement for `yoda`:
+For a less feature complete version, `babyyoda.grogu` is a simpler python drop-in replacement for `yoda` without UHI:
 
 ```python
 import babyyoda.grogu as yoda
