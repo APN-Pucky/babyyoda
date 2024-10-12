@@ -57,6 +57,13 @@ def test_histo1d_v3():
         assert gb.sumWX2() == yb.sumWX2()
         assert gb.numEntries() == yb.numEntries()
 
+    for gb, yb in zip(gh1.bins(True), yh1.bins(True)):
+        assert gb.sumW() == yb.sumW()
+        assert gb.sumW2() == yb.sumW2()
+        assert gb.sumWX() == yb.sumWX()
+        assert gb.sumWX2() == yb.sumWX2()
+        assert gb.numEntries() == yb.numEntries()
+
 
 def test_histo2d_v2():
     gh2 = next(iter(by.read_grogu("tests/test_histo2d_v2.yoda").values()))
@@ -90,6 +97,7 @@ def test_histo2d_v3():
         x == y for x, y in zip(gh2.yEdges(), yh2.yEdges())
     ), f"{gh2.yEdges()} != {yh2.yEdges()}"
     assert len(gh2.bins(True)) == len(yh2.bins(True))
+    assert len(gh2.bins()) == len(yh2.bins())
 
     for i, (gb, yb) in enumerate(zip(gh2.bins(True), yh2.bins(True))):
         assert gb.sumW() == yb.sumW(), f"at index {i}"

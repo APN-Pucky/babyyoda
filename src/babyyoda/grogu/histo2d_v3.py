@@ -2,6 +2,8 @@ import re
 from dataclasses import dataclass, field
 from typing import List
 
+import numpy as np
+
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
 
 
@@ -106,6 +108,11 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT):
     def __post_init__(self):
         self.d_type = "Histo2D"
 
+        # plus 1 for underflow and overflow
+        assert len(self.d_bins) == (len(self.d_edges[0]) + 1) * (
+            len(self.d_edges[1]) + 1
+        )
+
     #
     # YODA compatibilty code
     #
@@ -151,8 +158,12 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT):
     def bins(self, includeFlows=False):
         if includeFlows:
             return self.d_bins
-        # TODO think of a smart way to map here
-        return self.d_bins[1:-1]
+        # TODO consider represent data always as numpy
+        return (
+            np.array(self.d_bins)
+            .reshape((len(self.yEdges()) + 1, len(self.xEdges()) + 1))[1:-1, 1:-1]
+            .flatten()
+        )
 
     def to_string(self) -> str:
         """Convert a YODA_HISTO2D_V3 object to a formatted string."""

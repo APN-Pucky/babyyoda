@@ -242,22 +242,24 @@ class Histo2D:
         # TODO implement slice
         raise TypeError("Invalid argument type")
 
-    def plot(self, *args, **kwargs):
+    def plot(self, *args, binwnorm=True, **kwargs):
         import mplhep as hep
 
-        # Hack in the temporary division by dVol
-        saved_values = self.values
+        if binwnorm:
+            # Hack in the temporary division by dVol
+            saved_values = self.values
 
-        def temp_values():
-            return (
-                np.array([b.sumW() / b.dVol() for b in self.bins()])
-                .reshape((len(self.axes[1]), len(self.axes[0])))
-                .T
-            )
+            def temp_values():
+                return (
+                    np.array([b.sumW() / b.dVol() for b in self.bins()])
+                    .reshape((len(self.axes[1]), len(self.axes[0])))
+                    .T
+                )
 
-        self.values = temp_values
+            self.values = temp_values
         hep.hist2dplot(self, *args, **kwargs)
-        self.values = saved_values
+        if binwnorm:
+            self.values = saved_values
 
     def _ipython_display_(self):
         try:
