@@ -1,3 +1,5 @@
+import yoda
+
 import babyyoda
 
 
@@ -6,13 +8,7 @@ class Histo2D(babyyoda.Histo2D):
         """
         target is either a yoda or grogu HISTO2D_V2
         """
-        if len(args) == 1:
-            target = args[0]
-            # Store the target object where calls and attributes will be forwarded
-        else:
-            import yoda
-
-            target = yoda.Histo2D(*args, **kwargs)
+        target = args[0] if len(args) == 1 else yoda.Histo2D(*args, **kwargs)
 
         # unwrap target
         while isinstance(target, Histo2D):
