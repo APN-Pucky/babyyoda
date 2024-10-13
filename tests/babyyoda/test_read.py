@@ -2,9 +2,11 @@ import pytest
 
 import babyyoda
 import babyyoda.read
+from babyyoda import grogu
 
 try:
-    import yoda
+    from babyyoda import yoda
+    # import yoda
 
     yoda_available = True
     # version dependence possible here
@@ -18,9 +20,7 @@ except ImportError:
     "mod",
     [
         babyyoda.read,
-        babyyoda.read_yoda,
-        babyyoda.read_grogu,
-        babyyoda.grogu.read,
+        grogu.read,
         yoda.read,
     ],
 )
@@ -33,9 +33,7 @@ def test_read_histo1d_v2(mod):
     "mod",
     [
         babyyoda.read,
-        babyyoda.read_yoda,
-        babyyoda.read_grogu,
-        babyyoda.grogu.read,
+        grogu.read,
         yoda.read,
     ],
 )
@@ -48,9 +46,7 @@ def test_read_histo1d_v3(mod):
     "mod",
     [
         babyyoda.read,
-        babyyoda.read_yoda,
-        babyyoda.read_grogu,
-        babyyoda.grogu.read,
+        grogu.read,
         yoda.read,
     ],
 )
@@ -63,9 +59,7 @@ def test_read_histo2d_v2(mod):
     "mod",
     [
         babyyoda.read,
-        babyyoda.read_yoda,
-        babyyoda.read_grogu,
-        babyyoda.grogu.read,
+        grogu.read,
         yoda.read,
     ],
 )
