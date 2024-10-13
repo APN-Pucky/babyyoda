@@ -47,6 +47,30 @@ class Histo1D(babyyoda.UHIHisto1D):
         err = f"'{type(self.target).__name__}' object is not callable"
         raise TypeError(err)
 
+    def bins(self, includeOverflows=False, *args, **kwargs):
+        # YODA1 does not offer inlcudeOverflows
+        if hasattr(self.target, "overflow") and hasattr(self.target, "underflow"):
+            if includeOverflows:
+                return [
+                    self.target.underflow(),
+                    *self.target.bins(),
+                    self.target.overflow(),
+                ]
+            return self.target.bins(*args, **kwargs)
+        return self.target.bins(*args, includeOverflows=includeOverflows, **kwargs)
+
+    def rebinXTo(self, *args, **kwargs):
+        # YODA1 does not offer rebinXTo
+        if hasattr(self.target, "rebinXTo"):
+            return self.target.rebinXTo(*args, **kwargs)
+        return self.target.rebinTo(*args, **kwargs)
+
+    def rebinXBy(self, *args, **kwargs):
+        # YODA1 does not offer rebinXTo
+        if hasattr(self.target, "rebinXBy"):
+            return self.target.rebinXBy(*args, **kwargs)
+        return self.target.rebinBy(*args, **kwargs)
+
     def __getitem__(self, slices):
         return super().__getitem__(slices)
 
