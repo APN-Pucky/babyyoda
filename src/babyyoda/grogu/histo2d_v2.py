@@ -26,6 +26,22 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
         # YODA compatibilty code
         ########################################################
 
+        def clone(self):
+            return GROGU_HISTO2D_V2.Bin(
+                d_xmin=self.d_xmin,
+                d_xmax=self.d_xmax,
+                d_ymin=self.d_ymin,
+                d_ymax=self.d_ymax,
+                d_sumw=self.d_sumw,
+                d_sumw2=self.d_sumw2,
+                d_sumwx=self.d_sumwx,
+                d_sumwx2=self.d_sumwx2,
+                d_sumwy=self.d_sumwy,
+                d_sumwy2=self.d_sumwy2,
+                d_sumwxy=self.d_sumwxy,
+                d_numentries=self.d_numentries,
+            )
+
         def fill(self, x: float, y: float, weight: float = 1.0, fraction=1.0):
             sf = fraction * weight
             self.d_sumw += sf
@@ -126,6 +142,16 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
     #
     # YODA compatibilty code
     #
+
+    def clone(self):
+        return GROGU_HISTO2D_V2(
+            d_key=self.d_key,
+            d_path=self.d_path,
+            d_title=self.d_title,
+            d_bins=[b.clone() for b in self.d_bins],
+            d_underflow=self.d_underflow,
+            d_overflow=self.d_overflow,
+        )
 
     def fill(self, x, y, weight=1.0, fraction=1.0):
         for b in self.d_bins:

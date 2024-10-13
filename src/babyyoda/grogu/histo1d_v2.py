@@ -26,19 +26,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
         # YODA compatibilty code
         ########################################################
 
-        # TODO drop either clone or copy
         def clone(self):
-            return GROGU_HISTO1D_V2.Bin(
-                d_xmin=self.d_xmin,
-                d_xmax=self.d_xmax,
-                d_sumw=self.d_sumw,
-                d_sumw2=self.d_sumw2,
-                d_sumwx=self.d_sumwx,
-                d_sumwx2=self.d_sumwx2,
-                d_numentries=self.d_numentries,
-            )
-
-        def copy(self):
             return GROGU_HISTO1D_V2.Bin(
                 d_xmin=self.d_xmin,
                 d_xmax=self.d_xmax,
@@ -213,7 +201,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
             d_key=self.d_key,
             d_path=self.d_path,
             d_title=self.d_title,
-            d_bins=[b.copy() for b in self.d_bins],
+            d_bins=[b.clone() for b in self.d_bins],
             d_underflow=self.d_underflow,
             d_overflow=self.d_overflow,
         )

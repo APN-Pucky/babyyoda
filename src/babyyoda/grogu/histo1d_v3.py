@@ -1,3 +1,4 @@
+import copy
 import re
 from typing import List
 from dataclasses import dataclass, field
@@ -20,15 +21,6 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
         ########################################################
 
         def clone(self):
-            return GROGU_HISTO1D_V3.Bin(
-                d_sumw=self.d_sumw,
-                d_sumw2=self.d_sumw2,
-                d_sumwx=self.d_sumwx,
-                d_sumwx2=self.d_sumwx2,
-                d_numentries=self.d_numentries,
-            )
-
-        def copy(self):
             return GROGU_HISTO1D_V3.Bin(
                 d_sumw=self.d_sumw,
                 d_sumw2=self.d_sumw2,
@@ -168,8 +160,8 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
             d_key=self.d_key,
             d_path=self.d_path,
             d_title=self.d_title,
-            d_edges=self.d_edges.copy(),
-            d_bins=[b.copy() for b in self.d_bins],
+            d_edges=copy.deepcopy(self.d_edges),
+            d_bins=[b.clone() for b in self.d_bins],
         )
 
     def underflow(self):

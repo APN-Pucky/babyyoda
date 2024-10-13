@@ -1,3 +1,4 @@
+import copy
 import re
 from dataclasses import dataclass, field
 import sys
@@ -20,6 +21,18 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT):
         d_sumwy2: float = 0.0
         d_sumwxy: float = 0.0
         d_numentries: float = 0.0
+
+        def clone(self):
+            return GROGU_HISTO2D_V3.Bin(
+                d_sumw=self.d_sumw,
+                d_sumw2=self.d_sumw2,
+                d_sumwx=self.d_sumwx,
+                d_sumwx2=self.d_sumwx2,
+                d_sumwy=self.d_sumwy,
+                d_sumwy2=self.d_sumwy2,
+                d_sumwxy=self.d_sumwxy,
+                d_numentries=self.d_numentries,
+            )
 
         def fill(self, x: float, y: float, weight: float = 1.0, fraction=1.0):
             sf = fraction * weight
@@ -117,6 +130,15 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT):
     #
     # YODA compatibilty code
     #
+
+    def clone(self):
+        return GROGU_HISTO2D_V3(
+            d_key=self.d_key,
+            d_path=self.d_path,
+            d_title=self.d_title,
+            d_bins=[b.clone() for b in self.d_bins],
+            d_edges=copy.deepcopy(self.d_edges),
+        )
 
     def xEdges(self):
         return self.d_edges[0]
