@@ -33,12 +33,12 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo pip install '.[test]' --break-system-packages
-        sudo pip list
+        python3.12 -m pip install '.[test]' --break-system-packages
+        python3.12 -m pip list
 
     - name: Test with pytest
       run: |
-        sudo pytest -r sx tests/
+        python3.12 -m pytest -r sx tests/
 
 #    - name: Report core project coverage with Codecov
 #      if: >-
