@@ -171,7 +171,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
                 sorted({b.d_xmax for b in self.d_bins})[:-1],
             )
         )
-        return sorted({b.d_xmin for b in self.d_bins} + {self.xMax()})
+        return sorted({b.d_xmin for b in self.d_bins} | {self.xMax()})
 
     def yEdges(self):
         assert all(
@@ -181,7 +181,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
                 sorted({b.d_ymax for b in self.d_bins})[:-1],
             )
         )
-        return sorted({b.d_ymin for b in self.d_bins} + {self.yMax()})
+        return sorted({b.d_ymin for b in self.d_bins} | {self.yMax()})
 
     def xMin(self):
         return min(b.d_xmin for b in self.d_bins)
