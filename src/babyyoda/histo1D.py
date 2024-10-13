@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 import babyyoda
+from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
+from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
@@ -265,6 +267,98 @@ class Histo1D:
         # integer index
         index = self.__get_index(slices)
         self.__set_by_index(index, value)
+
+    def key(self):
+        if hasattr(self.target, "key"):
+            return self.target.key()
+        return self.path()
+
+    def to_grogu_v2(self):
+        return Histo1D(
+            GROGU_HISTO1D_V2(
+                d_key=self.key(),
+                d_path=self.path(),
+                d_title=self.title(),
+                d_bins=[
+                    GROGU_HISTO1D_V2.Bin(
+                        d_xmin=self.xEdges()[i],
+                        d_xmax=self.xEdges()[i + 1],
+                        d_sumw=b.sumW(),
+                        d_sumw2=b.sumW2(),
+                        d_sumwx=b.sumWX(),
+                        d_sumwx2=b.sumWX2(),
+                        d_numentries=b.numEntries(),
+                    )
+                    for i, b in enumerate(self.bins())
+                ],
+                d_overflow=GROGU_HISTO1D_V2.Bin(
+                    d_xmin=None,
+                    d_xmax=None,
+                    d_sumw=self.overflow().sumW(),
+                    d_sumw2=self.overflow().sumW2(),
+                    d_sumwx=self.overflow().sumWX(),
+                    d_sumwx2=self.overflow().sumWX2(),
+                    d_numentries=self.overflow().numEntries(),
+                ),
+                d_underflow=GROGU_HISTO1D_V2.Bin(
+                    d_xmin=None,
+                    d_xmax=None,
+                    d_sumw=self.underflow().sumW(),
+                    d_sumw2=self.underflow().sumW2(),
+                    d_sumwx=self.underflow().sumWX(),
+                    d_sumwx2=self.underflow().sumWX2(),
+                    d_numentries=self.underflow().numEntries(),
+                ),
+            )
+        )
+
+    def to_grogu_v3(self):
+        return Histo1D(
+            GROGU_HISTO1D_V3(
+                d_key=self.key(),
+                d_path=self.path(),
+                d_title=self.title(),
+                d_edges=self.xEdges(),
+                d_bins=[
+                    GROGU_HISTO1D_V3.Bin(
+                        d_sumw=self.underflow().sumW(),
+                        d_sumw2=self.underflow().sumW2(),
+                        d_sumwx=self.underflow().sumWX(),
+                        d_sumwx2=self.underflow().sumWX2(),
+                        d_numentries=self.underflow().numEntries(),
+                    )
+                ]
+                + [
+                    GROGU_HISTO1D_V3.Bin(
+                        d_sumw=b.sumW(),
+                        d_sumw2=b.sumW2(),
+                        d_sumwx=b.sumWX(),
+                        d_sumwx2=b.sumWX2(),
+                        d_numentries=b.numEntries(),
+                    )
+                    for b in self.bins()
+                ]
+                + [
+                    GROGU_HISTO1D_V3.Bin(
+                        d_sumw=self.overflow().sumW(),
+                        d_sumw2=self.overflow().sumW2(),
+                        d_sumwx=self.overflow().sumWX(),
+                        d_sumwx2=self.overflow().sumWX2(),
+                        d_numentries=self.overflow().numEntries(),
+                    )
+                ],
+            )
+        )
+
+    def to_yoda_v3(self):
+        raise NotImplementedError("Not implemented yet")
+
+    def to_string(self):
+        if hasattr(self.target, "to_string"):
+            return self.target.to_string()
+        # Now we need to map YODA to grogu and then call to_string
+        # TODO do we want to hardcode v3 here?
+        return self.to_grogu_v3().to_string()
 
     def plot(self, *args, binwnorm=1.0, **kwargs):
         import mplhep as hep

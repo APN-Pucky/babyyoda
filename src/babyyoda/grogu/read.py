@@ -33,7 +33,7 @@ def _extract_fileobj(filepath):
 def read(file_path: str):
     with _extract_fileobj(file_path) as f:
         content = f.read()
-
+        content = content.decode("utf-8")
     pattern = re.compile(
         r"(BEGIN (YODA_[A-Z0-9_]+) ([^\n]+)\n(.*?)\nEND \2)", re.DOTALL
     )

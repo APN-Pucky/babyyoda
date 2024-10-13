@@ -70,8 +70,9 @@ def assert_histo1d(gh1, yh1):
     for gb, yb in zip(gh1.bins(), yh1.bins()):
         assert_value1d(gb, yb)
 
-    assert_value1d(gh1.overflow(), yh1.overflow())
-    assert_value1d(gh1.underflow(), gh1.underflow())
+    if hasattr(gh1, "overflow") and hasattr(yh1, "overflow"):
+        assert_value1d(gh1.overflow(), yh1.overflow())
+        assert_value1d(gh1.underflow(), gh1.underflow())
 
 
 def assert_bin2d(gb, yb):

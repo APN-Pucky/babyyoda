@@ -5,6 +5,7 @@
 from ._version import version as __version__
 
 from .read import read, read_grogu, read_yoda
+from .write import write, write_grogu, write_yoda
 from .util import loc, overflow, underflow, rebin
 
 from .histo1D import Histo1D
@@ -21,4 +22,7 @@ __all__ = [
     "read_grogu",
     "read_yoda",
     "rebin",
+    "write",
+    "write_grogu",
+    "write_yoda",
 ]

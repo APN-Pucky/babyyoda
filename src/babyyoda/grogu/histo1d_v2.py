@@ -227,7 +227,10 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
     def xMin(self):
         return min([b.xMin() for b in self.d_bins])
 
-    def bins(self):
+    def bins(self, includeFlows=False):
+        if includeFlows:
+            return [self.d_underflow] + self.d_bins + [self.d_overflow]
+        # TODO sorted needed here?
         return sorted(self.d_bins, key=lambda b: b.d_xmin)
 
     def bin(self, *indices):

@@ -13,6 +13,9 @@ class GROGU_ANALYSIS_OBJECT:
     # YODA compatibilty code
     ############################################
 
+    def key(self):
+        return self.d_key
+
     def path(self):
         return self.d_path
 

@@ -1,3 +1,7 @@
+import gzip
+import inspect
+
+
 class loc:
     "When used in the start or stop of a Histogram's slice, x is taken to be the position in data coordinates."
 
@@ -26,3 +30,35 @@ class underflow:
 
 class overflow:
     pass
+
+
+def open_write_file(file_path, gz=False):
+    if file_path.endswith(".gz") or file_path.endswith(".gzip") or gz:
+        return gzip.open(file_path, "wt")
+    else:
+        return open(file_path, "w")
+
+
+def uses_yoda(obj):
+    if hasattr(obj, "target"):
+        return uses_yoda(obj.target)
+    return is_yoda(obj)
+
+
+def is_yoda(obj):
+    return is_from_package(obj, "yoda.")
+
+
+def is_from_package(obj, package_name):
+    # Get the class of the object
+    obj_class = obj.__class__
+
+    # Get the method resolution order (MRO) of the class, which includes parent classes
+    mro = inspect.getmro(obj_class)
+
+    # Check each class in the MRO for its module
+    for cls in mro:
+        module = inspect.getmodule(cls)
+        if module and module.__name__.startswith(package_name):
+            return True
+    return False

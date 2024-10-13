@@ -4,3 +4,4 @@ yoda-plots
 dist
 __pycache__
 test.yoda
+test.yoda.gz
