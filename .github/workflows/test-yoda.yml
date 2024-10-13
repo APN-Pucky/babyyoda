@@ -33,6 +33,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        PYTHON_TARGETS="python3_12" emerge -q dev-python/pip
         python3.12 -m pip install '.[test]' --break-system-packages
         python3.12 -m pip list
 
