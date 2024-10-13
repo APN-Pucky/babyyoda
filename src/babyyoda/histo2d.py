@@ -15,7 +15,7 @@ def set_bin2d(target, source):
             source.numEntries(),
             [source.sumW(), source.sumWX(), source.sumWY()],
             [source.sumW2(), source.sumWX2(), source.sumWY2()],
-            [source.sumWXY()],
+            [source.crossTerm(0, 1)],
         )
     else:
         err = "YODA1 backend can not set bin values"
@@ -146,8 +146,7 @@ class UHIHisto2D:
         return self.__get_x_index(slices[0]), self.__get_y_index(slices[1])
 
     def __setitem__(self, slices, value):
-        err = "Set item not implemented"
-        raise NotImplementedError(err)
+        set_bin2d(self.__getitem__(slices), value)
 
     def __getitem__(self, slices):
         # integer index
