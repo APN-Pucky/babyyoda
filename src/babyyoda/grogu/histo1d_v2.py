@@ -17,6 +17,11 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
         d_sumwx2: float = 0.0
         d_numentries: float = 0.0
 
+        def __post_init__(self):
+            assert (
+                self.d_xmin is None or self.d_xmax is None or self.d_xmin < self.d_xmax
+            )
+
         ########################################################
         # YODA compatibilty code
         ########################################################
@@ -129,17 +134,17 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
         def numEntries(self):
             return self.d_numentries
 
-        def __eq__(self, other):
-            return (
-                isinstance(other, GROGU_HISTO1D_V2.Bin)
-                and self.d_xmin == other.d_xmin
-                and self.d_xmax == other.d_xmax
-                and self.d_sumw == other.d_sumw
-                and self.d_sumw2 == other.d_sumw2
-                and self.d_sumwx == other.d_sumwx
-                and self.d_sumwx2 == other.d_sumwx2
-                and self.d_numentries == other.d_numentries
-            )
+        # def __eq__(self, other):
+        #    return (
+        #        isinstance(other, GROGU_HISTO1D_V2.Bin)
+        #        and self.d_xmin == other.d_xmin
+        #        and self.d_xmax == other.d_xmax
+        #        and self.d_sumw == other.d_sumw
+        #        and self.d_sumw2 == other.d_sumw2
+        #        and self.d_sumwx == other.d_sumwx
+        #        and self.d_sumwx2 == other.d_sumwx2
+        #        and self.d_numentries == other.d_numentries
+        #    )
 
         def __add__(self, other):
             assert isinstance(other, GROGU_HISTO1D_V2.Bin)
@@ -302,8 +307,11 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
         return f"{header}{stats}{underflow}\n{overflow}\n{legend}{bin_data}\n{footer}"
 
     @classmethod
-    def from_string(cls, file_content: str, key: str = "") -> "GROGU_HISTO1D_V2":
+    def from_string(cls, file_content: str) -> "GROGU_HISTO1D_V2":
         lines = file_content.strip().splitlines()
+        key = ""
+        if find := re.search(r"BEGIN YODA_HISTO1D_V2 (\S+)", lines[0]):
+            key = find.group(1)
 
         # Extract metadata (path, title)
         path = ""
@@ -322,7 +330,11 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
         data_section_started = False
 
         for line in lines:
-            if line.startswith("#"):
+            if line.startswith("BEGIN YODA_HISTO1D_V2"):
+                continue
+            if line.startswith("END YODA_HISTO1D_V2"):
+                break
+            if line.startswith("#") or line.isspace():
                 continue
             if line.startswith("---"):
                 data_section_started = True
@@ -332,18 +344,18 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT):
 
             values = re.split(r"\s+", line.strip())
             if values[0] == "Underflow":
-                underflow = GROGU_HISTO1D_V2.Bin.from_string(line)
+                underflow = cls.Bin.from_string(line)
             elif values[0] == "Overflow":
-                overflow = GROGU_HISTO1D_V2.Bin.from_string(line)
+                overflow = cls.Bin.from_string(line)
             elif values[0] == "Total":
                 # ignore for now
                 pass
             else:
                 # Regular bin
-                bins.append(GROGU_HISTO1D_V2.Bin.from_string(line))
+                bins.append(cls.Bin.from_string(line))
 
         # Create and return the YODA_HISTO1D_V2 object
-        return GROGU_HISTO1D_V2(
+        return cls(
             d_key=key,
             d_path=path,
             d_title=title,

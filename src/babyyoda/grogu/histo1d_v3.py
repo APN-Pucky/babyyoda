@@ -155,7 +155,9 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
     def __post_init__(self):
         self.d_type = "Histo1D"
         # one more edge than bins, subtract 2 for underflow and overflow
-        assert len(self.d_edges) == len(self.d_bins) + 1 - 2
+        assert (
+            len(self.d_edges) == len(self.d_bins) + 1 - 2
+        ), f"{len(self.d_edges)} != {len(self.d_bins)} + 1 - 2"
 
     ############################################
     # YODA compatibilty code
@@ -238,8 +240,11 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
         assert len(self.d_bins) == len(self.xEdges()) - 1 + 2
 
     @classmethod
-    def from_string(cls, file_content: str, key: str = "") -> "GROGU_HISTO1D_V3":
+    def from_string(cls, file_content: str) -> "GROGU_HISTO1D_V3":
         lines = file_content.strip().splitlines()
+        key = ""
+        if find := re.search(r"BEGIN YODA_HISTO1D_V3 (\S+)", lines[0]):
+            key = find.group(1)
 
         # Extract metadata (path, title)
         path = ""
@@ -258,7 +263,11 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
         data_section_started = False
 
         for line in lines:
-            if line.startswith("#"):
+            if line.startswith("BEGIN YODA_HISTO1D_V3"):
+                continue
+            if line.startswith("END YODA_HISTO1D_V3"):
+                break
+            if line.startswith("#") or line.isspace():
                 continue
             if line.startswith("---"):
                 data_section_started = True
@@ -267,17 +276,15 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
                 continue
 
             if line.startswith("Edges"):
-                content = re.findall(r"\[(.*?)\]", line)
-                numbers_as_strings = re.findall(
-                    r"[-+]?\d*\.\d+e[+-]?\d+|\d+", content[0]
-                )
-                edges = [float(i) for i in numbers_as_strings]
+                content = re.findall(r"\[(.*?)\]", line)[0]
+                values = re.split(r"\s+", content.replace(",", ""))
+                edges = [float(i) for i in values]
                 continue
 
-            bins.append(GROGU_HISTO1D_V3.Bin.from_string(line))
+            bins.append(cls.Bin.from_string(line))
 
         # Create and return the YODA_HISTO1D_V2 object
-        return GROGU_HISTO1D_V3(
+        return cls(
             d_key=key,
             d_path=path,
             d_title=title,
@@ -303,8 +310,8 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
 
         edges = f"Edges(A1): [{', '.join(str(e) for e in self.d_edges)}]\n"
         # Add the bin data
-        bin_data = "\n".join(GROGU_HISTO1D_V3.Bin.to_string(b) for b in self.bins())
+        bin_data = "\n".join(GROGU_HISTO1D_V3.Bin.to_string(b) for b in self.bins(True))
 
         footer = "END YODA_HISTO1D_V3\n"
 
-        return f"{header}{stats}{edges}\n\n# sumW\t sumW2\t sumW(A1)\t sumW2(A1)\t numEntries\n{bin_data}\n{footer}"
+        return f"{header}{stats}{edges}# sumW\t sumW2\t sumW(A1)\t sumW2(A1)\t numEntries\n{bin_data}\n{footer}"

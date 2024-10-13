@@ -1,6 +1,6 @@
 import pytest
 from babyyoda.histo1D import Histo1D
-from babyyoda.test import assert_equal_histo1d
+from babyyoda.test import assert_histo1d
 
 import babyyoda
 import babyyoda.grogu as grogu
@@ -45,9 +45,9 @@ def create_histo(backend):
 def test_slicing_everything(factory1):
     yuhi1d = create_histo(factory1)
     assert yuhi1d.clone() != yuhi1d
-    assert_equal_histo1d(yuhi1d.clone(), yuhi1d)
+    assert_histo1d(yuhi1d.clone(), yuhi1d)
     assert yuhi1d[:] != yuhi1d
-    assert_equal_histo1d(yuhi1d[:], yuhi1d)
+    assert_histo1d(yuhi1d[:], yuhi1d)
     assert yuhi1d.clone()[:] != yuhi1d
 
 
@@ -66,7 +66,7 @@ def test_slicing_subset(factory1):
     yuhi1d = create_histo(factory1)
     assert yuhi1d.clone()[1:3] != yuhi1d
     assert yuhi1d[1:3] != yuhi1d[1:3]
-    assert_equal_histo1d(yuhi1d[1:3], yuhi1d[1:3])
+    assert_histo1d(yuhi1d[1:3], yuhi1d[1:3])
     assert yuhi1d[1:3][0].sumW() == yuhi1d[1].sumW()
 
 
@@ -118,18 +118,18 @@ def test_slicing_lower_bound(factory1):
 def test_slicing_mixed_bound(factory1):
     yuhi1d = create_histo(factory1)
     assert yuhi1d[1:9] != yuhi1d[1:-1]
-    assert_equal_histo1d(yuhi1d[1:9], yuhi1d[1:-1])
+    assert_histo1d(yuhi1d[1:9], yuhi1d[1:-1])
     assert yuhi1d[1:] != yuhi1d[1:10]
-    assert_equal_histo1d(yuhi1d[1:], yuhi1d[1:10])
+    assert_histo1d(yuhi1d[1:], yuhi1d[1:10])
     assert yuhi1d[1:][2:-1] != yuhi1d[1:10][2:8]
-    assert_equal_histo1d(yuhi1d[1:][2:-1], yuhi1d[1:10][2:8])
+    assert_histo1d(yuhi1d[1:][2:-1], yuhi1d[1:10][2:8])
     assert yuhi1d[:3][2:] != yuhi1d[:3][2:]
-    assert_equal_histo1d(yuhi1d[:3][2:], yuhi1d[:3][2:])
+    assert_histo1d(yuhi1d[:3][2:], yuhi1d[:3][2:])
 
     assert yuhi1d[:3][overflow].sumW() == yuhi1d[2:3][overflow].sumW()
     assert yuhi1d[:3][2:][overflow].sumW() == yuhi1d[2:3][overflow].sumW()
     assert yuhi1d[2:][:3] != yuhi1d[2:5]
-    assert_equal_histo1d(yuhi1d[2:][:3], yuhi1d[2:5])
+    assert_histo1d(yuhi1d[2:][:3], yuhi1d[2:5])
 
 
 @pytest.mark.parametrize(

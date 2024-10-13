@@ -4,7 +4,7 @@ from babyyoda.histo1D import Histo1D
 from babyyoda.histo2D import Histo2D
 from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
-from babyyoda.test import assert_ao, assert_equal_histo1d, assert_histo2d
+from babyyoda.test import assert_ao, assert_histo1d, assert_histo2d
 
 
 pytest.importorskip("yoda")
@@ -128,7 +128,7 @@ def test_create_histo1d():
     h.fill(10)
     g.fill(10)
 
-    assert_equal_histo1d(Histo1D(g), Histo1D(h))
+    assert_histo1d(Histo1D(g), Histo1D(h))
 
 
 def test_create_histo2d():

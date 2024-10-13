@@ -59,7 +59,7 @@ def assert_value1d(gb, yb):
     assert gb.numEntries() == yb.numEntries()
 
 
-def assert_equal_histo1d(gh1, yh1):
+def assert_histo1d(gh1, yh1):
     assert_ao(gh1, yh1)
 
     assert len(gh1.bins()) == len(yh1.bins()), f"{len(gh1.bins())} != {len(yh1.bins())}"

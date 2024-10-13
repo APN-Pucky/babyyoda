@@ -205,13 +205,17 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
 
         legend = "# xlow\t xhigh\t ylow\t yhigh\t sumw\t sumw2\t sumwx\t sumwx2\t sumwy\t sumwy2\t sumwxy\t numEntries\n"
         bin_data = "\n".join(b.to_string() for b in self.d_bins)
-        footer = "END YODA_HISTO2D_V2\n"
+        footer = "\nEND YODA_HISTO2D_V2\n"
 
         return f"{header}{stats}{legend}{bin_data}{footer}"
 
     @classmethod
-    def from_string(cls, file_content: str, name: str = "") -> "GROGU_HISTO2D_V2":
+    def from_string(cls, file_content: str) -> "GROGU_HISTO2D_V2":
         lines = file_content.strip().splitlines()
+
+        key = ""
+        if find := re.search(r"BEGIN YODA_HISTO2D_V2 (\S+)", lines[0]):
+            key = find.group(1)
 
         # Extract metadata (path, title)
         path = ""
@@ -229,7 +233,11 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
         data_section_started = False
 
         for line in lines:
-            if line.startswith("#"):
+            if line.startswith("BEGIN YODA_HISTO2D_V2"):
+                continue
+            if line.startswith("END YODA_HISTO2D_V2"):
+                break
+            if line.startswith("#") or line.isspace():
                 continue
             if line.startswith("---"):
                 data_section_started = True
@@ -239,7 +247,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
 
             values = re.split(r"\s+", line.strip())
             if values[0] == "Underflow":
-                underflow = GROGU_HISTO2D_V2.Bin(
+                underflow = cls.Bin(
                     None,
                     None,
                     None,
@@ -254,7 +262,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
                     float(values[9]),
                 )
             elif values[0] == "Overflow":
-                overflow = GROGU_HISTO2D_V2.Bin(
+                overflow = cls.Bin(
                     None,
                     None,
                     None,
@@ -286,7 +294,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
                     numEntries,
                 ) = map(float, values)
                 bins.append(
-                    GROGU_HISTO2D_V2.Bin(
+                    cls.Bin(
                         xlow,
                         xhigh,
                         ylow,
@@ -302,8 +310,8 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT):
                     )
                 )
 
-        return GROGU_HISTO2D_V2(
-            d_key=name,
+        return cls(
+            d_key=key,
             d_path=path,
             d_title=title,
             d_bins=bins,
