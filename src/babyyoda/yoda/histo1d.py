@@ -1,4 +1,5 @@
 import yoda
+from packaging import version
 
 import babyyoda
 
@@ -48,26 +49,24 @@ class Histo1D(babyyoda.UHIHisto1D):
         raise TypeError(err)
 
     def bins(self, includeOverflows=False, *args, **kwargs):
+        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
+            return self.target.bins(*args, includeOverflows=includeOverflows, **kwargs)
         # YODA1 does not offer inlcudeOverflows
-        if hasattr(self.target, "overflow") and hasattr(self.target, "underflow"):
-            if includeOverflows:
-                return [
-                    self.target.underflow(),
-                    *self.target.bins(),
-                    self.target.overflow(),
-                ]
-            return self.target.bins(*args, **kwargs)
-        return self.target.bins(*args, includeOverflows=includeOverflows, **kwargs)
+        if includeOverflows:
+            return [
+                self.target.underflow(),
+                *self.target.bins(),
+                self.target.overflow(),
+            ]
+        return self.target.bins(*args, **kwargs)
 
     def rebinXTo(self, *args, **kwargs):
-        # YODA1 does not offer rebinXTo
-        if hasattr(self.target, "rebinXTo"):
+        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
             return self.target.rebinXTo(*args, **kwargs)
         return self.target.rebinTo(*args, **kwargs)
 
     def rebinXBy(self, *args, **kwargs):
-        # YODA1 does not offer rebinXTo
-        if hasattr(self.target, "rebinXBy"):
+        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
             return self.target.rebinXBy(*args, **kwargs)
         return self.target.rebinBy(*args, **kwargs)
 

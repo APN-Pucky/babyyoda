@@ -1,4 +1,5 @@
 import yoda
+from packaging import version
 
 import babyyoda
 
@@ -47,6 +48,17 @@ class Histo2D(babyyoda.UHIHisto2D):
             return self.target(*args, **kwargs)
         err = f"'{type(self.target).__name__}' object is not callable"
         raise TypeError(err)
+
+    def bins(self, includeOverflows=False, *args, **kwargs):
+        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
+            return self.target.bins(*args, includeOverflows=includeOverflows, **kwargs)
+        if not includeOverflows:
+            # YODA1 bins are not sorted than YODA2
+            return sorted(
+                self.target.bins(*args, **kwargs), key=lambda b: (b.yMin(), b.xMin())
+            )
+        err = "YODA1 backend can not include overflows"
+        raise NotImplementedError(err)
 
     def __getitem__(self, slices):
         return super().__getitem__(slices)

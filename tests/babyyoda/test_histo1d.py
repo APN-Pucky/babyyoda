@@ -1,17 +1,9 @@
 import pytest
 
 from babyyoda import grogu
-from babyyoda.test import assert_histo1d
+from babyyoda.test import assert_histo1d, init_yoda
 
-try:
-    from babyyoda import yoda
-
-    yoda_available = True
-    # version dependence possible here
-except ImportError:
-    import babyyoda.grogu as yoda
-
-    yoda_available = False
+yoda, yoda_available, yoda2 = init_yoda()
 
 
 def create_histo(factory):
@@ -52,6 +44,34 @@ def test_histos_equal(factory1, factory2):
     "factory2", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
 )
 def test_histos_rebinby(factory1, factory2):
+    o1 = create_histo(factory1)
+    o2 = create_histo(factory2)
+
+    h1 = o1.clone()
+    h2 = o2.clone()
+
+    h1.rebinBy(2)
+    h2.rebinBy(2)
+
+    # check that modifications happen
+    with pytest.raises(AssertionError):
+        assert_histo1d(o1, h1)
+    with pytest.raises(AssertionError):
+        assert_histo1d(o2, h2)
+
+    assert_histo1d(h1, h2)
+
+
+@pytest.mark.skipif(
+    not yoda2, reason="yoda >= 2.0.0 is required, since yoda1 rebins differently"
+)
+@pytest.mark.parametrize(
+    "factory1", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+)
+@pytest.mark.parametrize(
+    "factory2", [grogu.Histo1D, grogu.Histo1D_v2, grogu.Histo1D_v3, yoda.Histo1D]
+)
+def test_histos_rebinby_begin(factory1, factory2):
     o1 = create_histo(factory1)
     o2 = create_histo(factory2)
 

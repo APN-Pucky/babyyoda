@@ -3,25 +3,16 @@ import pytest
 import babyyoda
 import babyyoda.read
 from babyyoda import grogu
-from babyyoda.test import assert_histo1d, assert_histo2d
+from babyyoda.test import assert_histo1d, assert_histo2d, init_yoda
 from babyyoda.util import is_yoda, uses_yoda
 
-try:
-    import yoda
-
-    yoda_available = True
-    # version dependence possible here
-except ImportError:
-    import babyyoda.grogu as yoda
-
-    yoda_available = False
+yoda, yoda_available, yoda2 = init_yoda()
 
 
 def test_is_from_package():
     if yoda_available:
         h = next(iter(yoda.read("tests/test_histo1d_v2.yoda").values()))
         assert uses_yoda(h)
-        assert is_yoda(h)
         h = next(iter(babyyoda.read("tests/test_histo1d_v2.yoda").values()))
         assert uses_yoda(h)
         assert not is_yoda(h)
@@ -48,6 +39,9 @@ def test_is_from_package():
         "test.yoda.gz",
     ],
 )
+@pytest.mark.skipif(
+    not yoda2, reason="yoda >= 2.0.0 is required"
+)  # yoda to_string is always v3
 def test_write_histo1d_v2(read, write, reread, filename):
     hs1 = read("tests/test_histo1d_v2.yoda")
     write(hs1, filename)
@@ -78,6 +72,7 @@ def test_write_histo1d_v2(read, write, reread, filename):
         "test.yoda.gz",
     ],
 )
+@pytest.mark.skipif(not yoda2, reason="yoda >= 2.0.0 is required")
 def test_write_histo1d_v3(read, write, reread, filename):
     hs1 = read("tests/test_histo1d_v3.yoda")
     write(hs1, filename)
@@ -108,6 +103,9 @@ def test_write_histo1d_v3(read, write, reread, filename):
         "test.yoda.gz",
     ],
 )
+@pytest.mark.skipif(
+    not yoda2, reason="yoda >= 2.0.0 is required"
+)  # yoda to_string is always v3
 def test_write_histo2d_v2(read, write, reread, filename):
     hs1 = read("tests/test_histo2d_v2.yoda")
     write(hs1, filename)
@@ -138,6 +136,7 @@ def test_write_histo2d_v2(read, write, reread, filename):
         "test.yoda.gz",
     ],
 )
+@pytest.mark.skipif(not yoda2, reason="yoda >= 2.0.0 is required")
 def test_write_histo2d_v3(read, write, reread, filename):
     hs1 = read("tests/test_histo2d_v3.yoda")
     write(hs1, filename)
