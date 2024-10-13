@@ -6,7 +6,6 @@ from babyyoda import grogu
 
 try:
     from babyyoda import yoda
-    # import yoda
 
     yoda_available = True
     # version dependence possible here
