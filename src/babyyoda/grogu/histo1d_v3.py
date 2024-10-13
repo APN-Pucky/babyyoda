@@ -132,7 +132,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
 
         def to_string(self) -> str:
             """Convert a Histo1DBin object to a formatted string."""
-            return f"{self.d_sumw:<13.6e}\t{self.d_sumw2:<13.6e}\t{self.d_sumwx:<13.6e}\t{self.d_sumwx2:<13.6e}\t{self.d_numentries:<13.6e}"
+            return f"{self.d_sumw:<13.6e}\t{self.d_sumw2:<13.6e}\t{self.d_sumwx:<13.6e}\t{self.d_sumwx2:<13.6e}\t{self.d_numentries:<13.6e}".strip()
 
         @classmethod
         def from_string(cls, string: str) -> "GROGU_HISTO1D_V3.Bin":
@@ -159,6 +159,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         return GROGU_HISTO1D_V3(
             d_key=self.d_key,
             d_path=self.d_path,
+            d_scaled_by=self.d_scaled_by,
             d_title=self.d_title,
             d_edges=copy.deepcopy(self.d_edges),
             d_bins=[b.clone() for b in self.d_bins],
@@ -241,11 +242,14 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         # Extract metadata (path, title)
         path = ""
         title = ""
+        scaled_by = 1.0
         for line in lines:
             if line.startswith("Path:"):
                 path = line.split(":")[1].strip()
             elif line.startswith("Title:"):
                 title = line.split(":")[1].strip()
+            elif line.startswith("ScaledBy:"):
+                scaled_by = float(line.split(":")[1].strip())
             elif line.startswith("---"):
                 break
 
@@ -279,6 +283,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         return cls(
             d_key=key,
             d_path=path,
+            d_scaled_by=scaled_by,
             d_title=title,
             d_bins=bins,
             d_edges=edges,
@@ -286,9 +291,13 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
 
     def to_string(self):
         """Convert a YODA_HISTO1D_V3 object to a formatted string."""
+        scale = (
+            "" if self.d_scaled_by == 1.0 else f"ScaledBy: {self.d_scaled_by:.17e}\n"
+        )
         header = (
             f"BEGIN YODA_HISTO1D_V3 {self.d_key}\n"
             f"Path: {self.d_path}\n"
+            f"{scale}"
             f"Title: {self.d_title}\n"
             f"Type: Histo1D\n"
             "---\n"
@@ -301,6 +310,6 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         # Add the bin data
         bin_data = "\n".join(GROGU_HISTO1D_V3.Bin.to_string(b) for b in self.bins(True))
 
-        footer = "END YODA_HISTO1D_V3\n"
+        footer = "END YODA_HISTO1D_V3"
 
         return f"{header}{stats}{edges}# sumW       \tsumW2        \tsumW(A1)     \tsumW2(A1)    \tnumEntries\n{bin_data}\n{footer}"

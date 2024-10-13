@@ -149,6 +149,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         return GROGU_HISTO2D_V2(
             d_key=self.d_key,
             d_path=self.d_path,
+            d_scaled_by=self.d_scaled_by,
             d_title=self.d_title,
             d_bins=[b.clone() for b in self.d_bins],
             d_total=self.d_total.clone(),
@@ -213,9 +214,13 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
 
     def to_string(self) -> str:
         """Convert a YODA_HISTO2D_V2 object to a formatted string."""
+        scale = (
+            "" if self.d_scaled_by == 1.0 else f"ScaledBy: {self.d_scaled_by:.17e}\n"
+        )
         header = (
             f"BEGIN YODA_HISTO2D_V2 {self.d_key}\n"
             f"Path: {self.d_path}\n"
+            f"{scale}"
             f"Title: {self.d_title}\n"
             f"Type: {self.d_type}\n"
             f"---\n"
@@ -248,11 +253,14 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         # Extract metadata (path, title)
         path = ""
         title = ""
+        scaled_by = 1.0
         for line in lines:
             if line.startswith("Path:"):
                 path = line.split(":")[1].strip()
             elif line.startswith("Title:"):
                 title = line.split(":")[1].strip()
+            elif line.startswith("ScaledBy:"):
+                scaled_by = float(line.split(":")[1].strip())
             elif line.startswith("---"):
                 break
 
@@ -326,6 +334,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         return cls(
             d_key=key,
             d_path=path,
+            d_scaled_by=scaled_by,
             d_title=title,
             d_bins=bins,
             d_total=total,

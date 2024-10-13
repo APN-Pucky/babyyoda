@@ -106,7 +106,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             return (
                 f"{self.d_sumw:<13.6e}\t{self.d_sumw2:<13.6e}\t{self.d_sumwx:<13.6e}\t{self.d_sumwx2:<13.6e}\t"
                 f"{self.d_sumwy:<13.6e}\t{self.d_sumwy2:<13.6e}\t{self.d_sumwxy:<13.6e}\t{self.d_numentries:<13.6e}"
-            )
+            ).strip()
 
         @classmethod
         def from_string(cls, line: str) -> "GROGU_HISTO2D_V3.Bin":
@@ -135,6 +135,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         return GROGU_HISTO2D_V3(
             d_key=self.d_key,
             d_path=self.d_path,
+            d_scaled_by=self.d_scaled_by,
             d_title=self.d_title,
             d_bins=[b.clone() for b in self.d_bins],
             d_edges=copy.deepcopy(self.d_edges),
@@ -191,9 +192,13 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
 
     def to_string(self) -> str:
         """Convert a YODA_HISTO2D_V3 object to a formatted string."""
+        scale = (
+            "" if self.d_scaled_by == 1.0 else f"ScaledBy: {self.d_scaled_by:.17e}\n"
+        )
         header = (
             f"BEGIN YODA_HISTO2D_V3 {self.d_key}\n"
             f"Path: {self.d_path}\n"
+            f"{scale}"
             f"Title: {self.d_title}\n"
             f"Type: {self.d_type}\n"
             f"---\n"
@@ -211,7 +216,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
 
         legend = "# sumW       \tsumW2        \tsumW(A1)     \tsumW2(A1)    \tsumW(A2)     \tsumW2(A2)    \tsumW(A1,A2)  \tnumEntries\n"
         bin_data = "\n".join(b.to_string() for b in self.d_bins)
-        footer = "\nEND YODA_HISTO2D_V3\n"
+        footer = "\nEND YODA_HISTO2D_V3"
 
         return f"{header}{stats}{edges}{legend}{bin_data}{footer}"
 
@@ -224,11 +229,14 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         # Extract metadata (path, title)
         path = ""
         title = ""
+        scaled_by = 1.0
         for line in lines:
             if line.startswith("Path:"):
                 path = line.split(":")[1].strip()
             elif line.startswith("Title:"):
                 title = line.split(":")[1].strip()
+            elif line.startswith("ScaledBy:"):
+                scaled_by = float(line.split(":")[1].strip())
             elif line.startswith("---"):
                 break
 
@@ -262,6 +270,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         return cls(
             d_key=key,
             d_path=path,
+            d_scaled_by=scaled_by,
             d_title=title,
             d_bins=bins,
             d_edges=edges,
