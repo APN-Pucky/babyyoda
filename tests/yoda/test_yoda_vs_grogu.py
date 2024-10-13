@@ -1,9 +1,9 @@
 import pytest
+
 import babyyoda as by
 from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
 from babyyoda.test import assert_ao, assert_histo1d, assert_histo2d
-
 
 pytest.importorskip("yoda")
 
@@ -104,7 +104,7 @@ def test_histo2d_v3():
 
 
 def test_create_histo1d():
-    import babyyoda.yoda as yoda
+    from babyyoda import yoda
 
     h = yoda.Histo1D(10, 0, 10, title="test")
 

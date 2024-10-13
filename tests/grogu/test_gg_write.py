@@ -1,5 +1,4 @@
-from babyyoda.grogu import read
-from babyyoda.grogu import write
+from babyyoda.grogu import read, write
 
 
 def test_gg_write_histo1d_v2():

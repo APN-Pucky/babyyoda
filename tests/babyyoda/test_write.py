@@ -1,7 +1,8 @@
 import pytest
+
 import babyyoda
 import babyyoda.read
-import babyyoda.grogu as grogu
+from babyyoda import grogu
 from babyyoda.test import assert_histo1d, assert_histo2d
 from babyyoda.util import is_yoda, uses_yoda
 
@@ -28,7 +29,7 @@ def test_is_from_package():
 
 # babyyoda, yoda or grogu
 @pytest.mark.parametrize(
-    "read, write, reread",
+    ("read", "write", "reread"),
     [
         (yoda.read, yoda.write, yoda.read),
         (babyyoda.read, babyyoda.write, babyyoda.read),
@@ -58,7 +59,7 @@ def test_write_histo1d_v2(read, write, reread, filename):
 
 
 @pytest.mark.parametrize(
-    "read, write, reread",
+    ("read", "write", "reread"),
     [
         (yoda.read, yoda.write, yoda.read),
         (babyyoda.read, babyyoda.write, babyyoda.read),
@@ -88,7 +89,7 @@ def test_write_histo1d_v3(read, write, reread, filename):
 
 
 @pytest.mark.parametrize(
-    "read, write, reread",
+    ("read", "write", "reread"),
     [
         (yoda.read, yoda.write, yoda.read),
         (babyyoda.read, babyyoda.write, babyyoda.read),
@@ -118,7 +119,7 @@ def test_write_histo2d_v2(read, write, reread, filename):
 
 
 @pytest.mark.parametrize(
-    "read, write, reread",
+    ("read", "write", "reread"),
     [
         (yoda.read, yoda.write, yoda.read),
         (babyyoda.read, babyyoda.write, babyyoda.read),

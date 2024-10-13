@@ -1,14 +1,13 @@
 import pytest
+
+from babyyoda import grogu
 from babyyoda.test import assert_histo2d
-
-import babyyoda.grogu as grogu
-
 
 # YODA1 does not support histo2d overflows
 pytest.importorskip("yoda", minversion="2.0.0")
 
 try:
-    import babyyoda.yoda as yoda
+    from babyyoda import yoda
 
     yoda_available = True
     # version dependence possible here

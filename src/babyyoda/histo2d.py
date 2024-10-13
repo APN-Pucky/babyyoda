@@ -1,5 +1,8 @@
+import contextlib
 import sys
+
 import numpy as np
+
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
@@ -100,7 +103,8 @@ class Histo2D:
         for a, b in bins:
             if a <= loc.value and loc.value < b:
                 return bins.index((a, b)) + loc.offset
-        raise ValueError(f"loc {loc.value} is not in the range of {bins}")
+        err = f"loc {loc.value} is not in the range of {bins}"
+        raise ValueError(err)
 
     def __get_x_index(self, slices):
         ix = None
@@ -124,65 +128,68 @@ class Histo2D:
     def __getitem__(self, slices):
         # integer index
         if slices is underflow:
-            raise TypeError("No underflow bin in 2D histogram")
+            err = "No underflow bin in 2D histogram"
+            raise TypeError(err)
         if slices is overflow:
-            raise TypeError("No overflow bin in 2D histogram")
-        if isinstance(slices, tuple):
-            if len(slices) == 2:
-                ix, iy = self.__get_indices(slices)
-                if isinstance(ix, int) and isinstance(iy, int):
-                    return self.__get_by_indices(ix, iy)
-                ix, iy = slices
-                sc = self.clone()
-                if isinstance(ix, slice) and isinstance(iy, slice):
-                    xstart, xstop, xstep = (
-                        self.__get_x_index(ix.start),
-                        self.__get_x_index(ix.stop),
-                        ix.step,
-                    )
-                    ystart, ystop, ystep = (
-                        self.__get_y_index(iy.start),
-                        self.__get_y_index(iy.stop),
-                        iy.step,
-                    )
+            err = "No overflow bin in 2D histogram"
+            raise TypeError(err)
+        if isinstance(slices, tuple) and len(slices) == 2:
+            ix, iy = self.__get_indices(slices)
+            if isinstance(ix, int) and isinstance(iy, int):
+                return self.__get_by_indices(ix, iy)
+            ix, iy = slices
+            sc = self.clone()
+            if isinstance(ix, slice) and isinstance(iy, slice):
+                xstart, xstop, xstep = (
+                    self.__get_x_index(ix.start),
+                    self.__get_x_index(ix.stop),
+                    ix.step,
+                )
+                ystart, ystop, ystep = (
+                    self.__get_y_index(iy.start),
+                    self.__get_y_index(iy.stop),
+                    iy.step,
+                )
 
-                    if isinstance(ystep, rebin):
-                        # weird yoda default
-                        if ystart is None:
-                            ystart = 1
-                        else:
-                            ystart += 1
-                        if ystop is None:
-                            ystop = sys.maxsize
-                        else:
-                            ystop += 1
-                        sc.rebinYBy(ystep.factor, ystart, ystop)
+                if isinstance(ystep, rebin):
+                    # weird yoda default
+                    if ystart is None:
+                        ystart = 1
                     else:
-                        if ystop is not None:
-                            ystop += 1
-                        sc.rebinYTo(self.yEdges()[ystart:ystop])
-
-                    if isinstance(xstep, rebin):
-                        # weird yoda default
-                        if xstart is None:
-                            xstart = 1
-                        else:
-                            xstart += 1
-                        if xstop is None:
-                            xstop = sys.maxsize
-                        else:
-                            xstop += 1
-                        sc.rebinXBy(xstep.factor, xstart, xstop)
+                        ystart += 1
+                    if ystop is None:
+                        ystop = sys.maxsize
                     else:
-                        if xstop is not None:
-                            xstop += 1
-                        sc.rebinXTo(self.xEdges()[xstart:xstop])
+                        ystop += 1
+                    sc.rebinYBy(ystep.factor, ystart, ystop)
+                else:
+                    if ystop is not None:
+                        ystop += 1
+                    sc.rebinYTo(self.yEdges()[ystart:ystop])
 
-                    return sc
-                raise NotImplementedError("Slice with Index not implemented")
+                if isinstance(xstep, rebin):
+                    # weird yoda default
+                    if xstart is None:
+                        xstart = 1
+                    else:
+                        xstart += 1
+                    if xstop is None:
+                        xstop = sys.maxsize
+                    else:
+                        xstop += 1
+                    sc.rebinXBy(xstep.factor, xstart, xstop)
+                else:
+                    if xstop is not None:
+                        xstop += 1
+                    sc.rebinXTo(self.xEdges()[xstart:xstop])
+
+                return sc
+            err = "Slice with Index not implemented"
+            raise NotImplementedError(err)
 
         # TODO implement slice
-        raise TypeError("Invalid argument type")
+        err = "Invalid argument type"
+        raise TypeError(err)
 
     def key(self):
         if hasattr(self.target, "key"):
@@ -279,8 +286,6 @@ class Histo2D:
             self.values = saved_values
 
     def _ipython_display_(self):
-        try:
+        with contextlib.suppress(ImportError):
             self.plot()
-        except ImportError:
-            pass
         return self

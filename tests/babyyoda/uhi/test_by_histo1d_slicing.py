@@ -1,11 +1,11 @@
 import pytest
-from babyyoda.test import assert_histo1d
 
-import babyyoda.grogu as grogu
+from babyyoda import grogu
+from babyyoda.test import assert_histo1d
 from babyyoda.util import loc, overflow, underflow
 
 try:
-    import babyyoda.yoda as yoda
+    from babyyoda import yoda
 
     yoda_available = True
     # version dependence possible here

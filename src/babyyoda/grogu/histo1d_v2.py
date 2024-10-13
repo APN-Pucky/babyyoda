@@ -1,6 +1,6 @@
 import re
-from typing import List, Optional
 from dataclasses import dataclass, field
+from typing import Optional
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
 from babyyoda.histo1d import Histo1D
@@ -57,7 +57,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, Histo1D):
             self.d_sumwx2 = bin.sumWX2()
             self.d_numentries = bin.numEntries()
 
-        def set(self, numEntries: float, sumW: List[float], sumW2: List[float]):
+        def set(self, numEntries: float, sumW: list[float], sumW2: list[float]):
             assert len(sumW) == 2
             assert len(sumW2) == 2
             self.d_sumw = sumW[0]
@@ -168,25 +168,23 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, Histo1D):
                     float(values[5]),
                     float(values[6]),
                 )
-            else:
-                return cls(
-                    float(values[0]),
-                    float(values[1]),
-                    float(values[2]),
-                    float(values[3]),
-                    float(values[4]),
-                    float(values[5]),
-                    float(values[6]),
-                )
+            return cls(
+                float(values[0]),
+                float(values[1]),
+                float(values[2]),
+                float(values[3]),
+                float(values[4]),
+                float(values[5]),
+                float(values[6]),
+            )
 
         def to_string(bin, label=None) -> str:
             """Convert a Histo1DBin object to a formatted string."""
             if label is None:
                 return f"{bin.d_xmin:.6e}\t{bin.d_xmax:.6e}\t{bin.d_sumw:.6e}\t{bin.d_sumw2:.6e}\t{bin.d_sumwx:.6e}\t{bin.d_sumwx2:.6e}\t{bin.d_numentries:.6e}"
-            else:
-                return f"{label}\t{label}\t{bin.d_sumw:.6e}\t{bin.d_sumw2:.6e}\t{bin.d_sumwx:.6e}\t{bin.d_sumwx2:.6e}\t{bin.d_numentries:.6e}"
+            return f"{label}\t{label}\t{bin.d_sumw:.6e}\t{bin.d_sumw2:.6e}\t{bin.d_sumwx:.6e}\t{bin.d_sumwx2:.6e}\t{bin.d_numentries:.6e}"
 
-    d_bins: List[Bin] = field(default_factory=list)
+    d_bins: list[Bin] = field(default_factory=list)
     d_overflow: Optional[Bin] = None
     d_underflow: Optional[Bin] = None
 
@@ -230,7 +228,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, Histo1D):
 
     def bins(self, includeFlows=False):
         if includeFlows:
-            return [self.d_underflow] + self.d_bins + [self.d_overflow]
+            return [self.d_underflow, *self.d_bins, self.d_overflow]
         # TODO sorted needed here?
         return sorted(self.d_bins, key=lambda b: b.d_xmin)
 
@@ -249,7 +247,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, Histo1D):
     def xEdges(self):
         return [b.xMin() for b in self.d_bins] + [self.xMax()]
 
-    def rebinXTo(self, edges: List[float]):
+    def rebinXTo(self, edges: list[float]):
         own_edges = self.xEdges()
         for e in edges:
             assert e in own_edges, f"Edge {e} not found in own edges {own_edges}"

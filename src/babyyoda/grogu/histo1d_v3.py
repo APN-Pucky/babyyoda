@@ -1,6 +1,5 @@
 import copy
 import re
-from typing import List
 from dataclasses import dataclass, field
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
@@ -45,7 +44,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, Histo1D):
             self.d_sumwx2 = bin.sumWX2()
             self.d_numentries = bin.numEntries()
 
-        def set(self, numEntries: float, sumW: List[float], sumW2: List[float]):
+        def set(self, numEntries: float, sumW: list[float], sumW2: list[float]):
             assert len(sumW) == 2
             assert len(sumW2) == 2
             self.d_sumw = sumW[0]
@@ -142,8 +141,8 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, Histo1D):
             sumw, sumw2, sumwx, sumwx2, numEntries = map(float, values)
             return cls(sumw, sumw2, sumwx, sumwx2, numEntries)
 
-    d_edges: List[float] = field(default_factory=list)
-    d_bins: List[Bin] = field(default_factory=list)
+    d_edges: list[float] = field(default_factory=list)
+    d_bins: list[Bin] = field(default_factory=list)
 
     def __post_init__(self):
         self.d_type = "Histo1D"
@@ -208,7 +207,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, Histo1D):
     def xMid(self, i):
         return (self.xEdges()[i] + self.xEdges()[i + 1]) / 2
 
-    def rebinXTo(self, edges: List[float]):
+    def rebinXTo(self, edges: list[float]):
         own_edges = self.xEdges()
         for e in edges:
             assert e in own_edges, f"Edge {e} not found in own edges {own_edges}"
@@ -216,7 +215,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, Histo1D):
         new_bins = []
         of = self.overflow()
         uf = self.underflow()
-        for i in range(len(edges) - 1):
+        for _i in range(len(edges) - 1):
             new_bins.append(GROGU_HISTO1D_V3.Bin())
         for i, b in enumerate(self.bins()):
             if self.xMid(i) < min(edges):
@@ -227,7 +226,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, Histo1D):
                 for j in range(len(edges) - 1):
                     if edges[j] <= self.xMid(i) and self.xMid(i) <= edges[j + 1]:
                         new_bins[j] += b
-        self.d_bins = [uf] + new_bins + [of]
+        self.d_bins = [uf, *new_bins, of]
         self.d_edges = edges
 
         assert len(self.d_bins) == len(self.xEdges()) - 1 + 2

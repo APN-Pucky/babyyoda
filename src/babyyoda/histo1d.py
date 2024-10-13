@@ -1,5 +1,8 @@
+import contextlib
 import sys
+
 import numpy as np
+
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
@@ -14,7 +17,8 @@ def set_bin(target, source):
             [source.sumW2(), source.sumWX2()],
         )
     else:
-        raise NotImplementedError("YODA1 backend can not set bin values")
+        err = "YODA1 backend can not set bin values"
+        raise NotImplementedError(err)
 
 
 # TODO make this implementation independent (no V2 or V3...)
@@ -58,14 +62,11 @@ class Histo1D:
         stop = end
         if start is None:
             start = 0
-        if stop >= sys.maxsize:
-            stop = len(self.bins())
-        else:
-            stop = stop - 1
+        stop = len(self.bins()) if stop >= sys.maxsize else stop - 1
         new_edges = []
         # new_bins = []
         # new_bins += [self.underflow()]
-        for i in range(0, start):
+        for i in range(start):
             # new_bins.append(self.bins()[i].clone())
             new_edges.append(self.xEdges()[i])
             new_edges.append(self.xEdges()[i + 1])
@@ -75,7 +76,7 @@ class Histo1D:
                 xmin = self.xEdges()[i]
                 xmax = self.xEdges()[i + 1]
                 # nb = GROGU_HISTO1D_V3.Bin()
-                for j in range(0, factor):
+                for j in range(factor):
                     last = i + j
                     # nb += self.bins()[i + j]
                     xmin = min(xmin, self.xEdges()[i + j])
@@ -161,7 +162,8 @@ class Histo1D:
                 sc.rebinTo(self.xEdges()[start:stop])
             return sc
 
-        raise TypeError("Invalid argument type")
+        err = "Invalid argument type"
+        raise TypeError(err)
 
     def __get_index(self, slices):
         index = None
@@ -172,7 +174,7 @@ class Histo1D:
         if isinstance(slices, loc):
             # TODO cyclic maybe
             idx = None
-            for i, b in enumerate(self.bins()):
+            for i, _b in enumerate(self.bins()):
                 if (
                     slices.value >= self.xEdges()[i]
                     and slices.value < self.xEdges()[i + 1]
@@ -280,7 +282,8 @@ class Histo1D:
         )
 
     def to_yoda_v3(self):
-        raise NotImplementedError("Not implemented yet")
+        err = "Not implemented yet"
+        raise NotImplementedError(err)
 
     def to_string(self):
         # Now we need to map YODA to grogu and then call to_string
@@ -300,8 +303,6 @@ class Histo1D:
         )
 
     def _ipython_display_(self):
-        try:
+        with contextlib.suppress(ImportError):
             self.plot()
-        except ImportError:
-            pass
         return self

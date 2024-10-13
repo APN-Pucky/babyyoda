@@ -1,10 +1,10 @@
-import babyyoda as by
 import uhi.typing.plottable as uhit
+
+import babyyoda as by
 
 
 def load_histos():
-    g2 = next(iter(by.read_grogu("tests/test_histo1d_v2.yoda").values()))
-    return g2
+    return next(iter(by.read_grogu("tests/test_histo1d_v2.yoda").values()))
 
 
 def test_plottable():

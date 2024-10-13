@@ -1,4 +1,4 @@
-import babyyoda.grogu.read as read
+from babyyoda.grogu import read
 
 
 def test_gg_read_histo1d_v2():

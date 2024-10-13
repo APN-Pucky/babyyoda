@@ -1,8 +1,7 @@
 import copy
 import re
-from dataclasses import dataclass, field
 import sys
-from typing import List
+from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -59,9 +58,9 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, Histo2D):
         def set(
             self,
             numEntries: float,
-            sumW: List[float],
-            sumW2: List[float],
-            sumWcross: List[float],
+            sumW: list[float],
+            sumW2: list[float],
+            sumWcross: list[float],
         ):
             assert len(sumW) == 3
             assert len(sumW2) == 3
@@ -117,8 +116,8 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, Histo2D):
             )
             return cls(sumw, sumw2, sumwx, sumwx2, sumwy, sumwy2, sumwxy, numEntries)
 
-    d_bins: List[Bin] = field(default_factory=list)
-    d_edges: List[List[float]] = field(default_factory=list)
+    d_bins: list[Bin] = field(default_factory=list)
+    d_edges: list[list[float]] = field(default_factory=list)
 
     def __post_init__(self):
         self.d_type = "Histo2D"
@@ -149,14 +148,20 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, Histo2D):
 
     def fill(self, x, y, weight=1.0, fraction=1.0):
         # get ix and iy to map to correct bin
-        for ix, xEdge in enumerate(self.xEdges() + [sys.float_info.max]):
+        fix = None
+        for ix, xEdge in enumerate([*self.xEdges(), sys.float_info.max]):
+            fix = ix
             if x < xEdge:
                 break
-        for iy, yEdge in enumerate(self.yEdges() + [sys.float_info.max]):
+        fiy = None
+        for iy, yEdge in enumerate([*self.yEdges(), sys.float_info.max]):
+            fiy = iy
             if y < yEdge:
                 break
         # Also fill overflow bins
-        self.bins(True)[iy * (len(self.xEdges()) + 1) + ix].fill(x, y, weight, fraction)
+        self.bins(True)[fiy * (len(self.xEdges()) + 1) + fix].fill(
+            x, y, weight, fraction
+        )
 
     def xMax(self):
         assert max(self.xEdges()) == self.xEdges()[-1], "xMax is not the last edge"
