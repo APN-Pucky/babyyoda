@@ -6,14 +6,18 @@ import numpy as np
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
-class Histo2D:
-    # def __init__(self, *args, **kwargs):
-    #    try:
-    #        import babyyoda.yoda as yoda
-    #    except ImportError:
-    #        import babyyoda.grogu as yoda
-    #    return yoda.Histo2D(*args, **kwargs)
+def Histo2D(*args, **kwargs):
+    """
+    Automatically select the correct version of the Histo2D class
+    """
+    try:
+        from babyyoda import yoda
+    except ImportError:
+        import babyyoda.grogu as yoda
+    return yoda.Histo2D(*args, **kwargs)
 
+
+class UHIHisto2D:
     # def bins(self, *args, **kwargs):
     #    # fix order
     #    return self.target.bins(*args, **kwargs)

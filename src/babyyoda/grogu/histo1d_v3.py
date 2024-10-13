@@ -3,11 +3,11 @@ import re
 from dataclasses import dataclass, field
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
-from babyyoda.histo1d import Histo1D
+from babyyoda.histo1d import UHIHisto1D
 
 
 @dataclass
-class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, Histo1D):
+class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
     @dataclass
     class Bin:
         d_sumw: float = 0.0

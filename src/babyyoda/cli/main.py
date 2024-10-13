@@ -5,8 +5,8 @@ import matplotlib as mpl
 from histoprint import print_hist
 
 import babyyoda
-from babyyoda.histo1d import Histo1D
-from babyyoda.histo2d import Histo2D
+from babyyoda.histo1d import UHIHisto1D
+from babyyoda.histo2d import UHIHisto2D
 
 
 def main():
@@ -36,7 +36,7 @@ def main():
             ):
                 continue
 
-            if isinstance(v, (Histo1D, Histo2D)):
+            if isinstance(v, (UHIHisto1D, UHIHisto2D)):
                 if args.operation == "print":
                     print(k)
                     print_hist(v, summary=True, title=v.title())

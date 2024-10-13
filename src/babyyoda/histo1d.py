@@ -21,17 +21,22 @@ def set_bin(target, source):
         raise NotImplementedError(err)
 
 
+def Histo1D(*args, **kwargs):
+    """
+    Automatically select the correct version of the Histo1D class
+    """
+    try:
+        from babyyoda import yoda
+    except ImportError:
+        import babyyoda.grogu as yoda
+    return yoda.Histo1D(*args, **kwargs)
+
+
 # TODO make this implementation independent (no V2 or V3...)
-class Histo1D:
+class UHIHisto1D:
     ########################################################
     # YODA compatibility code (dropped legacy code?)
     ########################################################
-    # def __init__(self, *args, **kwargs):
-    #    try:
-    #        import babyyoda.yoda as yoda
-    #    except ImportError:
-    #        import babyyoda.grogu as yoda
-    #    return yoda.Histo1D(*args, **kwargs)
 
     def overflow(self):
         return self.bins(includeOverflows=True)[-1]

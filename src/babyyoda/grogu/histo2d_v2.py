@@ -1,13 +1,13 @@
 import re
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Optional
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
-from babyyoda.histo2d import Histo2D
+from babyyoda.histo2d import UHIHisto2D
 
 
 @dataclass
-class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, Histo2D):
+class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
     @dataclass
     class Bin:
         d_xmin: Optional[float] = None
@@ -67,9 +67,9 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, Histo2D):
         def set(
             self,
             numEntries: float,
-            sumW: List[float],
-            sumW2: List[float],
-            sumWcross: List[float],
+            sumW: list[float],
+            sumW2: list[float],
+            sumWcross: list[float],
         ):
             assert len(sumW) == 3
             assert len(sumW2) == 3
@@ -133,7 +133,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, Histo2D):
                 f"{self.d_sumwy:.6e}\t{self.d_sumwy2:.6e}\t{self.d_sumwxy:.6e}\t{self.d_numentries:.6e}"
             )
 
-    d_bins: List[Bin] = field(default_factory=list)
+    d_bins: list[Bin] = field(default_factory=list)
     d_overflow: Optional[Bin] = None
     d_underflow: Optional[Bin] = None
 
@@ -167,21 +167,21 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, Histo2D):
         assert all(
             x == y
             for x, y in zip(
-                sorted(list(set([b.d_xmin for b in self.d_bins])))[1:],
-                sorted(list(set([b.d_xmax for b in self.d_bins])))[:-1],
+                sorted({b.d_xmin for b in self.d_bins})[1:],
+                sorted({b.d_xmax for b in self.d_bins})[:-1],
             )
         )
-        return sorted(list(set([b.d_xmin for b in self.d_bins])) + [self.xMax()])
+        return sorted({b.d_xmin for b in self.d_bins} + {self.xMax()})
 
     def yEdges(self):
         assert all(
             x == y
             for x, y in zip(
-                sorted(list(set([b.d_ymin for b in self.d_bins])))[1:],
-                sorted(list(set([b.d_ymax for b in self.d_bins])))[:-1],
+                sorted({b.d_ymin for b in self.d_bins})[1:],
+                sorted({b.d_ymax for b in self.d_bins})[:-1],
             )
         )
-        return sorted(list(set([b.d_ymin for b in self.d_bins])) + [self.yMax()])
+        return sorted({b.d_ymin for b in self.d_bins} + {self.yMax()})
 
     def xMin(self):
         return min(b.d_xmin for b in self.d_bins)
@@ -197,7 +197,8 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, Histo2D):
 
     def bins(self, includeFlow=False):
         if includeFlow:
-            raise NotImplementedError("includeFlow=True not supported")
+            err = "includeFlow=True not supported"
+            raise NotImplementedError(err)
         # sort the bins by xlow, then ylow
         # YODA-1
         # return sorted(self.d_bins, key=lambda b: (b.d_xmin, b.d_ymin))

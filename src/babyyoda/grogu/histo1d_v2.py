@@ -3,11 +3,11 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
-from babyyoda.histo1d import Histo1D
+from babyyoda.histo1d import UHIHisto1D
 
 
 @dataclass
-class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, Histo1D):
+class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
     @dataclass
     class Bin:
         d_xmin: Optional[float] = None

@@ -3,7 +3,7 @@ import yoda
 import babyyoda
 
 
-class Histo1D(babyyoda.Histo1D):
+class Histo1D(babyyoda.UHIHisto1D):
     def __init__(self, *args, **kwargs):
         """
         target is either a yoda or grogu HISTO1D_V2

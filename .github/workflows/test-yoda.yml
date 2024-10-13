@@ -31,8 +31,6 @@ jobs:
       with:
         fetch-depth: 0
 
-    - uses: astral-sh/setup-uv@v3
-
     - name: Install dependencies
       run: |
         pip install '.[test]' --break-system-packages

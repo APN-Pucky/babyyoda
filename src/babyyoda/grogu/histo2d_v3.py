@@ -6,11 +6,11 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
-from babyyoda.histo2d import Histo2D
+from babyyoda.histo2d import UHIHisto2D
 
 
 @dataclass
-class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, Histo2D):
+class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
     @dataclass
     class Bin:
         d_sumw: float = 0.0

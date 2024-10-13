@@ -1,6 +1,6 @@
 import warnings
 
-from babyyoda import grogu, yoda
+from babyyoda import grogu
 
 
 def read(file_path: str):
@@ -18,6 +18,8 @@ def read_yoda(file_path: str):
     """
     Wrap yoda histograms in the by HISTO1D_V2 class
     """
+    from babyyoda import yoda
+
     return yoda.read(file_path)
 
 
