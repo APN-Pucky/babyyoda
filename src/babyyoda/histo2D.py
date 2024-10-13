@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 import babyyoda
+from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
+from babyyoda.grogu.histo2d_v3 import GROGU_HISTO2D_V3
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
@@ -241,6 +243,81 @@ class Histo2D:
 
         # TODO implement slice
         raise TypeError("Invalid argument type")
+
+    def key(self):
+        if hasattr(self.target, "key"):
+            return self.target.key()
+        return self.path()
+
+    def to_grogu_v2(self):
+        return Histo2D(
+            GROGU_HISTO2D_V2(
+                d_key=self.key(),
+                d_path=self.path(),
+                d_title=self.title(),
+                d_bins=[
+                    GROGU_HISTO2D_V2.Bin(
+                        d_xmin=self.xEdges()[i % len(self.xEdges())],
+                        d_xmax=self.xEdges()[i % len(self.xEdges()) + 1],
+                        d_ymin=self.yEdges()[i // len(self.xEdges())],
+                        d_ymax=self.yEdges()[i // len(self.xEdges()) + 1],
+                        d_sumw=b.sumW(),
+                        d_sumw2=b.sumW2(),
+                        d_sumwx=b.sumWX(),
+                        d_sumwx2=b.sumWX2(),
+                        d_sumwy=b.sumWY(),
+                        d_sumwy2=b.sumWY2(),
+                        d_sumwxy=b.sumWXY(),
+                        d_numentries=b.numEntries(),
+                    )
+                    for i, b in enumerate(self.bins())
+                ],
+            )
+        )
+
+    def to_grogu_v3(self):
+        bins = []
+        try:
+            bins = self.bins(True)
+        except NotImplementedError:
+            nobins = self.bins()
+            bins += [GROGU_HISTO2D_V3.Bin()] * (len(self.xEdges()))
+            for j in range(len(nobins)):
+                if j % (len(self.xEdges()) - 1) == 0:
+                    bins += [GROGU_HISTO2D_V3.Bin()]  # overflow
+                    bins += [GROGU_HISTO2D_V3.Bin()]  # underflow
+                bins += [nobins[j]]
+            bins += [GROGU_HISTO2D_V3.Bin()]  # overflow
+            bins += [GROGU_HISTO2D_V3.Bin()]  # underflow
+            bins += [GROGU_HISTO2D_V3.Bin()] * (len(self.xEdges()))
+
+            # Fill up with empty overflow bins
+        return Histo2D(
+            GROGU_HISTO2D_V3(
+                d_key=self.key(),
+                d_path=self.path(),
+                d_title=self.title(),
+                d_edges=[self.xEdges(), self.yEdges()],
+                d_bins=[
+                    GROGU_HISTO2D_V3.Bin(
+                        d_sumw=b.sumW(),
+                        d_sumw2=b.sumW2(),
+                        d_sumwx=b.sumWX(),
+                        d_sumwx2=b.sumWX2(),
+                        d_sumwy=b.sumWY(),
+                        d_sumwy2=b.sumWY2(),
+                        d_sumwxy=b.crossTerm(0, 1),
+                        d_numentries=b.numEntries(),
+                    )
+                    for b in bins
+                ],
+            )
+        )
+
+    def to_string(self):
+        if hasattr(self.target, "to_string"):
+            return self.target.to_string()
+        return self.to_grogu_v3().to_string()
 
     def plot(self, *args, binwnorm=True, **kwargs):
         import mplhep as hep
