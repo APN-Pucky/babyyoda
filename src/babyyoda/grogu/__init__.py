@@ -1,10 +1,10 @@
 from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
 from babyyoda.grogu.histo2d_v3 import GROGU_HISTO2D_V3
+
+from .histo1d_v2 import GROGU_HISTO1D_V2
 from .read import read
 from .write import write
-from .histo1d_v2 import GROGU_HISTO1D_V2
-
 
 __all__ = ["read", "write"]
 

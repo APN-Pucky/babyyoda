@@ -1,11 +1,11 @@
 import pytest
+
 import babyyoda as by
-from babyyoda.histo1D import Histo1D
-from babyyoda.histo2D import Histo2D
 from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
-from babyyoda.test import assert_ao, assert_histo1d, assert_histo2d
+from babyyoda.test import assert_ao, assert_histo1d, assert_histo2d, init_yoda
 
+yoda, yoda_available, yoda2 = init_yoda()
 
 pytest.importorskip("yoda")
 
@@ -40,6 +40,7 @@ def test_histo1d_v2():
     # TODO test overflow and underflow
 
 
+@pytest.mark.skipif(not yoda2, reason="yoda >= 2.0.0 is required")
 def test_histo1d_v3():
     gh1 = next(iter(by.read_grogu("tests/test_histo1d_v3.yoda").values()))
     yh1 = next(iter(by.read_yoda("tests/test_histo1d_v3.yoda").values()))
@@ -74,7 +75,7 @@ def test_histo2d_v2():
     assert all(x == y for x, y in zip(gh2.yEdges(), yh2.yEdges()))
 
     for i, (gb, yb) in enumerate(zip(gh2.bins(), yh2.bins())):
-        assert gb.xMin() == yb.xMin(), f"at index {i}"
+        assert gb.xMin() == yb.xMin(), f"at index {i}, {gb.xMin()} != {yb.xMin()}"
         assert gb.xMax() == yb.xMax()
         assert gb.yMin() == yb.yMin()
         assert gb.yMax() == yb.yMax()
@@ -86,6 +87,7 @@ def test_histo2d_v2():
     # TODO test overflow and underflow
 
 
+@pytest.mark.skipif(not yoda2, reason="yoda >= 2.0.0 is required")
 def test_histo2d_v3():
     gh2 = next(iter(by.read_grogu("tests/test_histo2d_v3.yoda").values()))
     yh2 = next(iter(by.read_yoda("tests/test_histo2d_v3.yoda").values()))
@@ -106,7 +108,7 @@ def test_histo2d_v3():
 
 
 def test_create_histo1d():
-    import yoda
+    from babyyoda import yoda
 
     h = yoda.Histo1D(10, 0, 10, title="test")
 
@@ -128,11 +130,11 @@ def test_create_histo1d():
     h.fill(10)
     g.fill(10)
 
-    assert_histo1d(Histo1D(g), Histo1D(h))
+    assert_histo1d(g, h)
 
 
 def test_create_histo2d():
-    import yoda as yd
+    import babyyoda.yoda as yd
 
     h = yd.Histo2D(10, 0, 10, 10, 0, 10, title="test")
 
@@ -154,4 +156,4 @@ def test_create_histo2d():
                 h.fill(i, j)
                 g.fill(i, j)
 
-    assert_histo2d(Histo2D(g), Histo2D(h), includeFlow=False)
+    assert_histo2d(g, h, includeFlow=False)

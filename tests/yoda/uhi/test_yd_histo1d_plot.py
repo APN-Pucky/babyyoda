@@ -1,13 +1,13 @@
 import pytest
-import babyyoda as by
 import uhi.typing.plottable as uhit
+
+import babyyoda as by
 
 pytest.importorskip("yoda")
 
 
 def load_histos():
-    h2 = next(iter(by.read_yoda("tests/test_histo1d_v2.yoda").values()))
-    return h2
+    return next(iter(by.read_yoda("tests/test_histo1d_v2.yoda").values()))
 
 
 def test_plottable():

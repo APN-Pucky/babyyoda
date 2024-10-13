@@ -1,11 +1,10 @@
 import pytest
-from babyyoda.histo2D import Histo2D
+
+from babyyoda import grogu
 from babyyoda.test import assert_histo2d
 
-import babyyoda.grogu as grogu
-
 try:
-    import yoda
+    from babyyoda import yoda
 
     yoda_available = True
     # version dependence possible here
@@ -18,7 +17,7 @@ except ImportError:
 
 
 def create_histo(backend):
-    h = Histo2D(10, 0, 10, 10, 0, 10, title="test", backend=backend)
+    h = backend(10, 0, 10, 10, 0, 10, title="test")
     w = 0
     for i in range(-10, 12):
         for j in range(-10, 12):

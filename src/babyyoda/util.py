@@ -33,10 +33,9 @@ class overflow:
 
 
 def open_write_file(file_path, gz=False):
-    if file_path.endswith(".gz") or file_path.endswith(".gzip") or gz:
+    if file_path.endswith((".gz", ".gzip")) or gz:
         return gzip.open(file_path, "wt")
-    else:
-        return open(file_path, "w")
+    return open(file_path, "w")
 
 
 def uses_yoda(obj):

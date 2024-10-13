@@ -1,11 +1,12 @@
-import matplotlib
-import babyyoda
 import argparse
 import re
+
+import matplotlib as mpl
 from histoprint import print_hist
 
-from babyyoda.histo1D import Histo1D
-from babyyoda.histo2D import Histo2D
+import babyyoda
+from babyyoda.histo1d import UHIHisto1D
+from babyyoda.histo2d import UHIHisto2D
 
 
 def main():
@@ -35,10 +36,10 @@ def main():
             ):
                 continue
 
-            if isinstance(v, Histo1D) or isinstance(v, Histo2D):
+            if isinstance(v, (UHIHisto1D, UHIHisto2D)):
                 if args.operation == "print":
                     print(k)
                     print_hist(v, summary=True, title=v.title())
                 if args.operation == "plot":
                     v.plot()
-                    matplotlib.pyplot.show()
+                    mpl.pyplot.show()

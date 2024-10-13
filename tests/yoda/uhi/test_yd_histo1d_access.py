@@ -1,5 +1,5 @@
 import pytest
-from babyyoda.histo1D import Histo1D
+
 from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.test import assert_bin1d, assert_value1d
 from babyyoda.util import loc, overflow, underflow
@@ -8,7 +8,7 @@ pytest.importorskip("yoda")
 
 
 def create_linear_histo1ds():
-    import yoda
+    from babyyoda import yoda
 
     h = yoda.Histo1D(10, 0, 10, title="test")
 
@@ -30,7 +30,7 @@ def create_linear_histo1ds():
     h.fill(10)
     g.fill(10)
 
-    return Histo1D(h), Histo1D(g)
+    return h, g
 
 
 def test_access_index():

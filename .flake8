@@ -1,0 +1,8 @@
+[flake8]
+# E501: line too long
+# E203: E203 whitespace before ':'
+extend-ignore = E501, E203
+max-line-length = 88
+max-complexity = 18
+count = True
+statistics = True

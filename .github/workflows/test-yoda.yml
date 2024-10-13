@@ -23,24 +23,26 @@ jobs:
     runs-on: ubuntu-latest
     container: apnpucky/gentoo-yoda:${{ matrix.yoda-version }}-latest
     strategy:
+      fail-fast: false
       matrix:
-        yoda-version: ['1.9.10', '2.0.1']
+        yoda-version: ['1.9.10',
+          # '2.0.1',  # This version is faulty!!!
+          '9999']
 
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
-    - uses: astral-sh/setup-uv@v3
-
     - name: Install dependencies
       run: |
-        pip install '.[test]' --break-system-packages
-        pip list
+        PYTHON_TARGETS="python3_12" emerge -q dev-python/pip
+        python3.12 -m pip install '.[test]' --break-system-packages
+        python3.12 -m pip list
 
     - name: Test with pytest
       run: |
-        pytest -r sx tests/
+        python3.12 -m pytest -r sx tests/
 
 #    - name: Report core project coverage with Codecov
 #      if: >-

@@ -1,6 +1,7 @@
 # TODO test that from_string and to_string are inverses for bins and histograms
 
 import pytest
+
 import babyyoda
 from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
@@ -10,7 +11,7 @@ from babyyoda.test import assert_bin1d, assert_histo1d, assert_histo2d
 
 
 @pytest.mark.parametrize(
-    "args, kwargs, label",
+    ("args", "kwargs", "label"),
     [
         ([0, 1, 5, 6, 7, 8, 10], {}, None),
         ([0.0, 1.0, 5.0, 6.0, 7.0, 8.0, 10.0], {}, None),
@@ -78,9 +79,7 @@ def test_gg_histo1d_v2_bin_string(args, kwargs, label):
 
 def test_gg_histo1d_v2_string():
     h1 = babyyoda.grogu.Histo1D_v2(10, 0, 10, title="test")
-    w = 0
-    for i in range(-10, 12):
-        w += 1
+    for w, i in enumerate(range(-10, 12)):
         h1.fill(i, w)
     s = h1.to_string()
     print(s)
@@ -91,9 +90,7 @@ def test_gg_histo1d_v2_string():
 
 def test_gg_histo1d_v3_string():
     h1 = babyyoda.grogu.Histo1D_v3(10, 0, 10, title="test")
-    w = 0
-    for i in range(-10, 12):
-        w += 1
+    for w, i in enumerate(range(-10, 12)):
         h1.fill(i, w)
     s = h1.to_string()
     print(s)

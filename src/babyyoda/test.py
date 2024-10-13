@@ -1,6 +1,27 @@
 # TODO maybe promote all these to __eq__
 
 
+def init_yoda():
+    from packaging import version
+
+    try:
+        import yoda as yd
+
+        from babyyoda import yoda
+
+        yoda_available = True
+        yoda_version = yd.__version__
+        # version dependence possible here
+    except ImportError:
+        import babyyoda.grogu as yoda
+
+        yoda_available = False
+        yoda_version = "9999"
+
+    yoda2 = version.parse(yoda_version) >= version.parse("2.0.0")
+    return yoda, yoda_available, yoda2
+
+
 def equal_ao(g, y):
     return (
         g.name() == y.name()
