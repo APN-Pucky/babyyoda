@@ -119,6 +119,7 @@ def test_create_histo1d():
         ],
         d_underflow=GROGU_HISTO1D_V2.Bin(),
         d_overflow=GROGU_HISTO1D_V2.Bin(),
+        d_total=GROGU_HISTO2D_V2.Bin(),
     )
 
     for i in range(12):
@@ -146,8 +147,7 @@ def test_create_histo2d():
             )
             for hb in h.bins()
         ],
-        d_underflow=GROGU_HISTO2D_V2.Bin(),
-        d_overflow=GROGU_HISTO2D_V2.Bin(),
+        d_total=GROGU_HISTO2D_V2.Bin(),
     )
 
     for i in range(12):

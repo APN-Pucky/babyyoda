@@ -151,7 +151,11 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         def from_string(cls, line: str) -> "GROGU_HISTO1D_V2.Bin":
             values = re.split(r"\s+", line.strip())
             assert len(values) == 7
-            if values[0] == "Underflow" or values[0] == "Overflow":
+            if (
+                values[0] == "Underflow"
+                or values[0] == "Overflow"
+                or values[0] == "Total"
+            ):
                 return cls(
                     None,
                     None,
@@ -174,12 +178,13 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         def to_string(bin, label=None) -> str:
             """Convert a Histo1DBin object to a formatted string."""
             if label is None:
-                return f"{bin.d_xmin:.6e}\t{bin.d_xmax:.6e}\t{bin.d_sumw:.6e}\t{bin.d_sumw2:.6e}\t{bin.d_sumwx:.6e}\t{bin.d_sumwx2:.6e}\t{bin.d_numentries:.6e}"
-            return f"{label}\t{label}\t{bin.d_sumw:.6e}\t{bin.d_sumw2:.6e}\t{bin.d_sumwx:.6e}\t{bin.d_sumwx2:.6e}\t{bin.d_numentries:.6e}"
+                return f"{bin.d_xmin:<12.6e}\t{bin.d_xmax:<12.6e}\t{bin.d_sumw:<12.6e}\t{bin.d_sumw2:<12.6e}\t{bin.d_sumwx:<12.6e}\t{bin.d_sumwx2:<12.6e}\t{bin.d_numentries:<12.6e}"
+            return f"{label:8}\t{label:8}\t{bin.d_sumw:<12.6e}\t{bin.d_sumw2:<12.6e}\t{bin.d_sumwx:<12.6e}\t{bin.d_sumwx2:<12.6e}\t{bin.d_numentries:<12.6e}"
 
     d_bins: list[Bin] = field(default_factory=list)
     d_overflow: Optional[Bin] = None
     d_underflow: Optional[Bin] = None
+    d_total: Optional[Bin] = None
 
     def __post_init__(self):
         self.d_type = "Histo1D"
@@ -196,6 +201,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             d_bins=[b.clone() for b in self.d_bins],
             d_underflow=self.d_underflow,
             d_overflow=self.d_overflow,
+            d_total=self.d_total,
         )
 
     def underflow(self):
@@ -205,6 +211,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         return self.d_overflow
 
     def fill(self, x, weight=1.0, fraction=1.0):
+        self.d_total.fill(x, weight, fraction)
         for b in self.d_bins:
             if b.xMin() <= x < b.xMax():
                 b.fill(x, weight, fraction)
@@ -219,8 +226,8 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
     def xMin(self):
         return min([b.xMin() for b in self.d_bins])
 
-    def bins(self, includeFlows=False):
-        if includeFlows:
+    def bins(self, includeOverflows=False):
+        if includeOverflows:
             return [self.d_underflow, *self.d_bins, self.d_overflow]
         # TODO sorted needed here?
         return sorted(self.d_bins, key=lambda b: b.d_xmin)
@@ -273,21 +280,20 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         )
 
         # Add the sumw and other info (we assume it's present in the metadata but you could also compute)
-        stats = (
-            f"# Mean: {sum(b.d_sumwx for b in histo.d_bins) / sum(b.d_sumw for b in histo.d_bins):.6e}\n"
-            f"# Area: {sum(b.d_sumw for b in histo.d_bins):.6e}\n"
-        )
+        stats = f"# Mean: {histo.xMean():.6e}\n" f"# Area: {histo.integral():.6e}\n"
 
         underflow = histo.d_underflow.to_string("Underflow")
         overflow = histo.d_overflow.to_string("Overflow")
+        total = histo.d_total.to_string("Total")
 
+        xlegend = "# ID\t ID\t sumw\t sumw2\t sumwx\t sumwx2\t numEntries\n"
         legend = "# xlow\t xhigh\t sumw\t sumw2\t sumwx\t sumwx2\t numEntries\n"
         # Add the bin data
         bin_data = "\n".join(b.to_string() for b in histo.bins())
 
         footer = "END YODA_HISTO1D_V2\n"
 
-        return f"{header}{stats}{underflow}\n{overflow}\n{legend}{bin_data}\n{footer}"
+        return f"{header}{stats}{xlegend}{total}\n{underflow}\n{overflow}\n{legend}{bin_data}\n{footer}"
 
     @classmethod
     def from_string(cls, file_content: str) -> "GROGU_HISTO1D_V2":
@@ -309,7 +315,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
 
         # Extract bins and overflow/underflow
         bins = []
-        underflow = overflow = None
+        underflow = overflow = total = None
         data_section_started = False
 
         for line in lines:
@@ -331,8 +337,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             elif values[0] == "Overflow":
                 overflow = cls.Bin.from_string(line)
             elif values[0] == "Total":
-                # ignore for now
-                pass
+                total = cls.Bin.from_string(line)
             else:
                 # Regular bin
                 bins.append(cls.Bin.from_string(line))
@@ -344,5 +349,6 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             d_title=title,
             d_bins=bins,
             d_underflow=underflow,
+            d_total=total,
             d_overflow=overflow,
         )

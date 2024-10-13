@@ -61,3 +61,16 @@ def is_from_package(obj, package_name):
         if module and module.__name__.startswith(package_name):
             return True
     return False
+
+
+def has_own_method(cls, method_name):
+    # Check if the class has the method defined
+    if not hasattr(cls, method_name):
+        return False
+
+    # Get the method from the class and the parent class
+    cls_method = getattr(cls, method_name)
+    parent_method = getattr(cls.__bases__[0], method_name, None)
+
+    # Compare the underlying function (__func__) if both exist
+    return cls_method.__func__ is not parent_method.__func__

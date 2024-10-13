@@ -76,6 +76,19 @@ class UHIHisto2D:
     def sumWXYs(self):
         return [b.crossTerm(0, 1) for b in self.bins()]
 
+    def xMean(self, includeOverflows=True):
+        return sum(b.sumWX() for b in self.d_bins) / sum(
+            b.sumW() for b in self.bins(includeOverflows=includeOverflows)
+        )
+
+    def yMean(self, includeOverflows=True):
+        return sum(b.sumWY() for b in self.d_bins) / sum(
+            b.sumW() for b in self.bins(includeOverflows=includeOverflows)
+        )
+
+    def integral(self, includeOverflows=True):
+        return sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
+
     ########################################################
     # Generic UHI code
     ########################################################

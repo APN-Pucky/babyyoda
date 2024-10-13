@@ -61,6 +61,14 @@ class UHIHisto1D:
     def sumW2s(self):
         return np.array([b.sumW2() for b in self.bins()])
 
+    def xMean(self, includeOverflows=True):
+        return sum(
+            b.sumWX() for b in self.bins(includeOverflows=includeOverflows)
+        ) / sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
+
+    def integral(self, includeOverflows=True):
+        return sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
+
     def rebinXBy(self, factor: int, begin=1, end=sys.maxsize):
         # Just compute the new edges and call rebinXTo
         start = begin - 1

@@ -104,8 +104,8 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
 
         def to_string(self) -> str:
             return (
-                f"{self.d_sumw:.6e}\t{self.d_sumw2:.6e}\t{self.d_sumwx:.6e}\t{self.d_sumwx2:.6e}\t"
-                f"{self.d_sumwy:.6e}\t{self.d_sumwy2:.6e}\t{self.d_sumwxy:.6e}\t{self.d_numentries:.6e}"
+                f"{self.d_sumw:<13.6e}\t{self.d_sumw2:<13.6e}\t{self.d_sumwx:<13.6e}\t{self.d_sumwx2:<13.6e}\t"
+                f"{self.d_sumwy:<13.6e}\t{self.d_sumwy2:<13.6e}\t{self.d_sumwxy:<13.6e}\t{self.d_numentries:<13.6e}"
             )
 
         @classmethod
@@ -201,17 +201,15 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
 
         # TODO stats
         stats = ""
-        # stats= (
-        #    f"# Mean: {self.mean()}\n"
-        #    f"# Area: {self.area()}\n"
-        # )
+        stats = (
+            f"# Mean: ({self.xMean():.6e}, {self.yMean():.6e})\n"
+            f"# Integral: {self.integral():.6e}\n"
+        )
         edges = ""
         for i, edg in enumerate(self.d_edges):
-            edges += f"Edges(A{i+1}): [{', '.join(str(e) for e in edg )}]\n"
+            edges += f"Edges(A{i+1}): [{', '.join(f"{e:.6e}" for e in edg )}]\n"
 
-        legend = (
-            "# sumw\t sumw2\t sumwx\t sumwx2\t sumwy\t sumwy2\t sumwxy\t numEntries\n"
-        )
+        legend = "# sumW       \tsumW2        \tsumW(A1)     \tsumW2(A1)    \tsumW(A2)     \tsumW2(A2)    \tsumW(A1,A2)  \tnumEntries\n"
         bin_data = "\n".join(b.to_string() for b in self.d_bins)
         footer = "\nEND YODA_HISTO2D_V3\n"
 

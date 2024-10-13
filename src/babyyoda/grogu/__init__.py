@@ -24,6 +24,7 @@ def Histo1D_v2(nbins: int, start: float, end: float, title=None, **kwargs):
         ],
         d_overflow=GROGU_HISTO1D_V2.Bin(),
         d_underflow=GROGU_HISTO1D_V2.Bin(),
+        d_total=GROGU_HISTO1D_V2.Bin(),
         d_title=title,
         **kwargs,
     )
@@ -84,6 +85,7 @@ def Histo2D_v2(
             for i in range(nxbins)
             for j in range(nybins)
         ],
+        d_total=GROGU_HISTO2D_V2.Bin(),
         d_title=title,
         **kwargs,
     )

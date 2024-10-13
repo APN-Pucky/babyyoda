@@ -19,6 +19,7 @@ def create_linear_histo1ds():
         ],
         d_underflow=GROGU_HISTO1D_V2.Bin(),
         d_overflow=GROGU_HISTO1D_V2.Bin(),
+        d_total=GROGU_HISTO1D_V2.Bin(),
     )
 
     for i in range(12):

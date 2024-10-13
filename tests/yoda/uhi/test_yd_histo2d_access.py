@@ -20,8 +20,7 @@ def create_histo2d():
             )
             for hb in h.bins()
         ],
-        d_underflow=GROGU_HISTO2D_V2.Bin(),
-        d_overflow=GROGU_HISTO2D_V2.Bin(),
+        d_total=GROGU_HISTO2D_V2.Bin(),
     )
 
     for i in range(12):

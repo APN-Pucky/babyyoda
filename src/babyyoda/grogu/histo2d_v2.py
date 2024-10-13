@@ -126,16 +126,17 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         def numEntries(self):
             return self.d_numentries
 
-        def to_string(self) -> str:
-            return (
-                f"{self.d_xmin:.6e}\t{self.d_xmax:.6e}\t{self.d_ymin:.6e}\t{self.d_ymax:.6e}\t"
-                f"{self.d_sumw:.6e}\t{self.d_sumw2:.6e}\t{self.d_sumwx:.6e}\t{self.d_sumwx2:.6e}\t"
-                f"{self.d_sumwy:.6e}\t{self.d_sumwy2:.6e}\t{self.d_sumwxy:.6e}\t{self.d_numentries:.6e}"
-            )
+        def to_string(self, label=None) -> str:
+            if label is None:
+                return (
+                    f"{self.d_xmin:<12.6e}\t{self.d_xmax:<12.6e}\t{self.d_ymin:<12.6e}\t{self.d_ymax:<12.6e}\t"
+                    f"{self.d_sumw:<12.6e}\t{self.d_sumw2:<12.6e}\t{self.d_sumwx:<12.6e}\t{self.d_sumwx2:<12.6e}\t"
+                    f"{self.d_sumwy:<12.6e}\t{self.d_sumwy2:<12.6e}\t{self.d_sumwxy:<12.6e}\t{self.d_numentries:<12.6e}"
+                )
+            return f"{label:8}\t{label:8}\t{self.d_sumw:<12.6e}\t{self.d_sumw2:<12.6e}\t{self.d_sumwx:<12.6e}\t{self.d_sumwx2:<12.6e}\t{self.d_sumwy:<12.6e}\t{self.d_sumwy2:<12.6e}\t{self.d_sumwxy:<12.6e}\t{self.d_numentries:<12.6e}"
 
     d_bins: list[Bin] = field(default_factory=list)
-    d_overflow: Optional[Bin] = None
-    d_underflow: Optional[Bin] = None
+    d_total: Optional[Bin] = None
 
     def __post_init__(self):
         self.d_type = "Histo2D"
@@ -150,18 +151,14 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             d_path=self.d_path,
             d_title=self.d_title,
             d_bins=[b.clone() for b in self.d_bins],
-            d_underflow=self.d_underflow,
-            d_overflow=self.d_overflow,
+            d_total=self.d_total.clone(),
         )
 
     def fill(self, x, y, weight=1.0, fraction=1.0):
+        self.d_total.fill(x, y, weight, fraction)
         for b in self.d_bins:
             if b.d_xmin <= x < b.d_xmax and b.d_ymin <= y < b.d_ymax:
                 b.fill(x, y, weight, fraction)
-        if x >= self.xMax() and self.d_overflow is not None:
-            self.d_overflow.fill(x, y, weight, fraction)
-        if x < self.xMin() and self.d_underflow is not None:
-            self.d_underflow.fill(x, y, weight, fraction)
 
     def xEdges(self):
         assert all(
@@ -195,8 +192,8 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
     def yMax(self):
         return max(b.d_ymax for b in self.d_bins)
 
-    def bins(self, includeOverflow=False):
-        if includeOverflow:
+    def bins(self, includeOverflows=False):
+        if includeOverflows:
             err = "includeFlow=True not supported"
             raise NotImplementedError(err)
         # sort the bins by xlow, then ylow
@@ -226,16 +223,19 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
 
         # TODO stats
         stats = ""
-        # stats= (
-        #    f"# Mean: {self.mean()}\n"
-        #    f"# Area: {self.area()}\n"
-        # )
+        stats = (
+            f"# Mean: ({self.xMean(includeOverflows=False):.6e}, {self.yMean(includeOverflows=False):.6e})\n"
+            f"# Volume: {self.integral(includeOverflows=False):.6e}\n"
+        )
 
-        legend = "# xlow\t xhigh\t ylow\t yhigh\t sumw\t sumw2\t sumwx\t sumwx2\t sumwy\t sumwy2\t sumwxy\t numEntries\n"
+        xlegend = "# ID\t ID\t sumw\t sumw2\t sumwx\t sumwx2\t sumwy\t sumwy2\t sumwxy\t numEntries\n"
+        total = self.d_total.to_string("Total")
+
+        legend = "# 2D outflow persistency not currently supported until API is stable\n# xlow\t xhigh\t ylow\t yhigh\t sumw\t sumw2\t sumwx\t sumwx2\t sumwy\t sumwy2\t sumwxy\t numEntries\n"
         bin_data = "\n".join(b.to_string() for b in self.d_bins)
-        footer = "\nEND YODA_HISTO2D_V2\n"
+        footer = "\nEND YODA_HISTO2D_V2"
 
-        return f"{header}{stats}{legend}{bin_data}{footer}"
+        return f"{header}{stats}{xlegend}{total}\n{legend}{bin_data}{footer}"
 
     @classmethod
     def from_string(cls, file_content: str) -> "GROGU_HISTO2D_V2":
@@ -257,7 +257,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
                 break
 
         bins = []
-        underflow = overflow = None
+        total = None
         data_section_started = False
 
         for line in lines:
@@ -274,38 +274,23 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
                 continue
 
             values = re.split(r"\s+", line.strip())
-            if values[0] == "Underflow":
-                underflow = cls.Bin(
-                    None,
-                    None,
-                    None,
-                    None,
-                    float(values[2]),
-                    float(values[3]),
-                    float(values[4]),
-                    float(values[5]),
-                    float(values[6]),
-                    float(values[7]),
-                    float(values[8]),
-                    float(values[9]),
-                )
-            elif values[0] == "Overflow":
-                overflow = cls.Bin(
-                    None,
-                    None,
-                    None,
-                    None,
-                    float(values[2]),
-                    float(values[3]),
-                    float(values[4]),
-                    float(values[5]),
-                    float(values[6]),
-                    float(values[7]),
-                    float(values[8]),
-                    float(values[9]),
-                )
-            elif values[0] == "Total":
+            if values[0] == "Underflow" or values[0] == "Overflow":
                 pass
+            elif values[0] == "Total":
+                total = cls.Bin(
+                    None,
+                    None,
+                    None,
+                    None,
+                    float(values[2]),
+                    float(values[3]),
+                    float(values[4]),
+                    float(values[5]),
+                    float(values[6]),
+                    float(values[7]),
+                    float(values[8]),
+                    float(values[9]),
+                )
             else:
                 (
                     xlow,
@@ -343,6 +328,5 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             d_path=path,
             d_title=title,
             d_bins=bins,
-            d_underflow=underflow,
-            d_overflow=overflow,
+            d_total=total,
         )

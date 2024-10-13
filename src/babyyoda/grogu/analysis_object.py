@@ -8,6 +8,7 @@ class GROGU_ANALYSIS_OBJECT:
     d_type: str = ""
     d_title: str = ""
     d_path: str = "/"
+    # d_scaled_by: float = 1.0 #TODO maybe we want to track ScaledBy in the future
 
     ############################################
     # YODA compatibilty code

@@ -132,7 +132,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
 
         def to_string(self) -> str:
             """Convert a Histo1DBin object to a formatted string."""
-            return f"{self.d_sumw:.6e}\t{self.d_sumw2:.6e}\t{self.d_sumwx:.6e}\t{self.d_sumwx2:.6e}\t{self.d_numentries:.6e}"
+            return f"{self.d_sumw:<13.6e}\t{self.d_sumw2:<13.6e}\t{self.d_sumwx:<13.6e}\t{self.d_sumwx2:<13.6e}\t{self.d_numentries:<13.6e}"
 
         @classmethod
         def from_string(cls, string: str) -> "GROGU_HISTO1D_V3.Bin":
@@ -295,15 +295,12 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         )
 
         # Add the sumw and other info (we assume it's present in the metadata but you could also compute)
-        stats = (
-            f"# Mean: {sum(b.d_sumwx for b in self.d_bins) / sum(b.d_sumw for b in self.d_bins):.6e}\n"
-            f"# Integral: {sum(b.d_sumw for b in self.d_bins):.6e}\n"
-        )
+        stats = f"# Mean: {self.xMean():.6e}\n" f"# Integral: {self.integral():.6e}\n"
 
-        edges = f"Edges(A1): [{', '.join(str(e) for e in self.d_edges)}]\n"
+        edges = f"Edges(A1): [{', '.join(f"{e:.6e}" for e in self.d_edges)}]\n"
         # Add the bin data
         bin_data = "\n".join(GROGU_HISTO1D_V3.Bin.to_string(b) for b in self.bins(True))
 
         footer = "END YODA_HISTO1D_V3\n"
 
-        return f"{header}{stats}{edges}# sumW\t sumW2\t sumW(A1)\t sumW2(A1)\t numEntries\n{bin_data}\n{footer}"
+        return f"{header}{stats}{edges}# sumW       \tsumW2        \tsumW(A1)     \tsumW2(A1)    \tnumEntries\n{bin_data}\n{footer}"

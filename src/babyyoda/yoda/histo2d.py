@@ -2,6 +2,7 @@ import yoda
 from packaging import version
 
 import babyyoda
+from babyyoda.util import has_own_method
 
 
 class Histo2D(babyyoda.UHIHisto2D):
@@ -23,21 +24,25 @@ class Histo2D(babyyoda.UHIHisto2D):
     ########################################################
 
     def __getattr__(self, name):
-        # yoda-1 has overflow but yoda-2 does not so we patch it in here
-        if name in self.__dict__ or hasattr(type(self), name):
-            return object.__getattribute__(self, name)
+        # if we overwrite it here, use that
+        if has_own_method(Histo2D, name):
+            return getattr(self, name)
+        # if the target has the attribute, use that
         if hasattr(self.target, name):
             return getattr(self.target, name)
+        # lastly use the inherited attribute
+        if hasattr(super(), name):
+            return getattr(super(), name)
         err = f"'{type(self).__name__}' object and target have no attribute '{name}'"
         raise AttributeError(err)
 
     def __setattr__(self, name, value):
-        # First, check if the attribute belongs to the Forwarder itself
-        if name in self.__dict__ or hasattr(type(self), name):
-            object.__setattr__(self, name, value)
-        # If not, forward attribute setting to the target
+        if has_own_method(Histo2D, name):
+            setattr(self, name, value)
         elif hasattr(self.target, name):
             setattr(self.target, name, value)
+        elif hasattr(super(), name):
+            setattr(super(), name, value)
         else:
             err = f"Cannot set attribute '{name}'; it does not exist in target or Forwarder."
             raise AttributeError(err)
