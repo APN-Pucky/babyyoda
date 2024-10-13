@@ -165,10 +165,10 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         )
 
     def underflow(self):
-        return self.bins(includeFlows=True)[0]
+        return self.bins(includeOverflows=True)[0]
 
     def overflow(self):
-        return self.bins(includeFlows=True)[-1]
+        return self.bins(includeOverflows=True)[-1]
 
     def fill(self, x, weight=1.0, fraction=1.0):
         for i, b in enumerate(self.bins()):
@@ -185,8 +185,8 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
     def xMin(self):
         return min(self.xEdges())
 
-    def bins(self, includeFlows=False):
-        return self.d_bins[1:-1] if not includeFlows else self.d_bins
+    def bins(self, includeOverflows=False):
+        return self.d_bins[1:-1] if not includeOverflows else self.d_bins
 
     def bin(self, *indices):
         return [self.bins()[i] for i in indices]

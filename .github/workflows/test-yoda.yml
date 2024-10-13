@@ -23,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     container: apnpucky/gentoo-yoda:${{ matrix.yoda-version }}-latest
     strategy:
+      fail-fast: false
       matrix:
         yoda-version: ['1.9.10', '2.0.1']
 

@@ -6,6 +6,22 @@ import numpy as np
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
+def set_bin2d(target, source):
+    # TODO allow modify those?
+    # self.d_xmin = bin.xMin()
+    # self.d_xmax = bin.xMax()
+    if hasattr(target, "set"):
+        target.set(
+            source.numEntries(),
+            [source.sumW(), source.sumWX(), source.sumWY()],
+            [source.sumW2(), source.sumWX2(), source.sumWY2()],
+            [source.sumWXY()],
+        )
+    else:
+        err = "YODA1 backend can not set bin values"
+        raise NotImplementedError(err)
+
+
 def Histo2D(*args, **kwargs):
     """
     Automatically select the correct version of the Histo2D class
@@ -128,6 +144,10 @@ class UHIHisto2D:
 
     def __get_indices(self, slices):
         return self.__get_x_index(slices[0]), self.__get_y_index(slices[1])
+
+    def __setitem__(self, slices, value):
+        err = "Set item not implemented"
+        raise NotImplementedError(err)
 
     def __getitem__(self, slices):
         # integer index

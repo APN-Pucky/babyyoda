@@ -6,7 +6,7 @@ import numpy as np
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
-def set_bin(target, source):
+def set_bin1d(target, source):
     # TODO allow modify those?
     # self.d_xmin = bin.xMin()
     # self.d_xmax = bin.xMax()
@@ -194,12 +194,12 @@ class UHIHisto1D:
 
     def __set_by_index(self, index, value):
         if index == underflow:
-            set_bin(self.underflow(), value)
+            set_bin1d(self.underflow(), value)
             return
         if index == overflow:
-            set_bin(self.overflow(), value)
+            set_bin1d(self.overflow(), value)
             return
-        set_bin(self.bins()[index], value)
+        set_bin1d(self.bins()[index], value)
 
     def __setitem__(self, slices, value):
         # integer index

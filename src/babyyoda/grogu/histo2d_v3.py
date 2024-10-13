@@ -179,8 +179,8 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         assert min(self.yEdges()) == self.yEdges()[0], "yMin is not the first edge"
         return self.yEdges()[0]
 
-    def bins(self, includeFlows=False):
-        if includeFlows:
+    def bins(self, includeOverflows=False):
+        if includeOverflows:
             return self.d_bins
         # TODO consider represent data always as numpy
         return (
