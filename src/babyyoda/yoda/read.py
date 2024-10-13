@@ -1,4 +1,5 @@
-from babyyoda import yoda as baby_yoda
+from babyyoda.yoda.histo1d import Histo1D
+from babyyoda.yoda.histo2d import Histo2D
 
 
 def read(file_path: str):
@@ -10,9 +11,9 @@ def read(file_path: str):
     ret = {}
     for k, v in yd.read(file_path).items():
         if isinstance(v, yd.Histo1D):
-            ret[k] = baby_yoda.Histo1D(v)
+            ret[k] = Histo1D(v)
         elif isinstance(v, yd.Histo2D):
-            ret[k] = baby_yoda.Histo2D(v)
+            ret[k] = Histo2D(v)
         else:
             ret[k] = v
     return ret

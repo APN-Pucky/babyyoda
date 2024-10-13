@@ -1,5 +1,5 @@
+import babyyoda
 from babyyoda import grogu
-from babyyoda.util import is_yoda
 
 
 def write(anyhistograms, file_path: str, *args, **kwargs):
@@ -9,7 +9,7 @@ def write(anyhistograms, file_path: str, *args, **kwargs):
     # check if all histograms are yoda => use yoda
     use_yoda = True
     for h in listhistograms:
-        if not is_yoda(h):
+        if not (isinstance(h, (babyyoda.yoda.Histo1D, babyyoda.yoda.Histo2D))):
             use_yoda = False
             break
     if use_yoda:
@@ -25,6 +25,6 @@ def write_grogu(histograms, file_path: str, gz=False):
 
 def write_yoda(histograms, file_path: str, gz=False):
     # TODO we could force convert to YODA in Histo{1,2}D here ...
-    import yoda
+    from babyyoda import yoda
 
     yoda.write(histograms, file_path, gz=gz)

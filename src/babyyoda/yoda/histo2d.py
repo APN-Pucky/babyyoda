@@ -1,4 +1,3 @@
-import yoda
 from packaging import version
 
 import babyyoda
@@ -10,6 +9,8 @@ class Histo2D(babyyoda.UHIHisto2D):
         """
         target is either a yoda or grogu HISTO2D_V2
         """
+        import yoda
+
         target = args[0] if len(args) == 1 else yoda.Histo2D(*args, **kwargs)
 
         # unwrap target
@@ -55,6 +56,8 @@ class Histo2D(babyyoda.UHIHisto2D):
         raise TypeError(err)
 
     def bins(self, includeOverflows=False, *args, **kwargs):
+        import yoda
+
         if version.parse(yoda.__version__) >= version.parse("2.0.0"):
             return self.target.bins(*args, includeOverflows=includeOverflows, **kwargs)
         if not includeOverflows:

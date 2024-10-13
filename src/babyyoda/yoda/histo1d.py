@@ -1,4 +1,3 @@
-import yoda
 from packaging import version
 
 import babyyoda
@@ -10,6 +9,8 @@ class Histo1D(babyyoda.UHIHisto1D):
         """
         target is either a yoda or grogu HISTO1D_V2
         """
+        import yoda
+
         target = args[0] if len(args) == 1 else yoda.Histo1D(*args, **kwargs)
         # unwrap target
         while isinstance(target, Histo1D):
@@ -53,6 +54,8 @@ class Histo1D(babyyoda.UHIHisto1D):
         raise TypeError(err)
 
     def bins(self, includeOverflows=False, *args, **kwargs):
+        import yoda
+
         if version.parse(yoda.__version__) >= version.parse("2.0.0"):
             return self.target.bins(*args, includeOverflows=includeOverflows, **kwargs)
         # YODA1 does not offer inlcudeOverflows
@@ -65,11 +68,15 @@ class Histo1D(babyyoda.UHIHisto1D):
         return self.target.bins(*args, **kwargs)
 
     def rebinXTo(self, *args, **kwargs):
+        import yoda
+
         if version.parse(yoda.__version__) >= version.parse("2.0.0"):
             return self.target.rebinXTo(*args, **kwargs)
         return self.target.rebinTo(*args, **kwargs)
 
     def rebinXBy(self, *args, **kwargs):
+        import yoda
+
         if version.parse(yoda.__version__) >= version.parse("2.0.0"):
             return self.target.rebinXBy(*args, **kwargs)
         return self.target.rebinBy(*args, **kwargs)
