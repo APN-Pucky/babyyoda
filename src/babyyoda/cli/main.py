@@ -4,8 +4,8 @@ import argparse
 import re
 from histoprint import print_hist
 
-from babyyoda.histo1D import Histo1D
-from babyyoda.histo2D import Histo2D
+from babyyoda.histo1d import Histo1D
+from babyyoda.histo2d import Histo2D
 
 
 def main():

@@ -1,84 +1,24 @@
 import sys
 import numpy as np
-import babyyoda
-from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
-from babyyoda.grogu.histo2d_v3 import GROGU_HISTO2D_V3
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
 class Histo2D:
-    def __init__(self, *args, backend=None, **kwargs):
-        """
-        target is either a yoda or grogu HISTO2D_V2
-        """
-        if len(args) == 1:
-            target = args[0]
-            # Store the target object where calls and attributes will be forwarded
-        else:
-            # Pick faster backend if possible
-            if backend is None:
-                try:
-                    import yoda
+    # def __init__(self, *args, **kwargs):
+    #    try:
+    #        import babyyoda.yoda as yoda
+    #    except ImportError:
+    #        import babyyoda.grogu as yoda
+    #    return yoda.Histo2D(*args, **kwargs)
 
-                    backend = yoda.Histo2D
-                except ImportError:
-                    backend = babyyoda.grogu.Histo2D_v3
-            target = backend(*args, **kwargs)
-
-        # unwrap target
-        while isinstance(target, Histo2D):
-            target = target.target
-
-        # Store the target object where calls and attributes will be forwarded
-        super().__setattr__("target", target)
-
-    ########################################################
-    # Relay all attribute access to the target object
-    ########################################################
-
-    def __getattr__(self, name):
-        # yoda-1 has overflow but yoda-2 does not so we patch it in here
-        if name in self.__dict__ or hasattr(type(self), name):
-            return object.__getattribute__(self, name)
-        elif hasattr(self.target, name):
-            return getattr(self.target, name)
-        raise AttributeError(
-            f"'{type(self).__name__}' object and target have no attribute '{name}'"
-        )
-
-    def __setattr__(self, name, value):
-        # First, check if the attribute belongs to the Forwarder itself
-        if name in self.__dict__ or hasattr(type(self), name):
-            object.__setattr__(self, name, value)
-        # If not, forward attribute setting to the target
-        elif hasattr(self.target, name):
-            setattr(self.target, name, value)
-        else:
-            raise AttributeError(
-                f"Cannot set attribute '{name}'; it does not exist in target or Forwarder."
-            )
-
-    def __call__(self, *args, **kwargs):
-        # If the target is callable, forward the call, otherwise raise an error
-        if callable(self.target):
-            return self.target(*args, **kwargs)
-        raise TypeError(f"'{type(self.target).__name__}' object is not callable")
-
-    ########################################################
-    # YODA compatibility code (dropped legacy code?)
-    ########################################################
-
-    def clone(self):
-        return Histo2D(self.target.clone())
-
-    def bins(self, *args, **kwargs):
-        # fix order
-        return self.target.bins(*args, **kwargs)
-        return np.array(
-            sorted(
-                self.target.bins(*args, **kwargs), key=lambda b: (b.xMin(), b.yMin())
-            )
-        )
+    # def bins(self, *args, **kwargs):
+    #    # fix order
+    #    return self.target.bins(*args, **kwargs)
+    #    return np.array(
+    #        sorted(
+    #            self.target.bins(*args, **kwargs), key=lambda b: (b.xMin(), b.yMin())
+    #        )
+    #    )
 
     # def bin(self, *indices):
     #    return self.bins()[indices]
@@ -250,32 +190,34 @@ class Histo2D:
         return self.path()
 
     def to_grogu_v2(self):
-        return Histo2D(
-            GROGU_HISTO2D_V2(
-                d_key=self.key(),
-                d_path=self.path(),
-                d_title=self.title(),
-                d_bins=[
-                    GROGU_HISTO2D_V2.Bin(
-                        d_xmin=self.xEdges()[i % len(self.xEdges())],
-                        d_xmax=self.xEdges()[i % len(self.xEdges()) + 1],
-                        d_ymin=self.yEdges()[i // len(self.xEdges())],
-                        d_ymax=self.yEdges()[i // len(self.xEdges()) + 1],
-                        d_sumw=b.sumW(),
-                        d_sumw2=b.sumW2(),
-                        d_sumwx=b.sumWX(),
-                        d_sumwx2=b.sumWX2(),
-                        d_sumwy=b.sumWY(),
-                        d_sumwy2=b.sumWY2(),
-                        d_sumwxy=b.sumWXY(),
-                        d_numentries=b.numEntries(),
-                    )
-                    for i, b in enumerate(self.bins())
-                ],
-            )
+        from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
+
+        return GROGU_HISTO2D_V2(
+            d_key=self.key(),
+            d_path=self.path(),
+            d_title=self.title(),
+            d_bins=[
+                GROGU_HISTO2D_V2.Bin(
+                    d_xmin=self.xEdges()[i % len(self.xEdges())],
+                    d_xmax=self.xEdges()[i % len(self.xEdges()) + 1],
+                    d_ymin=self.yEdges()[i // len(self.xEdges())],
+                    d_ymax=self.yEdges()[i // len(self.xEdges()) + 1],
+                    d_sumw=b.sumW(),
+                    d_sumw2=b.sumW2(),
+                    d_sumwx=b.sumWX(),
+                    d_sumwx2=b.sumWX2(),
+                    d_sumwy=b.sumWY(),
+                    d_sumwy2=b.sumWY2(),
+                    d_sumwxy=b.sumWXY(),
+                    d_numentries=b.numEntries(),
+                )
+                for i, b in enumerate(self.bins())
+            ],
         )
 
     def to_grogu_v3(self):
+        from babyyoda.grogu.histo2d_v3 import GROGU_HISTO2D_V3
+
         bins = []
         try:
             bins = self.bins(True)
@@ -292,26 +234,24 @@ class Histo2D:
             bins += [GROGU_HISTO2D_V3.Bin()] * (len(self.xEdges()))
 
             # Fill up with empty overflow bins
-        return Histo2D(
-            GROGU_HISTO2D_V3(
-                d_key=self.key(),
-                d_path=self.path(),
-                d_title=self.title(),
-                d_edges=[self.xEdges(), self.yEdges()],
-                d_bins=[
-                    GROGU_HISTO2D_V3.Bin(
-                        d_sumw=b.sumW(),
-                        d_sumw2=b.sumW2(),
-                        d_sumwx=b.sumWX(),
-                        d_sumwx2=b.sumWX2(),
-                        d_sumwy=b.sumWY(),
-                        d_sumwy2=b.sumWY2(),
-                        d_sumwxy=b.crossTerm(0, 1),
-                        d_numentries=b.numEntries(),
-                    )
-                    for b in bins
-                ],
-            )
+        return GROGU_HISTO2D_V3(
+            d_key=self.key(),
+            d_path=self.path(),
+            d_title=self.title(),
+            d_edges=[self.xEdges(), self.yEdges()],
+            d_bins=[
+                GROGU_HISTO2D_V3.Bin(
+                    d_sumw=b.sumW(),
+                    d_sumw2=b.sumW2(),
+                    d_sumwx=b.sumWX(),
+                    d_sumwx2=b.sumWX2(),
+                    d_sumwy=b.sumWY(),
+                    d_sumwy2=b.sumWY2(),
+                    d_sumwxy=b.crossTerm(0, 1),
+                    d_numentries=b.numEntries(),
+                )
+                for b in bins
+            ],
         )
 
     def to_string(self):

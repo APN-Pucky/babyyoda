@@ -4,10 +4,11 @@ from typing import List
 from dataclasses import dataclass, field
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
+from babyyoda.histo1d import Histo1D
 
 
 @dataclass
-class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT):
+class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, Histo1D):
     @dataclass
     class Bin:
         d_sumw: float = 0.0

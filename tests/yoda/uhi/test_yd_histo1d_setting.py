@@ -1,5 +1,4 @@
 import pytest
-from babyyoda.histo1D import Histo1D
 from babyyoda.util import loc, overflow, underflow
 
 # YODA1 does not support setting
@@ -7,13 +6,12 @@ pytest.importorskip("yoda", minversion="2.0.0")
 
 
 def get_histo1d():
-    import yoda
+    import babyyoda.yoda as yoda
 
     h = yoda.Histo1D(10, 0, 10, title="test")
     for i in range(12):
         for _ in range(i):
             h.fill(i)
-    h = Histo1D(h)
     h.underflow().fill(-1)
     h.overflow().fill(10)
     return h

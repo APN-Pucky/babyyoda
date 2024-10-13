@@ -4,12 +4,13 @@
 
 from ._version import version as __version__
 
+from .histo1d import Histo1D
+from .histo2d import Histo2D
+
 from .read import read, read_grogu, read_yoda
 from .write import write, write_grogu, write_yoda
 from .util import loc, overflow, underflow, rebin
 
-from .histo1D import Histo1D
-from .histo2D import Histo2D
 
 __all__ = [
     "__version__",

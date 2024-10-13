@@ -47,6 +47,12 @@ For a less feature complete version, `babyyoda.grogu` is a simpler python drop-i
 import babyyoda.grogu as yoda
 ```
 
+or force yoda use with
+
+```python
+import babyyoda.yoda as yoda
+```
+
 ## License
 
 `babyyoda` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.

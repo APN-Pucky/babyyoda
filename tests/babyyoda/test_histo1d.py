@@ -1,11 +1,10 @@
 import pytest
-from babyyoda.histo1D import Histo1D
 from babyyoda.test import assert_histo1d
 
 import babyyoda.grogu as grogu
 
 try:
-    import yoda
+    import babyyoda.yoda as yoda
 
     yoda_available = True
     # version dependence possible here
@@ -21,7 +20,6 @@ def create_histo(factory):
         for _ in range(i):
             h.fill(i)
     # do we already want to use HISTO1D here?
-    h = Histo1D(h)
     h.underflow().fill(-1)
     h.overflow().fill(10)
     return h

@@ -1,11 +1,10 @@
 import pytest
-from babyyoda.histo1D import Histo1D
 from babyyoda.test import assert_histo1d
 
 import babyyoda.grogu as grogu
 
 try:
-    import yoda
+    import babyyoda.yoda as yoda
 
     yoda_available = True
     # version dependence possible here
@@ -18,7 +17,7 @@ except ImportError:
 
 
 def create_histo(backend):
-    h = Histo1D(10, 0, 10, title="test", backend=backend)
+    h = backend(10, 0, 10, title="test")
     for i in range(12):
         for _ in range(i):
             h.fill(i)
@@ -32,7 +31,6 @@ def create_histo(backend):
 @pytest.mark.parametrize(
     "factory1",
     [
-        None,
         # babyyoda.Histo1D,
         grogu.Histo1D,
         grogu.Histo1D_v2,
@@ -43,7 +41,6 @@ def create_histo(backend):
 @pytest.mark.parametrize(
     "factory2",
     [
-        None,
         # babyyoda.Histo1D,
         grogu.Histo1D,
         grogu.Histo1D_v2,
