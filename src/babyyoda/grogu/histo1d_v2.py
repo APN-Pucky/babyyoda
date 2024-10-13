@@ -137,13 +137,6 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, Histo1D):
 
         def __add__(self, other):
             assert isinstance(other, GROGU_HISTO1D_V2.Bin)
-            ## combine if the bins are adjacent
-            # if self.d_xmax == other.d_xmin:
-            #    nxlow = self.d_xmin
-            #    nxhigh = other.d_xmax
-            # elif self.d_xmin == other.d_xmax:
-            #    nxlow = other.d_xmin
-            #    nxhigh = self.d_xmax
             return GROGU_HISTO1D_V2.Bin(
                 self.d_xmin,
                 self.d_xmax,
