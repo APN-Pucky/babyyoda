@@ -306,7 +306,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         # Add the sumw and other info (we assume it's present in the metadata but you could also compute)
         stats = f"# Mean: {self.xMean():.6e}\n" f"# Integral: {self.integral():.6e}\n"
 
-        edges = f"Edges(A1): [{', '.join(f"{e:.6e}" for e in self.d_edges)}]\n"
+        edges = f"Edges(A1): [{', '.join("{:.6e}".format(e) for e in self.d_edges)}]\n"
         # Add the bin data
         bin_data = "\n".join(GROGU_HISTO1D_V3.Bin.to_string(b) for b in self.bins(True))
 

@@ -212,7 +212,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         )
         edges = ""
         for i, edg in enumerate(self.d_edges):
-            edges += f"Edges(A{i+1}): [{', '.join(f"{e:.6e}" for e in edg )}]\n"
+            edges += f"Edges(A{i+1}): [{', '.join("{:.6e}".format(e) for e in edg )}]\n"
 
         legend = "# sumW       \tsumW2        \tsumW(A1)     \tsumW2(A1)    \tsumW(A2)     \tsumW2(A2)    \tsumW(A1,A2)  \tnumEntries\n"
         bin_data = "\n".join(b.to_string() for b in self.d_bins)

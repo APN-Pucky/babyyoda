@@ -130,4 +130,5 @@ ignore = [
   "ISC001",   # Conflicts with formatter
   "RUF012",   # TODO: mutable class attributes
   "SIM115",   # TODO: use context manager for opening files
+  "UP032",    # Use `f`-strings instead of `.format()`, but is incompatible with lower Python versions
 ]
