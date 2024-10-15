@@ -1,4 +1,3 @@
-import babyyoda
 from babyyoda import grogu
 
 
@@ -8,10 +7,16 @@ def write(anyhistograms, file_path: str, *args, **kwargs):
         listhistograms = anyhistograms.values()
     # check if all histograms are yoda => use yoda
     use_yoda = True
-    for h in listhistograms:
-        if not (isinstance(h, (babyyoda.yoda.Histo1D, babyyoda.yoda.Histo2D))):
-            use_yoda = False
-            break
+    try:
+        from babyyoda import yoda
+
+        for h in listhistograms:
+            if not (isinstance(h, (yoda.Histo1D, yoda.Histo2D))):
+                use_yoda = False
+                break
+    except ImportError:
+        use_yoda = False
+
     if use_yoda:
         write_yoda(anyhistograms, file_path, *args, **kwargs)
     else:
