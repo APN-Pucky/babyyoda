@@ -1,3 +1,4 @@
+import yoda
 from packaging import version
 
 import babyyoda
@@ -9,7 +10,6 @@ class Histo1D(babyyoda.UHIHisto1D):
         """
         target is either a yoda or grogu HISTO1D_V2
         """
-        import yoda
 
         target = args[0] if len(args) == 1 else yoda.Histo1D(*args, **kwargs)
         # unwrap target

@@ -1,9 +1,9 @@
 import warnings
 
+import yoda as yd
+
 
 def write(anyhistograms, file_path: str, *args, gz=False, **kwargs):
-    import yoda as yd
-
     if gz and not file_path.endswith((".gz", ".gzip")):
         warnings.warn(
             "gz is True but file_path does not end with .gz or .gzip", stacklevel=2

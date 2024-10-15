@@ -1,3 +1,5 @@
+import yoda as yd
+
 from babyyoda.yoda.histo1d import Histo1D
 from babyyoda.yoda.histo2d import Histo2D
 
@@ -6,7 +8,6 @@ def read(file_path: str):
     """
     Wrap yoda histograms in the by HISTO1D_V2 class
     """
-    import yoda as yd
 
     ret = {}
     for k, v in yd.read(file_path).items():
