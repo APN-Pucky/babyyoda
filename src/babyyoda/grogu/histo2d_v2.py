@@ -8,25 +8,42 @@ from babyyoda.histo2d import UHIHisto2D
 
 
 def Histo2D_v2(
-    nxbins: int,
-    xstart: float,
-    xend: float,
-    nybins: int,
-    ystart: float,
-    yend: float,
+    *args,
     title=None,
     **kwargs,
 ):
+    xedges = []
+    yedges = []
+    if isinstance(args[0], list) and isinstance(args[1], list):
+        xedges = args[0]
+        yedges = args[1]
+    elif (
+        isinstance(args[0], int)
+        and isinstance(args[1], (int, float))
+        and isinstance(args[2], (int, float))
+        and isinstance(args[3], int)
+        and isinstance(args[4], (int, float))
+        and isinstance(args[5], (int, float))
+    ):
+        nxbins = args[0]
+        xstart = float(args[1])
+        xend = float(args[2])
+        nybins = args[3]
+        ystart = float(args[4])
+        yend = float(args[5])
+        xedges = [i * (xend - xstart) / nxbins for i in range(nxbins + 1)]
+        yedges = [i * (yend - ystart) / nybins for i in range(nybins + 1)]
+
     return GROGU_HISTO2D_V2(
         d_bins=[
             GROGU_HISTO2D_V2.Bin(
-                d_xmin=xstart + i * (xend - xstart) / nxbins,
-                d_xmax=xstart + (i + 1) * (xend - xstart) / nxbins,
-                d_ymin=ystart + j * (yend - ystart) / nybins,
-                d_ymax=ystart + (j + 1) * (yend - ystart) / nybins,
+                d_xmin=xedges[i],
+                d_xmax=xedges[i + 1],
+                d_ymin=yedges[j],
+                d_ymax=yedges[j + 1],
             )
-            for i in range(nxbins)
-            for j in range(nybins)
+            for i in range(len(xedges) - 1)
+            for j in range(len(yedges) - 1)
         ],
         d_total=GROGU_HISTO2D_V2.Bin(),
         d_annotations={"Title": title} if title else {},
@@ -285,11 +302,22 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             for j in range(len(yedges) - 1):
                 for i in range(len(xedges) - 1):
                     if (
-                        xedges[i] <= b.xMid()
-                        and b.xMid() <= xedges[i + 1]
-                        and yedges[j] <= b.yMid()
-                        and b.yMid() <= yedges[j + 1]
+                        xedges[i] <= b.xMid() < xedges[i + 1]
+                        and yedges[j] <= b.yMid() < yedges[j + 1]
                     ):
+                        assert new_bins[i + j * (len(xedges) - 1)].d_xmin == xedges[i]
+                        assert (
+                            new_bins[i + j * (len(xedges) - 1)].d_xmax == xedges[i + 1]
+                        )
+                        assert new_bins[i + j * (len(xedges) - 1)].d_ymin == yedges[j]
+                        assert (
+                            new_bins[i + j * (len(xedges) - 1)].d_ymax == yedges[j + 1]
+                        )
+                        assert (
+                            new_bins[i + j * (len(xedges) - 1)].d_xmin
+                            <= b.xMid()
+                            < new_bins[i + j * (len(xedges) - 1)].d_xmax
+                        )
                         new_bins[i + j * (len(xedges) - 1)] += b
         self.d_bins = new_bins
 

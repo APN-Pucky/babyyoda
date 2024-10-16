@@ -7,12 +7,27 @@ from babyyoda.grogu.counter_v3 import Counter_v3
 from babyyoda.histo1d import UHIHisto1D
 
 
-def Histo1D_v3(nbins: int, start: float, end: float, title=None, **kwargs):
+def Histo1D_v3(*args, title=None, **kwargs):
+    edges = []
+    if isinstance(args[0], list):
+        edges = args[0]
+    elif (
+        isinstance(args[0], int)
+        and isinstance(args[1], (float, int))
+        and isinstance(args[2], (float, int))
+    ):
+        nbins = args[0]
+        start = float(args[1])
+        end = float(args[2])
+        edges = [i * (end - start) / nbins for i in range(nbins + 1)]
+    else:
+        err = "Invalid arguments"
+        raise ValueError(err)
     return GROGU_HISTO1D_V3(
-        d_edges=[start + i * (end - start) / nbins for i in range(nbins + 1)],
+        d_edges=edges,
         d_bins=[
             GROGU_HISTO1D_V3.Bin()
-            for i in range(nbins + 2)  # add overflow and underflow
+            for i in range(len(edges) + 1)  # add overflow and underflow
         ],
         d_annotations={"Title": title} if title else {},
         **kwargs,

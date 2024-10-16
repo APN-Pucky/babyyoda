@@ -7,14 +7,29 @@ from babyyoda.grogu.counter_v2 import Counter_v2
 from babyyoda.histo1d import UHIHisto1D
 
 
-def Histo1D_v2(nbins: int, start: float, end: float, title=None, **kwargs):
+def Histo1D_v2(*args, title=None, **kwargs):
+    edges = []
+    if isinstance(args[0], list):
+        edges = args[0]
+    elif (
+        isinstance(args[0], int)
+        and isinstance(args[1], (float, int))
+        and isinstance(args[2], (float, int))
+    ):
+        nbins = args[0]
+        start = float(args[1])
+        end = float(args[2])
+        edges = [i * (end - start) / nbins for i in range(nbins + 1)]
+    else:
+        err = "Invalid arguments"
+        raise ValueError(err)
     return GROGU_HISTO1D_V2(
         d_bins=[
             GROGU_HISTO1D_V2.Bin(
-                d_xmin=start + i * (end - start) / nbins,
-                d_xmax=start + (i + 1) * (end - start) / nbins,
+                d_xmin=edges[i],
+                d_xmax=edges[i + 1],
             )
-            for i in range(nbins)
+            for i in range(len(edges) - 1)
         ],
         d_overflow=GROGU_HISTO1D_V2.Bin(),
         d_underflow=GROGU_HISTO1D_V2.Bin(),

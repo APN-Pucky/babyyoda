@@ -27,23 +27,41 @@ def to_index(x, y, xedges, yedges):
 
 
 def Histo2D_v3(
-    nxbins: int,
-    xstart: float,
-    xend: float,
-    nybins: int,
-    ystart: float,
-    yend: float,
+    *args,
     title=None,
     **kwargs,
 ):
+    xedges = []
+    yedges = []
+    if isinstance(args[0], list) and isinstance(args[1], list):
+        xedges = args[0]
+        yedges = args[1]
+    elif (
+        isinstance(args[0], int)
+        and isinstance(args[1], (int, float))
+        and isinstance(args[2], (int, float))
+        and isinstance(args[3], int)
+        and isinstance(args[4], (int, float))
+        and isinstance(args[5], (int, float))
+    ):
+        nxbins = args[0]
+        xstart = float(args[1])
+        xend = float(args[2])
+        nybins = args[3]
+        ystart = float(args[4])
+        yend = float(args[5])
+        xedges = [i * (xend - xstart) / nxbins for i in range(nxbins + 1)]
+        yedges = [i * (yend - ystart) / nybins for i in range(nybins + 1)]
     return GROGU_HISTO2D_V3(
         d_edges=[
-            [xstart + i * (xend - xstart) / nxbins for i in range(nxbins + 1)],
-            [ystart + i * (yend - ystart) / nybins for i in range(nybins + 1)],
+            xedges,
+            yedges,
         ],
         d_bins=[
             GROGU_HISTO2D_V3.Bin()
-            for _ in range((nxbins + 2) * (nybins + 2))  # add overflow and underflow
+            for _ in range(
+                (len(xedges) + 1) * (len(yedges) + 1)
+            )  # add overflow and underflow
         ],
         d_annotations={"Title": title} if title else {},
         **kwargs,
@@ -233,6 +251,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         )
 
     def rebinXYTo(self, xedges: list[float], yedges: list[float]):
+        print(f"rebinXYTo : {self.xEdges()} -> {xedges}, {self.yEdges()} -> {yedges}")
         own_xedges = self.xEdges()
         for e in xedges:
             assert e in own_xedges, f"Edge {e} not found in own edges {own_xedges}"

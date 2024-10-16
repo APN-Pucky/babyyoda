@@ -29,22 +29,12 @@ def Histo1D(*args, **kwargs):
 
 
 def Histo2D(
-    nxbins: int,
-    xstart: float,
-    xend: float,
-    nybins: int,
-    ystart: float,
-    yend: float,
+    *args,
     title=None,
     **kwargs,
 ):
     return Histo2D_v3(
-        nxbins=nxbins,
-        xstart=xstart,
-        xend=xend,
-        nybins=nybins,
-        ystart=ystart,
-        yend=yend,
+        *args,
         title=title,
         **kwargs,
     )
