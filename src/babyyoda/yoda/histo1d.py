@@ -86,3 +86,10 @@ class Histo1D(babyyoda.UHIHisto1D):
 
     def clone(self):
         return Histo1D(self.target.clone())
+
+    # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
+    def annotationsDict(self):
+        d = {}
+        for k in self.target.annotations():
+            d[k] = self.target.annotation(k)
+        return d

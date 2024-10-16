@@ -1,23 +1,20 @@
 import yoda
-from packaging import version
 
 import babyyoda
 from babyyoda.util import has_own_method
 
 
-class Histo2D(babyyoda.UHIHisto2D):
+class Counter(babyyoda.UHICounter):
     def __init__(self, *args, **kwargs):
         """
-        target is either a yoda or grogu HISTO2D_V2
+        target is either a yoda or grogu Counter
         """
 
-        target = args[0] if len(args) == 1 else yoda.Histo2D(*args, **kwargs)
-
+        target = args[0] if len(args) == 1 else yoda.Counter(*args, **kwargs)
         # unwrap target
-        while isinstance(target, Histo2D):
+        while isinstance(target, Counter):
             target = target.target
 
-        # Store the target object where calls and attributes will be forwarded
         super().__setattr__("target", target)
 
     ########################################################
@@ -26,7 +23,7 @@ class Histo2D(babyyoda.UHIHisto2D):
 
     def __getattr__(self, name):
         # if we overwrite it here, use that
-        if has_own_method(Histo2D, name):
+        if has_own_method(Counter, name):
             return getattr(self, name)
         # if the target has the attribute, use that
         if hasattr(self.target, name):
@@ -38,7 +35,7 @@ class Histo2D(babyyoda.UHIHisto2D):
         raise AttributeError(err)
 
     def __setattr__(self, name, value):
-        if has_own_method(Histo2D, name):
+        if has_own_method(Counter, name):
             setattr(self, name, value)
         elif hasattr(self.target, name):
             setattr(self.target, name, value)
@@ -55,24 +52,11 @@ class Histo2D(babyyoda.UHIHisto2D):
         err = f"'{type(self.target).__name__}' object is not callable"
         raise TypeError(err)
 
-    def bins(self, includeOverflows=False, *args, **kwargs):
-        import yoda
-
-        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
-            return self.target.bins(*args, includeOverflows=includeOverflows, **kwargs)
-        if not includeOverflows:
-            # YODA1 bins are not sorted than YODA2
-            return sorted(
-                self.target.bins(*args, **kwargs), key=lambda b: (b.yMin(), b.xMin())
-            )
-        err = "YODA1 backend can not include overflows"
-        raise NotImplementedError(err)
-
-    def __getitem__(self, slices):
-        return super().__getitem__(slices)
+    def bins(self, *args, **kwargs):
+        return self.target.bins(*args, **kwargs)
 
     def clone(self):
-        return Histo2D(self.target.clone())
+        return Counter(self.target.clone())
 
     # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
     def annotationsDict(self):

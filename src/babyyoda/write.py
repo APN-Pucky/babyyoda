@@ -11,7 +11,7 @@ def write(anyhistograms, file_path: str, *args, **kwargs):
         from babyyoda import yoda
 
         for h in listhistograms:
-            if not (isinstance(h, (yoda.Histo1D, yoda.Histo2D))):
+            if not (isinstance(h, (yoda.Counter, yoda.Histo1D, yoda.Histo2D))):
                 use_yoda = False
                 break
     except ImportError:

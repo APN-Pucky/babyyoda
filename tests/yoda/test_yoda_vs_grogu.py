@@ -113,7 +113,7 @@ def test_create_histo1d():
     h = yoda.Histo1D(10, 0, 10, title="test")
 
     g = GROGU_HISTO1D_V2(
-        d_title="test",
+        d_annotations={"Title": "test"},
         d_bins=[
             GROGU_HISTO1D_V2.Bin(d_xmin=hb.xMin(), d_xmax=hb.xMax()) for hb in h.bins()
         ],
@@ -137,10 +137,9 @@ def test_create_histo1d():
 def test_create_histo2d():
     import babyyoda.yoda as yd
 
-    h = yd.Histo2D(10, 0, 10, 10, 0, 10, title="test")
+    h = yd.Histo2D(10, 0, 10, 10, 0, 10)
 
     g = GROGU_HISTO2D_V2(
-        d_title="test",
         d_bins=[
             GROGU_HISTO2D_V2.Bin(
                 d_xmin=hb.xMin(), d_xmax=hb.xMax(), d_ymin=hb.yMin(), d_ymax=hb.yMax()
