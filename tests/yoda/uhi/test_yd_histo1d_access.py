@@ -13,7 +13,6 @@ def create_linear_histo1ds():
     h = yoda.Histo1D(10, 0, 10, title="test")
 
     g = GROGU_HISTO1D_V2(
-        d_title="test",
         d_bins=[
             GROGU_HISTO1D_V2.Bin(d_xmin=hb.xMin(), d_xmax=hb.xMax()) for hb in h.bins()
         ],

@@ -13,7 +13,6 @@ def create_histo2d():
     h = yd.Histo2D(10, 0, 10, 10, 0, 10, title="test")
 
     g = GROGU_HISTO2D_V2(
-        d_title="test",
         d_bins=[
             GROGU_HISTO2D_V2.Bin(
                 d_xmin=hb.xMin(), d_xmax=hb.xMax(), d_ymin=hb.yMin(), d_ymax=hb.yMax()

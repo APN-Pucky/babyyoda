@@ -3,6 +3,7 @@ import sys
 
 import numpy as np
 
+from babyyoda.analysisobject import UHIAnalysisObject
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
@@ -33,7 +34,7 @@ def Histo2D(*args, **kwargs):
     return yoda.Histo2D(*args, **kwargs)
 
 
-class UHIHisto2D:
+class UHIHisto2D(UHIAnalysisObject):
     #####
     # BACKENDS
     #####
@@ -43,8 +44,7 @@ class UHIHisto2D:
 
         return GROGU_HISTO2D_V2(
             d_key=self.key(),
-            d_path=self.path(),
-            d_title=self.title(),
+            d_annotations=self.annotationsDict(),
             d_bins=[
                 GROGU_HISTO2D_V2.Bin(
                     d_xmin=self.xEdges()[i % len(self.xEdges())],
@@ -85,8 +85,7 @@ class UHIHisto2D:
             # Fill up with empty overflow bins
         return GROGU_HISTO2D_V3(
             d_key=self.key(),
-            d_path=self.path(),
-            d_title=self.title(),
+            d_annotations=self.annotationsDict(),
             d_edges=[self.xEdges(), self.yEdges()],
             d_bins=[
                 GROGU_HISTO2D_V3.Bin(
@@ -300,11 +299,6 @@ class UHIHisto2D:
         # TODO implement slice
         err = "Invalid argument type"
         raise TypeError(err)
-
-    def key(self):
-        if hasattr(self.target, "key"):
-            return self.target.key()
-        return self.path()
 
     def plot(self, *args, binwnorm=True, **kwargs):
         import mplhep as hep

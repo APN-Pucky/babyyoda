@@ -7,7 +7,7 @@ from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
 
 
 @dataclass
-class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
+class GROGU_COUNTER_V2(GROGU_ANALYSIS_OBJECT, UHICounter):
     @dataclass
     class Bin:
         d_sumw: float = 0.0
@@ -19,7 +19,7 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
         ########################################################
 
         def clone(self):
-            return GROGU_COUNTER_V3.Bin(
+            return GROGU_COUNTER_V2.Bin(
                 d_sumw=self.d_sumw,
                 d_sumw2=self.d_sumw2,
                 d_numentries=self.d_numentries,
@@ -84,15 +84,15 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
 
         def __eq__(self, other):
             return (
-                isinstance(other, GROGU_COUNTER_V3.Bin)
+                isinstance(other, GROGU_COUNTER_V2.Bin)
                 and self.d_sumw == other.d_sumw
                 and self.d_sumw2 == other.d_sumw2
                 and self.d_numentries == other.d_numentries
             )
 
         def __add__(self, other):
-            assert isinstance(other, GROGU_COUNTER_V3.Bin)
-            return GROGU_COUNTER_V3.Bin(
+            assert isinstance(other, GROGU_COUNTER_V2.Bin)
+            return GROGU_COUNTER_V2.Bin(
                 self.d_sumw + other.d_sumw,
                 self.d_sumw2 + other.d_sumw2,
                 self.d_numentries + other.d_numentries,
@@ -100,10 +100,10 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
 
         def to_string(self) -> str:
             """Convert a CounterBin object to a formatted string."""
-            return f"{self.d_sumw:<13.6e}\t{self.d_sumw2:<13.6e}\t{self.d_numentries:<13.6e}".strip()
+            return f"{self.d_sumw:<12.6e}\t{self.d_sumw2:<12.6e}\t{self.d_numentries:<12.6e}".strip()
 
         @classmethod
-        def from_string(cls, string: str) -> "GROGU_COUNTER_V3.Bin":
+        def from_string(cls, string: str) -> "GROGU_COUNTER_V2.Bin":
             values = re.split(r"\s+", string.strip())
             # Regular bin
             sumw, sumw2, numEntries = map(float, values)
@@ -130,7 +130,7 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
         return self.d_bins[0].numEntries()
 
     def clone(self):
-        return GROGU_COUNTER_V3(
+        return GROGU_COUNTER_V2(
             d_key=self.d_key,
             d_annotations=self.annotationsDict(),
             d_bins=[b.clone() for b in self.d_bins],
@@ -147,10 +147,10 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
         return self.d_bins
 
     @classmethod
-    def from_string(cls, file_content: str) -> "GROGU_COUNTER_V3":
+    def from_string(cls, file_content: str) -> "GROGU_COUNTER_V2":
         lines = file_content.strip().splitlines()
         key = ""
-        if find := re.search(r"BEGIN YODA_COUNTER_V3 (\S+)", lines[0]):
+        if find := re.search(r"BEGIN YODA_COUNTER_V2 (\S+)", lines[0]):
             key = find.group(1)
 
         annotations = GROGU_ANALYSIS_OBJECT.from_string(
@@ -163,9 +163,9 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
         data_section_started = False
 
         for line in lines:
-            if line.startswith("BEGIN YODA_COUNTER_V3"):
+            if line.startswith("BEGIN YODA_COUNTER_V2"):
                 continue
-            if line.startswith("END YODA_COUNTER_V3"):
+            if line.startswith("END YODA_COUNTER_V2"):
                 break
             if line.startswith("#") or line.isspace():
                 continue
@@ -184,9 +184,9 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
         )
 
     def to_string(self):
-        """Convert a YODA_COUNTER_V3 object to a formatted string."""
+        """Convert a YODA_COUNTER_V2 object to a formatted string."""
         header = (
-            f"BEGIN YODA_COUNTER_V3 {self.d_key}\n"
+            f"BEGIN YODA_COUNTER_V2 {self.d_key}\n"
             f"{GROGU_ANALYSIS_OBJECT.to_string(self)}"
             "---\n"
         )
@@ -199,8 +199,8 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
         # listed = ", ".join(f"{float(val):.6e}" for val in self.d_edges)
         # edges = f"Edges(A1): [{listed}]\n"
         # Add the bin data
-        bin_data = "\n".join(GROGU_COUNTER_V3.Bin.to_string(b) for b in self.bins())
+        bin_data = "\n".join(GROGU_COUNTER_V2.Bin.to_string(b) for b in self.bins())
 
-        footer = "END YODA_COUNTER_V3"
+        footer = "END YODA_COUNTER_V2"
 
-        return f"{header}{stats}# sumW       \tsumW2        \tnumEntries\n{bin_data}\n{footer}"
+        return f"{header}{stats}# sumW\t sumW2\t numEntries\n{bin_data}\n{footer}"

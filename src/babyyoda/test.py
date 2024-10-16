@@ -62,7 +62,7 @@ def equal_histo1d(gh1, yh1):
 def assert_ao(g, y):
     assert g.name() == y.name()
     assert g.path() == y.path()
-    assert g.title() == y.title()
+    assert g.title() == y.title(), f"{g.title()} != {y.title()}"
     assert g.type() == y.type()
 
 
@@ -70,6 +70,12 @@ def assert_bin1d(gb, yb):
     assert gb.xMin() == yb.xMin()
     assert gb.xMax() == yb.xMax()
     assert_value1d(gb, yb)
+
+
+def assert_value0d(gb, yb):
+    assert gb.sumW() == yb.sumW(), f"{gb.sumW()} != {yb.sumW()}"
+    assert gb.sumW2() == yb.sumW2()
+    assert gb.numEntries() == yb.numEntries()
 
 
 def assert_value1d(gb, yb):

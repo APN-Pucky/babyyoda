@@ -187,7 +187,8 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
     d_total: Optional[Bin] = None
 
     def __post_init__(self):
-        self.d_type = "Histo1D"
+        GROGU_ANALYSIS_OBJECT.__post_init__(self)
+        self.setAnnotation("Type", "Histo1D")
 
     ############################################
     # YODA compatibilty code
@@ -196,9 +197,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
     def clone(self):
         return GROGU_HISTO1D_V2(
             d_key=self.d_key,
-            d_path=self.d_path,
-            d_scaled_by=self.d_scaled_by,
-            d_title=self.d_title,
+            d_annotations=self.annotationsDict(),
             d_bins=[b.clone() for b in self.d_bins],
             d_underflow=self.d_underflow,
             d_overflow=self.d_overflow,
@@ -272,15 +271,9 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
 
     def to_string(histo) -> str:
         """Convert a YODA_HISTO1D_V2 object to a formatted string."""
-        scale = (
-            "" if histo.d_scaled_by == 1.0 else f"ScaledBy: {histo.d_scaled_by:.17e}\n"
-        )
         header = (
             f"BEGIN YODA_HISTO1D_V2 {histo.d_key}\n"
-            f"Path: {histo.d_path}\n"
-            f"{scale}"
-            f"Title: {histo.d_title}\n"
-            f"Type: Histo1D\n"
+            f"{GROGU_ANALYSIS_OBJECT.to_string(histo)}"
             "---\n"
         )
 
@@ -307,19 +300,9 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         if find := re.search(r"BEGIN YODA_HISTO1D_V2 (\S+)", lines[0]):
             key = find.group(1)
 
-        # Extract metadata (path, title)
-        path = ""
-        title = ""
-        scaled_by = 1.0
-        for line in lines:
-            if line.startswith("Path:"):
-                path = line.split(":")[1].strip()
-            elif line.startswith("Title:"):
-                title = line.split(":")[1].strip()
-            elif line.startswith("ScaledBy:"):
-                scaled_by = float(line.split(":")[1].strip())
-            elif line.startswith("---"):
-                break
+        annotations = GROGU_ANALYSIS_OBJECT.from_string(
+            file_content=file_content
+        ).d_annotations
 
         # Extract bins and overflow/underflow
         bins = []
@@ -353,9 +336,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         # Create and return the YODA_HISTO1D_V2 object
         return cls(
             d_key=key,
-            d_path=path,
-            d_title=title,
-            d_scaled_by=scaled_by,
+            d_annotations=annotations,
             d_bins=bins,
             d_underflow=underflow,
             d_total=total,

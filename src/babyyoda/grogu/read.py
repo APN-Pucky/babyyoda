@@ -1,6 +1,8 @@
 import gzip
 import re
 
+from babyyoda.grogu.counter_v2 import GROGU_COUNTER_V2
+from babyyoda.grogu.counter_v3 import GROGU_COUNTER_V3
 from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
@@ -41,8 +43,14 @@ def read(file_path: str):
 
     histograms = {}
 
-    for full_match, hist_type, name, body in matches:
-        if hist_type == "YODA_HISTO1D_V2":
+    for full_match, hist_type, name, _body in matches:
+        if hist_type == "YODA_COUNTER_V2":
+            hist = GROGU_COUNTER_V2.from_string(full_match)
+            histograms[name] = hist
+        elif hist_type == "YODA_COUNTER_V3":
+            hist = GROGU_COUNTER_V3.from_string(full_match)
+            histograms[name] = hist
+        elif hist_type == "YODA_HISTO1D_V2":
             hist = GROGU_HISTO1D_V2.from_string(full_match)
             histograms[name] = hist
         elif hist_type == "YODA_HISTO1D_V3":

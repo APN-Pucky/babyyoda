@@ -1,3 +1,4 @@
+from babyyoda.grogu.counter_v2 import GROGU_COUNTER_V2
 from babyyoda.grogu.counter_v3 import GROGU_COUNTER_V3
 from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
@@ -16,8 +17,16 @@ def Counter(title=None, **kwargs):
 
 def Counter_v3(title=None, **kwargs):
     return GROGU_COUNTER_V3(
-        d_bins=[GROGU_HISTO1D_V3.Bin()],
-        d_title=title,
+        d_bins=[GROGU_COUNTER_V3.Bin()],
+        d_annotations={"Title": title} if title else {},
+        **kwargs,
+    )
+
+
+def Counter_v2(title=None, **kwargs):
+    return GROGU_COUNTER_V2(
+        d_bins=[GROGU_COUNTER_V2.Bin()],
+        d_annotations={"Title": title} if title else {},
         **kwargs,
     )
 
@@ -38,7 +47,7 @@ def Histo1D_v2(nbins: int, start: float, end: float, title=None, **kwargs):
         d_overflow=GROGU_HISTO1D_V2.Bin(),
         d_underflow=GROGU_HISTO1D_V2.Bin(),
         d_total=GROGU_HISTO1D_V2.Bin(),
-        d_title=title,
+        d_annotations={"Title": title} if title else {},
         **kwargs,
     )
 
@@ -50,7 +59,7 @@ def Histo1D_v3(nbins: int, start: float, end: float, title=None, **kwargs):
             GROGU_HISTO1D_V3.Bin()
             for i in range(nbins + 2)  # add overflow and underflow
         ],
-        d_title=title,
+        d_annotations={"Title": title} if title else {},
         **kwargs,
     )
 
@@ -99,7 +108,7 @@ def Histo2D_v2(
             for j in range(nybins)
         ],
         d_total=GROGU_HISTO2D_V2.Bin(),
-        d_title=title,
+        d_annotations={"Title": title} if title else {},
         **kwargs,
     )
 
@@ -123,6 +132,6 @@ def Histo2D_v3(
             GROGU_HISTO2D_V3.Bin()
             for _ in range((nxbins + 2) * (nybins + 2))  # add overflow and underflow
         ],
-        d_title=title,
+        d_annotations={"Title": title} if title else {},
         **kwargs,
     )

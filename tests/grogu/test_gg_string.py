@@ -3,11 +3,13 @@
 import pytest
 
 import babyyoda
+from babyyoda.grogu.counter_v2 import GROGU_COUNTER_V2
+from babyyoda.grogu.counter_v3 import GROGU_COUNTER_V3
 from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
 from babyyoda.grogu.histo2d_v3 import GROGU_HISTO2D_V3
-from babyyoda.test import assert_bin1d, assert_histo1d, assert_histo2d
+from babyyoda.test import assert_bin1d, assert_histo1d, assert_histo2d, assert_value0d
 
 
 @pytest.mark.parametrize(
@@ -124,4 +126,32 @@ def test_gg_histo2d_v3_string():
     print(s)
     h2 = GROGU_HISTO2D_V3.from_string(s)
     assert_histo2d(h1, h2, includeFlow=True)
+    assert h1 == h2
+
+
+def test_gg_counter_v2_string():
+    h1 = babyyoda.grogu.Counter_v2(title="test")
+    w = 0
+    for _ in range(-10, 12):
+        for _ in range(-10, 12):
+            w += 1
+            h1.fill(w)
+    s = h1.to_string()
+    print(s)
+    h2 = GROGU_COUNTER_V2.from_string(s)
+    assert_value0d(h1, h2)
+    assert h1 == h2
+
+
+def test_gg_counter_v3_string():
+    h1 = babyyoda.grogu.Counter_v3(title="test")
+    w = 0
+    for _ in range(-10, 12):
+        for _ in range(-10, 12):
+            w += 1
+            h1.fill(w)
+    s = h1.to_string()
+    print(s)
+    h2 = GROGU_COUNTER_V3.from_string(s)
+    assert_value0d(h1, h2)
     assert h1 == h2

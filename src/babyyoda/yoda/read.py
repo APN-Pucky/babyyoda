@@ -1,5 +1,6 @@
 import yoda as yd
 
+from babyyoda.yoda.counter import Counter
 from babyyoda.yoda.histo1d import Histo1D
 from babyyoda.yoda.histo2d import Histo2D
 
@@ -15,6 +16,8 @@ def read(file_path: str):
             ret[k] = Histo1D(v)
         elif isinstance(v, yd.Histo2D):
             ret[k] = Histo2D(v)
+        elif isinstance(v, yd.Counter):
+            ret[k] = Counter(v)
         else:
             ret[k] = v
     return ret

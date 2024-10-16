@@ -3,6 +3,7 @@ import sys
 
 import numpy as np
 
+from babyyoda.analysisobject import UHIAnalysisObject
 from babyyoda.util import loc, overflow, rebin, underflow
 
 
@@ -33,7 +34,7 @@ def Histo1D(*args, **kwargs):
 
 
 # TODO make this implementation independent (no V2 or V3...)
-class UHIHisto1D:
+class UHIHisto1D(UHIAnalysisObject):
     ######
     # BACKENDS
     ######
@@ -43,8 +44,7 @@ class UHIHisto1D:
 
         return GROGU_HISTO1D_V2(
             d_key=self.key(),
-            d_path=self.path(),
-            d_title=self.title(),
+            d_annotations=self.annotationsDict(),
             d_bins=[
                 GROGU_HISTO1D_V2.Bin(
                     d_xmin=self.xEdges()[i],
@@ -82,8 +82,7 @@ class UHIHisto1D:
 
         return GROGU_HISTO1D_V3(
             d_key=self.key(),
-            d_path=self.path(),
-            d_title=self.title(),
+            d_annotations=self.annotationsDict(),
             d_edges=self.xEdges(),
             d_bins=[
                 GROGU_HISTO1D_V3.Bin(
@@ -303,9 +302,6 @@ class UHIHisto1D:
         # integer index
         index = self.__get_index(slices)
         self.__set_by_index(index, value)
-
-    def key(self):
-        return self.path()
 
     def plot(self, *args, binwnorm=1.0, **kwargs):
         import mplhep as hep
