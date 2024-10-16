@@ -4,7 +4,7 @@ import sys
 import numpy as np
 
 from babyyoda.analysisobject import UHIAnalysisObject
-from babyyoda.util import loc, overflow, rebin, underflow
+from babyyoda.util import loc, overflow, project, rebin, underflow
 
 
 def set_bin1d(target, source):
@@ -258,6 +258,10 @@ class UHIHisto1D(UHIAnalysisObject):
                 else:
                     stop += 1
                 sc.rebinBy(step.factor, start, stop)
+            elif step is project:
+                print("PROJECT")
+                # Get the subset and then project
+                sc = self[item.start : item.stop].project()
             else:
                 if stop is not None:
                     stop += 1

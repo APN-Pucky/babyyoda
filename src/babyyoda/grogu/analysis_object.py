@@ -67,7 +67,6 @@ class GROGU_ANALYSIS_OBJECT:
             elif line.startswith("---"):
                 break
 
-        print(annotations)
         return cls(
             d_annotations=annotations,
             d_key=annotations.get("Path", ""),
@@ -76,6 +75,8 @@ class GROGU_ANALYSIS_OBJECT:
     def to_string(self):
         ret = ""
         for k, v in self.d_annotations.items():
-            ret += f"{k}: {v}\n"
-        print(f"ret: {ret}")
+            val = v
+            if val is None:
+                val = "~"  # Weird YODA NULL strings cf. YAML-cpp
+            ret += f"{k}: {val}\n"
         return ret

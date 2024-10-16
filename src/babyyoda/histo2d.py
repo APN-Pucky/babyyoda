@@ -82,7 +82,6 @@ class UHIHisto2D(UHIAnalysisObject):
             bins += [GROGU_HISTO2D_V3.Bin()]  # underflow
             bins += [GROGU_HISTO2D_V3.Bin()] * (len(self.xEdges()))
 
-            # Fill up with empty overflow bins
         return GROGU_HISTO2D_V3(
             d_key=self.key(),
             d_annotations=self.annotationsDict(),
@@ -301,6 +300,17 @@ class UHIHisto2D(UHIAnalysisObject):
         raise TypeError(err)
 
     def plot(self, *args, binwnorm=True, **kwargs):
+        ## TODO should use histplot
+        # import mplhep as hep
+
+        # hep.histplot(
+        #    self,
+        #    *args,
+        #    #yerr=self.variances() ** 0.5,
+        #    w2method="sqrt",
+        #    binwnorm=binwnorm,
+        #    **kwargs,
+        # )
         import mplhep as hep
 
         if binwnorm:

@@ -3,6 +3,7 @@ import re
 from dataclasses import dataclass, field
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
+from babyyoda.grogu.counter_v3 import GROGU_COUNTER_V3
 from babyyoda.histo1d import UHIHisto1D
 
 
@@ -227,6 +228,19 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         self.d_edges = edges
 
         assert len(self.d_bins) == len(self.xEdges()) - 1 + 2
+
+    def project(self) -> GROGU_COUNTER_V3:
+        return GROGU_COUNTER_V3(
+            d_key=self.d_key,
+            d_annotations=self.annotationsDict(),
+            d_bins=[
+                GROGU_COUNTER_V3.Bin(
+                    d_sumw=sum([b.sumW() for b in self.bins()]),
+                    d_sumw2=sum([b.sumW2() for b in self.bins()]),
+                    d_numentries=sum([b.numEntries() for b in self.bins()]),
+                )
+            ],
+        )
 
     @classmethod
     def from_string(cls, file_content: str) -> "GROGU_HISTO1D_V3":
