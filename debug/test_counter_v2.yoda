@@ -1,0 +1,8 @@
+BEGIN YODA_COUNTER_V2 /
+Path: /
+Title: hi
+Type: Counter
+---
+# sumW	 sumW2	 numEntries
+0.000000e+00	0.000000e+00	0.000000e+00
+END YODA_COUNTER_V2

@@ -95,9 +95,6 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         def stdErr(self):
             return self.stdDev() / self.effNumEntries() ** 0.5
 
-        def dVol(self):
-            return self.d_xmax - self.d_xmin
-
         def xVariance(self):
             # return self.d_sumwx2/self.d_sumw - (self.d_sumwx/self.d_sumw)**2
             if self.d_sumw**2 - self.d_sumw2 == 0:

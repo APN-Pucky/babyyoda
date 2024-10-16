@@ -1,3 +1,4 @@
+from babyyoda.grogu.counter_v3 import GROGU_COUNTER_V3
 from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
 from babyyoda.grogu.histo2d_v3 import GROGU_HISTO2D_V3
@@ -7,6 +8,18 @@ from .read import read
 from .write import write
 
 __all__ = ["read", "write"]
+
+
+def Counter(title=None, **kwargs):
+    return Counter_v3(title=title, **kwargs)
+
+
+def Counter_v3(title=None, **kwargs):
+    return GROGU_COUNTER_V3(
+        d_bins=[GROGU_HISTO1D_V3.Bin()],
+        d_title=title,
+        **kwargs,
+    )
 
 
 def Histo1D(nbins: int, start: float, end: float, title=None, **kwargs):
