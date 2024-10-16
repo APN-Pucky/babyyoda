@@ -6,7 +6,24 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
+from babyyoda.grogu.histo1d_v3 import Histo1D_v3
 from babyyoda.histo2d import UHIHisto2D
+
+
+def to_index(x, y, xedges, yedges):
+    # get ix and iy to map to correct bin
+    fix = None
+    for ix, xEdge in enumerate([*xedges, sys.float_info.max]):
+        fix = ix
+        if x < xEdge:
+            break
+    fiy = None
+    for iy, yEdge in enumerate([*yedges, sys.float_info.max]):
+        fiy = iy
+        if y < yEdge:
+            break
+    # Also fill overflow bins
+    return fiy * (len(xedges) + 1) + fix
 
 
 def Histo2D_v3(
@@ -126,6 +143,19 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         def numEntries(self):
             return self.d_numentries
 
+        def __add__(self, other: "GROGU_HISTO2D_V3.Bin") -> "GROGU_HISTO2D_V3.Bin":
+            assert isinstance(other, GROGU_HISTO2D_V3.Bin)
+            return GROGU_HISTO2D_V3.Bin(
+                d_sumw=self.d_sumw + other.d_sumw,
+                d_sumw2=self.d_sumw2 + other.d_sumw2,
+                d_sumwx=self.d_sumwx + other.d_sumwx,
+                d_sumwx2=self.d_sumwx2 + other.d_sumwx2,
+                d_sumwy=self.d_sumwy + other.d_sumwy,
+                d_sumwy2=self.d_sumwy2 + other.d_sumwy2,
+                d_sumwxy=self.d_sumwxy + other.d_sumwxy,
+                d_numentries=self.d_numentries + other.d_numentries,
+            )
+
         def to_string(self) -> str:
             return (
                 f"{self.d_sumw:<13.6e}\t{self.d_sumw2:<13.6e}\t{self.d_sumwx:<13.6e}\t{self.d_sumwx2:<13.6e}\t"
@@ -171,19 +201,8 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         return self.d_edges[1]
 
     def fill(self, x, y, weight=1.0, fraction=1.0):
-        # get ix and iy to map to correct bin
-        fix = None
-        for ix, xEdge in enumerate([*self.xEdges(), sys.float_info.max]):
-            fix = ix
-            if x < xEdge:
-                break
-        fiy = None
-        for iy, yEdge in enumerate([*self.yEdges(), sys.float_info.max]):
-            fiy = iy
-            if y < yEdge:
-                break
         # Also fill overflow bins
-        self.bins(True)[fiy * (len(self.xEdges()) + 1) + fix].fill(
+        self.bins(True)[to_index(x, y, self.xEdges(), self.yEdges())].fill(
             x, y, weight, fraction
         )
 
@@ -212,6 +231,72 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             .reshape((len(self.yEdges()) + 1, len(self.xEdges()) + 1))[1:-1, 1:-1]
             .flatten()
         )
+
+    def rebinXYTo(self, xedges: list[float], yedges: list[float]):
+        own_xedges = self.xEdges()
+        for e in xedges:
+            assert e in own_xedges, f"Edge {e} not found in own edges {own_xedges}"
+        own_yedges = self.yEdges()
+        for e in yedges:
+            assert e in own_yedges, f"Edge {e} not found in own edges {own_yedges}"
+
+        # new bins inclusive of overflow and underflow
+        new_bins = []
+        for _ in range((len(xedges) + 1) * (len(yedges) + 1)):
+            new_bins.append(GROGU_HISTO2D_V3.Bin())
+        new_hist = np.array(new_bins).reshape((len(yedges) + 1, len(xedges) + 1))
+        old_hist = np.array(self.d_bins).reshape(
+            (len(self.yEdges()) + 1, len(self.xEdges()) + 1)
+        )
+        old_xedges = np.array(self.xEdges())
+        old_yedges = np.array(self.yEdges())
+        new_xedges = np.array(xedges)
+        new_yedges = np.array(yedges)
+
+        for i in range(len(xedges) + 1):
+            for j in range(len(yedges) + 1):
+                if i == 0:
+                    x_mask = old_xedges <= new_xedges[0]
+                    x_mask = np.concatenate((x_mask, [False]))  # skip overflow
+                elif i == len(xedges):
+                    x_mask = old_xedges > new_xedges[-1]
+                    x_mask = np.concatenate((x_mask, [True]))  # keep underflow
+                    # x_mask = x_mask + [True] # keep overflow
+                else:
+                    x_mask = (old_xedges > new_xedges[i - 1]) & (
+                        old_xedges <= new_xedges[i]
+                    )
+                    x_mask = np.concatenate((x_mask, [False]))  # skip overflow
+                    # x_mask = x_mask + [False] # skip overflow
+                if j == 0:
+                    y_mask = old_yedges <= new_yedges[0]
+                    y_mask = np.concatenate((y_mask, [False]))  # skip overflow
+                    # y_mask = y_mask + [False] # skip overflow
+                elif j == len(yedges):
+                    y_mask = old_yedges > new_yedges[-1]
+                    y_mask = np.concatenate((y_mask, [True]))  # keep underflow
+                    # y_mask = y_mask + [True] # keep overflow
+                else:
+                    y_mask = (old_yedges > new_yedges[j - 1]) & (
+                        old_yedges <= new_yedges[j]
+                    )
+                    y_mask = np.concatenate((y_mask, [False]))  # skip overflow
+                    # y_mask = y_mask + [False] # skip overflow
+                new_hist[j, i] = old_hist[y_mask, :][:, x_mask].sum()
+
+        self.d_bins = new_hist.flatten()
+        self.d_edges = [xedges, yedges]
+
+        assert len(self.d_bins) == (len(xedges) + 1) * (len(yedges) + 1)
+
+    def rebinXTo(self, xedges: list[float]):
+        self.rebinXYTo(xedges, self.yEdges())
+
+    def rebinYTo(self, yedges: list[float]):
+        self.rebinXYTo(self.xEdges(), yedges)
+
+    def get_projector(self):
+        return Histo1D_v3
 
     def to_string(self) -> str:
         """Convert a YODA_HISTO2D_V3 object to a formatted string."""

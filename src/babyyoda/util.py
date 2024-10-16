@@ -1,5 +1,6 @@
 import gzip
 import inspect
+import sys
 
 
 class loc:
@@ -78,3 +79,40 @@ def has_own_method(cls, method_name):
 
     # Compare the underlying function (__func__) if both exist
     return cls_method.__func__ is not parent_method.__func__
+
+
+def rebinBy_to_rebinTo(edges: list[float], factor: int, begin=1, end=sys.maxsize):
+    # Just compute the new edges and call rebinXTo
+    start = begin - 1
+    stop = end
+    if start is None:
+        start = 0
+    stop = (len(edges) - 1) if stop >= sys.maxsize else stop - 1
+    new_edges = []
+    # new_bins = []
+    # new_bins += [self.underflow()]
+    for i in range(start):
+        # new_bins.append(self.bins()[i].clone())
+        new_edges.append(edges[i])
+        new_edges.append(edges[i + 1])
+    last = None
+    for i in range(start, stop, factor):
+        if i + factor <= (len(edges) - 1):
+            xmin = edges[i]
+            xmax = edges[i + 1]
+            # nb = GROGU_HISTO1D_V3.Bin()
+            for j in range(factor):
+                last = i + j
+                # nb += self.bins()[i + j]
+                xmin = min(xmin, edges[i + j])
+                xmax = max(xmax, edges[i + j + 1])
+            # new_bins.append(nb)
+            # add both edges
+            new_edges.append(xmin)
+            new_edges.append(xmax)
+    for j in range(last + 1, (len(edges) - 1)):
+        # new_bins.append(self.bins()[j].clone())
+        new_edges.append(edges[j])
+        new_edges.append(edges[j + 1])
+    # no duplicates
+    return list(set(new_edges))

@@ -4,7 +4,7 @@ import sys
 import numpy as np
 
 from babyyoda.analysisobject import UHIAnalysisObject
-from babyyoda.util import loc, overflow, project, rebin, underflow
+from babyyoda.util import loc, overflow, project, rebin, rebinBy_to_rebinTo, underflow
 
 
 def set_bin2d(target, source):
@@ -160,6 +160,24 @@ class UHIHisto2D(UHIAnalysisObject):
 
     def integral(self, includeOverflows=True):
         return sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
+
+    def rebinXBy(self, factor: int, begin=1, end=sys.maxsize):
+        new_edges = rebinBy_to_rebinTo(self.xEdges(), factor, begin, end)
+        self.rebinXTo(new_edges)
+
+    def rebinYBy(self, factor: int, begin=1, end=sys.maxsize):
+        new_edges = rebinBy_to_rebinTo(self.yEdges(), factor, begin, end)
+        self.rebinYTo(new_edges)
+
+    def dVols(self):
+        ret = []
+        for iy in range(len(self.yMins())):
+            for ix in range(len(self.xMins())):
+                ret.append(
+                    (self.xMaxs()[ix] - self.xMins()[ix])
+                    * (self.yMaxs()[iy] - self.yMins()[iy])
+                )
+        return np.array(ret)
 
     ########################################################
     # Generic UHI code
@@ -359,7 +377,9 @@ class UHIHisto2D(UHIAnalysisObject):
 
             def temp_values():
                 return (
-                    np.array([b.sumW() / b.dVol() for b in self.bins()])
+                    np.array(
+                        [b.sumW() / vol for b, vol in zip(self.bins(), self.dVols())]
+                    )
                     .reshape((len(self.axes[1]), len(self.axes[0])))
                     .T
                 )
