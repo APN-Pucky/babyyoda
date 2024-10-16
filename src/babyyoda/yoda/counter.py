@@ -9,11 +9,12 @@ class Counter(babyyoda.UHICounter):
         """
         target is either a yoda or grogu Counter
         """
-
-        target = args[0] if len(args) == 1 else yoda.Counter(*args, **kwargs)
-        # unwrap target
-        while isinstance(target, Counter):
-            target = target.target
+        if len(args) == 1 and isinstance(args[0], yoda.Counter):
+            target = args[0]
+        elif len(args) == 1 and isinstance(args[0], Counter):
+            target = args[0].target
+        else:
+            target = yoda.Counter(*args, **kwargs)
 
         super().__setattr__("target", target)
 
@@ -34,23 +35,23 @@ class Counter(babyyoda.UHICounter):
         err = f"'{type(self).__name__}' object and target have no attribute '{name}'"
         raise AttributeError(err)
 
-    def __setattr__(self, name, value):
-        if has_own_method(Counter, name):
-            setattr(self, name, value)
-        elif hasattr(self.target, name):
-            setattr(self.target, name, value)
-        elif hasattr(super(), name):
-            setattr(super(), name, value)
-        else:
-            err = f"Cannot set attribute '{name}'; it does not exist in target or Forwarder."
-            raise AttributeError(err)
+    # def __setattr__(self, name, value):
+    #    if has_own_method(Counter, name):
+    #        setattr(self, name, value)
+    #    elif hasattr(self.target, name):
+    #        setattr(self.target, name, value)
+    #    elif hasattr(super(), name):
+    #        setattr(super(), name, value)
+    #    else:
+    #        err = f"Cannot set attribute '{name}'; it does not exist in target or Forwarder."
+    #        raise AttributeError(err)
 
-    def __call__(self, *args, **kwargs):
-        # If the target is callable, forward the call, otherwise raise an error
-        if callable(self.target):
-            return self.target(*args, **kwargs)
-        err = f"'{type(self.target).__name__}' object is not callable"
-        raise TypeError(err)
+    # def __call__(self, *args, **kwargs):
+    #    # If the target is callable, forward the call, otherwise raise an error
+    #    if callable(self.target):
+    #        return self.target(*args, **kwargs)
+    #    err = f"'{type(self.target).__name__}' object is not callable"
+    #    raise TypeError(err)
 
     def bins(self, *args, **kwargs):
         return self.target.bins(*args, **kwargs)

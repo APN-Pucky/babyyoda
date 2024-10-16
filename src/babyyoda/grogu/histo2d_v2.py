@@ -3,7 +3,35 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
+from babyyoda.grogu.histo1d_v2 import Histo1D_v2
 from babyyoda.histo2d import UHIHisto2D
+
+
+def Histo2D_v2(
+    nxbins: int,
+    xstart: float,
+    xend: float,
+    nybins: int,
+    ystart: float,
+    yend: float,
+    title=None,
+    **kwargs,
+):
+    return GROGU_HISTO2D_V2(
+        d_bins=[
+            GROGU_HISTO2D_V2.Bin(
+                d_xmin=xstart + i * (xend - xstart) / nxbins,
+                d_xmax=xstart + (i + 1) * (xend - xstart) / nxbins,
+                d_ymin=ystart + j * (yend - ystart) / nybins,
+                d_ymax=ystart + (j + 1) * (yend - ystart) / nybins,
+            )
+            for i in range(nxbins)
+            for j in range(nybins)
+        ],
+        d_total=GROGU_HISTO2D_V2.Bin(),
+        d_annotations={"Title": title} if title else {},
+        **kwargs,
+    )
 
 
 @dataclass
@@ -210,6 +238,9 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             if b.d_xmin <= x < b.d_xmax and b.d_ymin <= y < b.d_ymax:
                 return b
         return None
+
+    def get_projector(self):
+        return Histo1D_v2
 
     def to_string(self) -> str:
         """Convert a YODA_HISTO2D_V2 object to a formatted string."""

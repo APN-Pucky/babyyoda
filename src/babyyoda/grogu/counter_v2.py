@@ -6,6 +6,14 @@ from babyyoda.counter import UHICounter
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
 
 
+def Counter_v2(title=None, **kwargs):
+    return GROGU_COUNTER_V2(
+        d_bins=[GROGU_COUNTER_V2.Bin()],
+        d_annotations={"Title": title} if title else {},
+        **kwargs,
+    )
+
+
 @dataclass
 class GROGU_COUNTER_V2(GROGU_ANALYSIS_OBJECT, UHICounter):
     @dataclass

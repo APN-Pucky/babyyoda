@@ -4,6 +4,7 @@ import sys
 import numpy as np
 
 from babyyoda.analysisobject import UHIAnalysisObject
+from babyyoda.counter import UHICounter
 from babyyoda.util import loc, overflow, project, rebin, underflow
 
 
@@ -259,7 +260,6 @@ class UHIHisto1D(UHIAnalysisObject):
                     stop += 1
                 sc.rebinBy(step.factor, start, stop)
             elif step is project:
-                print("PROJECT")
                 # Get the subset and then project
                 sc = self[item.start : item.stop].project()
             else:
@@ -306,6 +306,17 @@ class UHIHisto1D(UHIAnalysisObject):
         # integer index
         index = self.__get_index(slices)
         self.__set_by_index(index, value)
+
+    def project(self) -> UHICounter:
+        # sc = self.clone().rebinTo(self.xEdges()[0], self.xEdges()[-1])
+        p = self.get_projector()()
+        p.set(
+            sum([b.numEntries() for b in self.bins()]),
+            sum([b.sumW() for b in self.bins()]),
+            sum([b.sumW2() for b in self.bins()]),
+        )
+        p.setAnnotationsDict(self.annotationsDict())
+        return p
 
     def plot(self, *args, binwnorm=1.0, **kwargs):
         import mplhep as hep

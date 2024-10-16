@@ -3,6 +3,7 @@ from packaging import version
 
 import babyyoda
 from babyyoda.util import has_own_method
+from babyyoda.yoda.histo1d import Histo1D
 
 
 class Histo2D(babyyoda.UHIHisto2D):
@@ -10,12 +11,12 @@ class Histo2D(babyyoda.UHIHisto2D):
         """
         target is either a yoda or grogu HISTO2D_V2
         """
-
-        target = args[0] if len(args) == 1 else yoda.Histo2D(*args, **kwargs)
-
-        # unwrap target
-        while isinstance(target, Histo2D):
-            target = target.target
+        if isinstance(args[0], yoda.Histo2D):
+            target = args[0]
+        elif isinstance(args[0], Histo2D):
+            target = args[0].target
+        else:
+            target = yoda.Histo2D(*args, **kwargs)
 
         # Store the target object where calls and attributes will be forwarded
         super().__setattr__("target", target)
@@ -37,23 +38,23 @@ class Histo2D(babyyoda.UHIHisto2D):
         err = f"'{type(self).__name__}' object and target have no attribute '{name}'"
         raise AttributeError(err)
 
-    def __setattr__(self, name, value):
-        if has_own_method(Histo2D, name):
-            setattr(self, name, value)
-        elif hasattr(self.target, name):
-            setattr(self.target, name, value)
-        elif hasattr(super(), name):
-            setattr(super(), name, value)
-        else:
-            err = f"Cannot set attribute '{name}'; it does not exist in target or Forwarder."
-            raise AttributeError(err)
+    # def __setattr__(self, name, value):
+    #    if has_own_method(Histo2D, name):
+    #        setattr(self, name, value)
+    #    elif hasattr(self.target, name):
+    #        setattr(self.target, name, value)
+    #    elif hasattr(super(), name):
+    #        setattr(super(), name, value)
+    #    else:
+    #        err = f"Cannot set attribute '{name}'; it does not exist in target or Forwarder."
+    #        raise AttributeError(err)
 
-    def __call__(self, *args, **kwargs):
-        # If the target is callable, forward the call, otherwise raise an error
-        if callable(self.target):
-            return self.target(*args, **kwargs)
-        err = f"'{type(self.target).__name__}' object is not callable"
-        raise TypeError(err)
+    # def __call__(self, *args, **kwargs):
+    #    # If the target is callable, forward the call, otherwise raise an error
+    #    if callable(self.target):
+    #        return self.target(*args, **kwargs)
+    #    err = f"'{type(self.target).__name__}' object is not callable"
+    #    raise TypeError(err)
 
     def bins(self, includeOverflows=False, *args, **kwargs):
         import yoda
@@ -73,6 +74,9 @@ class Histo2D(babyyoda.UHIHisto2D):
 
     def clone(self):
         return Histo2D(self.target.clone())
+
+    def get_projector(self):
+        return Histo1D
 
     # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
     def annotationsDict(self):

@@ -3,8 +3,20 @@ import re
 from dataclasses import dataclass, field
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
-from babyyoda.grogu.counter_v3 import GROGU_COUNTER_V3
+from babyyoda.grogu.counter_v3 import Counter_v3
 from babyyoda.histo1d import UHIHisto1D
+
+
+def Histo1D_v3(nbins: int, start: float, end: float, title=None, **kwargs):
+    return GROGU_HISTO1D_V3(
+        d_edges=[start + i * (end - start) / nbins for i in range(nbins + 1)],
+        d_bins=[
+            GROGU_HISTO1D_V3.Bin()
+            for i in range(nbins + 2)  # add overflow and underflow
+        ],
+        d_annotations={"Title": title} if title else {},
+        **kwargs,
+    )
 
 
 @dataclass
@@ -229,18 +241,8 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
 
         assert len(self.d_bins) == len(self.xEdges()) - 1 + 2
 
-    def project(self) -> GROGU_COUNTER_V3:
-        return GROGU_COUNTER_V3(
-            d_key=self.d_key,
-            d_annotations=self.annotationsDict(),
-            d_bins=[
-                GROGU_COUNTER_V3.Bin(
-                    d_sumw=sum([b.sumW() for b in self.bins()]),
-                    d_sumw2=sum([b.sumW2() for b in self.bins()]),
-                    d_numentries=sum([b.numEntries() for b in self.bins()]),
-                )
-            ],
-        )
+    def get_projector(self):
+        return Counter_v3
 
     @classmethod
     def from_string(cls, file_content: str) -> "GROGU_HISTO1D_V3":

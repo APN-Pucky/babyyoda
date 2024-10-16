@@ -4,7 +4,7 @@ import sys
 import numpy as np
 
 from babyyoda.analysisobject import UHIAnalysisObject
-from babyyoda.util import loc, overflow, rebin, underflow
+from babyyoda.util import loc, overflow, project, rebin, underflow
 
 
 def set_bin2d(target, source):
@@ -245,6 +245,10 @@ class UHIHisto2D(UHIAnalysisObject):
             ix, iy = self.__get_indices(slices)
             if isinstance(ix, int) and isinstance(iy, int):
                 return self.__get_by_indices(ix, iy)
+            if isinstance(slices[0], slice) and isinstance(iy, int):
+                slices = (slices[0], slice(iy, iy + 1, project))
+            if isinstance(ix, int) and isinstance(slices[1], slice):
+                slices = (slice(ix, ix + 1, project), slices[1])
             ix, iy = slices
             sc = self.clone()
             if isinstance(ix, slice) and isinstance(iy, slice):
@@ -270,6 +274,8 @@ class UHIHisto2D(UHIAnalysisObject):
                     else:
                         ystop += 1
                     sc.rebinYBy(ystep.factor, ystart, ystop)
+                elif ystep is project:
+                    sc = sc[:, ystart:ystop].projectY()
                 else:
                     if ystop is not None:
                         ystop += 1
@@ -286,6 +292,11 @@ class UHIHisto2D(UHIAnalysisObject):
                     else:
                         xstop += 1
                     sc.rebinXBy(xstep.factor, xstart, xstop)
+                elif xstep is project:
+                    if xstop is not None:
+                        xstop += 1
+                    sc.rebinXTo(sc.xEdges()[xstart:xstop])
+                    sc = sc.project()
                 else:
                     if xstop is not None:
                         xstop += 1
@@ -298,6 +309,35 @@ class UHIHisto2D(UHIAnalysisObject):
         # TODO implement slice
         err = "Invalid argument type"
         raise TypeError(err)
+
+    def projectX(self):
+        # Sum
+        c = self.clone()
+        c.rebinXTo([self.xEdges()[0], self.xEdges()[-1]])
+        # pick
+        p = self.get_projector()(self.yEdges())
+        for pb, cb in zip(p.bins(), c.bins()):
+            pb.set(cb.numEntries(), [cb.sumW(), cb.sumWY()], [cb.sumW2(), cb.sumWY2()])
+        p.setAnnotationsDict(self.annotationsDict())
+        return p
+
+    def projectY(self):
+        # Sum
+        c = self.clone()
+        c.rebinYTo([self.yEdges()[0], self.yEdges()[-1]])
+        # pick
+        p = self.get_projector()(self.xEdges())
+        for pb, cb in zip(p.bins(), c.bins()):
+            pb.set(cb.numEntries(), [cb.sumW(), cb.sumWX()], [cb.sumW2(), cb.sumWX2()])
+        p.setAnnotationsDict(self.annotationsDict())
+        return p
+
+    # TODO maybe N dim project
+    def project(self, axis: int = 0):
+        assert axis in [0, 1]
+        if axis == 0:
+            return self.projectX()
+        return self.projectY()
 
     def plot(self, *args, binwnorm=True, **kwargs):
         ## TODO should use histplot
