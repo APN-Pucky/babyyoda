@@ -317,7 +317,9 @@ class UHIHisto2D(UHIAnalysisObject):
                 elif xstep is project:
                     xstart, xstop = self._shift_rebinto(xstart, xstop)
                     sc.rebinXTo(sc.xEdges()[xstart:xstop])
-                    sc = sc.project()  # project defaults to projectX, but since we might have already projected Y we use the generic project that also exists for 1D
+                    # project defaults to projectX, but since we might have already projected Y
+                    # we use the generic project that also exists for 1D
+                    sc = sc.project()
                 else:
                     xstart, xstop = self._shift_rebinto(xstart, xstop)
                     sc.rebinXTo(self.xEdges()[xstart:xstop])
