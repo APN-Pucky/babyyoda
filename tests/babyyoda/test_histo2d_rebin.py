@@ -82,31 +82,31 @@ def test_histos_rebinXByRange(factory1, factory2):
 
     assert_histo2d(h1, h2, includeFlow=False)
 
-    for j in range(len(h2.yEdges()) - 1):
-        for i in range(len(h1.xEdges()) - 1):
-            print(h1.bins()[i + j * (len(h1.xEdges()) - 1)].numEntries(), end=" ")
-        print()
+    # for j in range(len(h2.yEdges()) - 1):
+    #    for i in range(len(h1.xEdges()) - 1):
+    #        print(h1.bins()[i + j * (len(h1.xEdges()) - 1)].numEntries(), end=" ")
+    #    print()
 
-    print()
+    # print()
     h1.rebinXBy(3, 5, 11)
     h2.rebinXBy(3, 5, 11)
 
     assert h1.xEdges() == h2.xEdges()
     assert h1.yEdges() == h2.yEdges()
 
-    print(h1, ":")
+    # print(h1, ":")
 
-    for j in range(len(h1.yEdges()) - 1):
-        for i in range(len(h1.xEdges()) - 1):
-            print(h1.bins()[i + j * (len(h1.xEdges()) - 1)].numEntries(), end=" ")
-        print()
+    # for j in range(len(h1.yEdges()) - 1):
+    #    for i in range(len(h1.xEdges()) - 1):
+    #        print(h1.bins()[i + j * (len(h1.xEdges()) - 1)].numEntries(), end=" ")
+    #    print()
 
-    print(h2, ":")
+    # print(h2, ":")
 
-    for j in range(len(h2.yEdges()) - 1):
-        for i in range(len(h2.xEdges()) - 1):
-            print(h2.bins()[i + j * (len(h2.xEdges()) - 1)].numEntries(), end=" ")
-        print()
+    # for j in range(len(h2.yEdges()) - 1):
+    #    for i in range(len(h2.xEdges()) - 1):
+    #        print(h2.bins()[i + j * (len(h2.xEdges()) - 1)].numEntries(), end=" ")
+    #    print()
 
     # assert h1.integral(includeOverflows=False) == h2.integral(includeOverflows=False)
 
