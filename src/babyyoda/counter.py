@@ -113,7 +113,7 @@ class UHICounter(UHIAnalysisObject):
         # Remove x-axis labels and ticks
         plt.gca().get_xaxis().set_visible(False)
         # Show the plot
-        plt.show()
+        # plt.show()
 
     def _ipython_display_(self):
         with contextlib.suppress(ImportError):

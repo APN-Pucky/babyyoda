@@ -31,8 +31,8 @@ def Histo2D_v2(
         nybins = args[3]
         ystart = float(args[4])
         yend = float(args[5])
-        xedges = [i * (xend - xstart) / nxbins for i in range(nxbins + 1)]
-        yedges = [i * (yend - ystart) / nybins for i in range(nybins + 1)]
+        xedges = [xstart + i * (xend - xstart) / nxbins for i in range(nxbins + 1)]
+        yedges = [ystart + i * (yend - ystart) / nybins for i in range(nybins + 1)]
 
     return GROGU_HISTO2D_V2(
         d_bins=[

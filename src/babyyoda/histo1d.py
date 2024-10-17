@@ -43,9 +43,18 @@ class UHIHisto1D(UHIAnalysisObject):
     def to_grogu_v2(self):
         from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 
+        tot = GROGU_HISTO1D_V2.Bin()
+        for b in self.bins():
+            tot.d_sumw += b.sumW()
+            tot.d_sumw2 += b.sumW2()
+            tot.d_sumwx += b.sumWX()
+            tot.d_sumwx2 += b.sumWX2()
+            tot.d_numentries += b.numEntries()
+
         return GROGU_HISTO1D_V2(
             d_key=self.key(),
             d_annotations=self.annotationsDict(),
+            d_total=tot,
             d_bins=[
                 GROGU_HISTO1D_V2.Bin(
                     d_xmin=self.xEdges()[i],

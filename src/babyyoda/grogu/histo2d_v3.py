@@ -50,8 +50,8 @@ def Histo2D_v3(
         nybins = args[3]
         ystart = float(args[4])
         yend = float(args[5])
-        xedges = [i * (xend - xstart) / nxbins for i in range(nxbins + 1)]
-        yedges = [i * (yend - ystart) / nybins for i in range(nybins + 1)]
+        xedges = [xstart + i * (xend - xstart) / nxbins for i in range(nxbins + 1)]
+        yedges = [ystart + i * (yend - ystart) / nybins for i in range(nybins + 1)]
     return GROGU_HISTO2D_V3(
         d_edges=[
             xedges,
@@ -251,7 +251,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         )
 
     def rebinXYTo(self, xedges: list[float], yedges: list[float]):
-        print(f"rebinXYTo : {self.xEdges()} -> {xedges}, {self.yEdges()} -> {yedges}")
+        # print(f"rebinXYTo : {self.xEdges()} -> {xedges}, {self.yEdges()} -> {yedges}")
         own_xedges = self.xEdges()
         for e in xedges:
             assert e in own_xedges, f"Edge {e} not found in own edges {own_xedges}"

@@ -19,7 +19,7 @@ def Histo1D_v2(*args, title=None, **kwargs):
         nbins = args[0]
         start = float(args[1])
         end = float(args[2])
-        edges = [i * (end - start) / nbins for i in range(nbins + 1)]
+        edges = [start + i * (end - start) / nbins for i in range(nbins + 1)]
     else:
         err = "Invalid arguments"
         raise ValueError(err)

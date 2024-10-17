@@ -4,7 +4,16 @@ import sys
 import numpy as np
 
 from babyyoda.analysisobject import UHIAnalysisObject
-from babyyoda.util import loc, overflow, project, rebin, rebinBy_to_rebinTo, underflow
+from babyyoda.util import (
+    loc,
+    overflow,
+    project,
+    rebin,
+    rebinBy_to_rebinTo,
+    shift_rebinby,
+    shift_rebinto,
+    underflow,
+)
 
 
 def set_bin2d(target, source):
@@ -42,22 +51,34 @@ class UHIHisto2D(UHIAnalysisObject):
     def to_grogu_v2(self):
         from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
 
+        tot = GROGU_HISTO2D_V2.Bin()
+        for b in self.bins():
+            tot.d_sumw += b.sumW()
+            tot.d_sumw2 += b.sumW2()
+            tot.d_sumwx += b.sumWX()
+            tot.d_sumwx2 += b.sumWX2()
+            tot.d_sumwy += b.sumWY()
+            tot.d_sumwy2 += b.sumWY2()
+            tot.d_sumwxy += b.crossTerm(0, 1)
+            tot.d_numentries += b.numEntries()
+
         return GROGU_HISTO2D_V2(
             d_key=self.key(),
             d_annotations=self.annotationsDict(),
+            d_total=tot,
             d_bins=[
                 GROGU_HISTO2D_V2.Bin(
-                    d_xmin=self.xEdges()[i % len(self.xEdges())],
-                    d_xmax=self.xEdges()[i % len(self.xEdges()) + 1],
-                    d_ymin=self.yEdges()[i // len(self.xEdges())],
-                    d_ymax=self.yEdges()[i // len(self.xEdges()) + 1],
+                    d_xmin=self.xEdges()[i % (len(self.xEdges()) - 1)],
+                    d_xmax=self.xEdges()[i % (len(self.xEdges()))],
+                    d_ymin=self.yEdges()[i // (len(self.xEdges()) - 1)],
+                    d_ymax=self.yEdges()[i // (len(self.xEdges()))],
                     d_sumw=b.sumW(),
                     d_sumw2=b.sumW2(),
                     d_sumwx=b.sumWX(),
                     d_sumwx2=b.sumWX2(),
                     d_sumwy=b.sumWY(),
                     d_sumwy2=b.sumWY2(),
-                    d_sumwxy=b.sumWXY(),
+                    d_sumwxy=b.crossTerm(0, 1),
                     d_numentries=b.numEntries(),
                 )
                 for i, b in enumerate(self.bins())
@@ -251,23 +272,6 @@ class UHIHisto2D(UHIAnalysisObject):
     def __setitem__(self, slices, value):
         set_bin2d(self.__getitem__(slices), value)
 
-    def _shift_rebinby(ystart, ystop):
-        # weird yoda default
-        if ystart is None:
-            ystart = 1
-        else:
-            ystart += 1
-        if ystop is None:
-            ystop = sys.maxsize
-        else:
-            ystop += 1
-        return ystart, ystop
-
-    def _shift_rebinto(xstart, xstop):
-        if xstop is not None:
-            xstop += 1
-        return xstart, xstop
-
     def __getitem__(self, slices):
         # integer index
         if slices is underflow:
@@ -299,29 +303,29 @@ class UHIHisto2D(UHIAnalysisObject):
                 )
 
                 if isinstance(ystep, rebin):
-                    ystart, ystop = self._shift_rebinby(ystart, ystop)
+                    ystart, ystop = shift_rebinby(ystart, ystop)
                     sc.rebinYBy(ystep.factor, ystart, ystop)
                 elif ystep is project:
-                    ystart, ystop = self._shift_rebinby(ystart, ystop)
+                    ystart, ystop = shift_rebinto(ystart, ystop)
                     sc.rebinYTo(sc.yEdges()[ystart:ystop])
                     sc = sc.projectY()
                     # sc = sc[:, ystart:ystop].projectY()
                 else:
-                    ystart, ystop = self._shift_rebinby(ystart, ystop)
+                    ystart, ystop = shift_rebinto(ystart, ystop)
                     sc.rebinYTo(self.yEdges()[ystart:ystop])
 
                 if isinstance(xstep, rebin):
                     # weird yoda default
-                    xstart, xstop = self._shift_rebinby(xstart, xstop)
+                    xstart, xstop = shift_rebinby(xstart, xstop)
                     sc.rebinXBy(xstep.factor, xstart, xstop)
                 elif xstep is project:
-                    xstart, xstop = self._shift_rebinto(xstart, xstop)
+                    xstart, xstop = shift_rebinto(xstart, xstop)
                     sc.rebinXTo(sc.xEdges()[xstart:xstop])
                     # project defaults to projectX, but since we might have already projected Y
                     # we use the generic project that also exists for 1D
                     sc = sc.project()
                 else:
-                    xstart, xstop = self._shift_rebinto(xstart, xstop)
+                    xstart, xstop = shift_rebinto(xstart, xstop)
                     sc.rebinXTo(self.xEdges()[xstart:xstop])
 
                 return sc

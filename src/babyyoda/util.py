@@ -116,3 +116,22 @@ def rebinBy_to_rebinTo(edges: list[float], factor: int, begin=1, end=sys.maxsize
         new_edges.append(edges[j + 1])
     # no duplicates
     return list(set(new_edges))
+
+
+def shift_rebinby(ystart, ystop):
+    # weird yoda default
+    if ystart is None:
+        ystart = 1
+    else:
+        ystart += 1
+    if ystop is None:
+        ystop = sys.maxsize
+    else:
+        ystop += 1
+    return ystart, ystop
+
+
+def shift_rebinto(xstart, xstop):
+    if xstop is not None:
+        xstop += 1
+    return xstart, xstop
