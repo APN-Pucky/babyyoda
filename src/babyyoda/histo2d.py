@@ -4,7 +4,7 @@ import sys
 import numpy as np
 
 from babyyoda.analysisobject import UHIAnalysisObject
-from babyyoda.util import loc, overflow, rebin, underflow
+from babyyoda.util import loc, overflow, project, rebin, rebinBy_to_rebinTo, underflow
 
 
 def set_bin2d(target, source):
@@ -82,7 +82,6 @@ class UHIHisto2D(UHIAnalysisObject):
             bins += [GROGU_HISTO2D_V3.Bin()]  # underflow
             bins += [GROGU_HISTO2D_V3.Bin()] * (len(self.xEdges()))
 
-            # Fill up with empty overflow bins
         return GROGU_HISTO2D_V3(
             d_key=self.key(),
             d_annotations=self.annotationsDict(),
@@ -162,6 +161,24 @@ class UHIHisto2D(UHIAnalysisObject):
     def integral(self, includeOverflows=True):
         return sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
 
+    def rebinXBy(self, factor: int, begin=1, end=sys.maxsize):
+        new_edges = rebinBy_to_rebinTo(self.xEdges(), factor, begin, end)
+        self.rebinXTo(new_edges)
+
+    def rebinYBy(self, factor: int, begin=1, end=sys.maxsize):
+        new_edges = rebinBy_to_rebinTo(self.yEdges(), factor, begin, end)
+        self.rebinYTo(new_edges)
+
+    def dVols(self):
+        ret = []
+        for iy in range(len(self.yMins())):
+            for ix in range(len(self.xMins())):
+                ret.append(
+                    (self.xMaxs()[ix] - self.xMins()[ix])
+                    * (self.yMaxs()[iy] - self.yMins()[iy])
+                )
+        return np.array(ret)
+
     ########################################################
     # Generic UHI code
     ########################################################
@@ -234,6 +251,23 @@ class UHIHisto2D(UHIAnalysisObject):
     def __setitem__(self, slices, value):
         set_bin2d(self.__getitem__(slices), value)
 
+    def _shift_rebinby(ystart, ystop):
+        # weird yoda default
+        if ystart is None:
+            ystart = 1
+        else:
+            ystart += 1
+        if ystop is None:
+            ystop = sys.maxsize
+        else:
+            ystop += 1
+        return ystart, ystop
+
+    def _shift_rebinto(xstart, xstop):
+        if xstop is not None:
+            xstop += 1
+        return xstart, xstop
+
     def __getitem__(self, slices):
         # integer index
         if slices is underflow:
@@ -246,6 +280,10 @@ class UHIHisto2D(UHIAnalysisObject):
             ix, iy = self.__get_indices(slices)
             if isinstance(ix, int) and isinstance(iy, int):
                 return self.__get_by_indices(ix, iy)
+            if isinstance(slices[0], slice) and isinstance(iy, int):
+                slices = (slices[0], slice(iy, iy + 1, project))
+            if isinstance(ix, int) and isinstance(slices[1], slice):
+                slices = (slice(ix, ix + 1, project), slices[1])
             ix, iy = slices
             sc = self.clone()
             if isinstance(ix, slice) and isinstance(iy, slice):
@@ -261,35 +299,29 @@ class UHIHisto2D(UHIAnalysisObject):
                 )
 
                 if isinstance(ystep, rebin):
-                    # weird yoda default
-                    if ystart is None:
-                        ystart = 1
-                    else:
-                        ystart += 1
-                    if ystop is None:
-                        ystop = sys.maxsize
-                    else:
-                        ystop += 1
+                    ystart, ystop = self._shift_rebinby(ystart, ystop)
                     sc.rebinYBy(ystep.factor, ystart, ystop)
+                elif ystep is project:
+                    ystart, ystop = self._shift_rebinby(ystart, ystop)
+                    sc.rebinYTo(sc.yEdges()[ystart:ystop])
+                    sc = sc.projectY()
+                    # sc = sc[:, ystart:ystop].projectY()
                 else:
-                    if ystop is not None:
-                        ystop += 1
+                    ystart, ystop = self._shift_rebinby(ystart, ystop)
                     sc.rebinYTo(self.yEdges()[ystart:ystop])
 
                 if isinstance(xstep, rebin):
                     # weird yoda default
-                    if xstart is None:
-                        xstart = 1
-                    else:
-                        xstart += 1
-                    if xstop is None:
-                        xstop = sys.maxsize
-                    else:
-                        xstop += 1
+                    xstart, xstop = self._shift_rebinby(xstart, xstop)
                     sc.rebinXBy(xstep.factor, xstart, xstop)
+                elif xstep is project:
+                    xstart, xstop = self._shift_rebinto(xstart, xstop)
+                    sc.rebinXTo(sc.xEdges()[xstart:xstop])
+                    # project defaults to projectX, but since we might have already projected Y
+                    # we use the generic project that also exists for 1D
+                    sc = sc.project()
                 else:
-                    if xstop is not None:
-                        xstop += 1
+                    xstart, xstop = self._shift_rebinto(xstart, xstop)
                     sc.rebinXTo(self.xEdges()[xstart:xstop])
 
                 return sc
@@ -300,7 +332,47 @@ class UHIHisto2D(UHIAnalysisObject):
         err = "Invalid argument type"
         raise TypeError(err)
 
+    def projectX(self):
+        # Sum
+        c = self.clone()
+        c.rebinXTo([self.xEdges()[0], self.xEdges()[-1]])
+        # pick
+        p = self.get_projector()(self.yEdges())
+        for pb, cb in zip(p.bins(), c.bins()):
+            pb.set(cb.numEntries(), [cb.sumW(), cb.sumWY()], [cb.sumW2(), cb.sumWY2()])
+        p.setAnnotationsDict(self.annotationsDict())
+        return p
+
+    def projectY(self):
+        # Sum
+        c = self.clone()
+        c.rebinYTo([self.yEdges()[0], self.yEdges()[-1]])
+        # pick
+        p = self.get_projector()(self.xEdges())
+        for pb, cb in zip(p.bins(), c.bins()):
+            pb.set(cb.numEntries(), [cb.sumW(), cb.sumWX()], [cb.sumW2(), cb.sumWX2()])
+        p.setAnnotationsDict(self.annotationsDict())
+        return p
+
+    # TODO maybe N dim project
+    def project(self, axis: int = 0):
+        assert axis in [0, 1]
+        if axis == 0:
+            return self.projectX()
+        return self.projectY()
+
     def plot(self, *args, binwnorm=True, **kwargs):
+        # # TODO should use histplot
+        # import mplhep as hep
+
+        # hep.histplot(
+        #    self,
+        #    *args,
+        #    #yerr=self.variances() ** 0.5,
+        #    w2method="sqrt",
+        #    binwnorm=binwnorm,
+        #    **kwargs,
+        # )
         import mplhep as hep
 
         if binwnorm:
@@ -309,7 +381,9 @@ class UHIHisto2D(UHIAnalysisObject):
 
             def temp_values():
                 return (
-                    np.array([b.sumW() / b.dVol() for b in self.bins()])
+                    np.array(
+                        [b.sumW() / vol for b, vol in zip(self.bins(), self.dVols())]
+                    )
                     .reshape((len(self.axes[1]), len(self.axes[0])))
                     .T
                 )

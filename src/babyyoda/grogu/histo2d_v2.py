@@ -3,7 +3,52 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
+from babyyoda.grogu.histo1d_v2 import Histo1D_v2
 from babyyoda.histo2d import UHIHisto2D
+
+
+def Histo2D_v2(
+    *args,
+    title=None,
+    **kwargs,
+):
+    xedges = []
+    yedges = []
+    if isinstance(args[0], list) and isinstance(args[1], list):
+        xedges = args[0]
+        yedges = args[1]
+    elif (
+        isinstance(args[0], int)
+        and isinstance(args[1], (int, float))
+        and isinstance(args[2], (int, float))
+        and isinstance(args[3], int)
+        and isinstance(args[4], (int, float))
+        and isinstance(args[5], (int, float))
+    ):
+        nxbins = args[0]
+        xstart = float(args[1])
+        xend = float(args[2])
+        nybins = args[3]
+        ystart = float(args[4])
+        yend = float(args[5])
+        xedges = [i * (xend - xstart) / nxbins for i in range(nxbins + 1)]
+        yedges = [i * (yend - ystart) / nybins for i in range(nybins + 1)]
+
+    return GROGU_HISTO2D_V2(
+        d_bins=[
+            GROGU_HISTO2D_V2.Bin(
+                d_xmin=xedges[i],
+                d_xmax=xedges[i + 1],
+                d_ymin=yedges[j],
+                d_ymax=yedges[j + 1],
+            )
+            for i in range(len(xedges) - 1)
+            for j in range(len(yedges) - 1)
+        ],
+        d_total=GROGU_HISTO2D_V2.Bin(),
+        d_annotations={"Title": title} if title else {},
+        **kwargs,
+    )
 
 
 @dataclass
@@ -89,6 +134,12 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         def xMax(self):
             return self.d_xmax
 
+        def xMid(self):
+            return (self.d_xmin + self.d_xmax) / 2
+
+        def yMid(self):
+            return (self.d_ymin + self.d_ymax) / 2
+
         def yMin(self):
             return self.d_ymin
 
@@ -125,6 +176,23 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
 
         def numEntries(self):
             return self.d_numentries
+
+        def __add__(self, other):
+            assert isinstance(other, GROGU_HISTO2D_V2.Bin)
+            return GROGU_HISTO2D_V2.Bin(
+                d_xmin=self.d_xmin,
+                d_xmax=self.d_xmax,
+                d_ymin=self.d_ymin,
+                d_ymax=self.d_ymax,
+                d_sumw=self.d_sumw + other.d_sumw,
+                d_sumw2=self.d_sumw2 + other.d_sumw2,
+                d_sumwx=self.d_sumwx + other.d_sumwx,
+                d_sumwx2=self.d_sumwx2 + other.d_sumwx2,
+                d_sumwy=self.d_sumwy + other.d_sumwy,
+                d_sumwy2=self.d_sumwy2 + other.d_sumwy2,
+                d_sumwxy=self.d_sumwxy + other.d_sumwxy,
+                d_numentries=self.d_numentries + other.d_numentries,
+            )
 
         def to_string(self, label=None) -> str:
             if label is None:
@@ -210,6 +278,59 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             if b.d_xmin <= x < b.d_xmax and b.d_ymin <= y < b.d_ymax:
                 return b
         return None
+
+    def rebinXYTo(self, xedges: list[float], yedges: list[float]):
+        own_xedges = self.xEdges()
+        for e in xedges:
+            assert e in own_xedges, f"Edge {e} not found in own edges {own_xedges}"
+        own_yedges = self.yEdges()
+        for e in yedges:
+            assert e in own_yedges, f"Edge {e} not found in own edges {own_yedges}"
+
+        new_bins = []
+        for j in range(len(yedges) - 1):
+            for i in range(len(xedges) - 1):
+                new_bins.append(
+                    GROGU_HISTO2D_V2.Bin(
+                        d_xmin=xedges[i],
+                        d_xmax=xedges[i + 1],
+                        d_ymin=yedges[j],
+                        d_ymax=yedges[j + 1],
+                    )
+                )
+        for b in self.bins():
+            for j in range(len(yedges) - 1):
+                for i in range(len(xedges) - 1):
+                    if (
+                        xedges[i] <= b.xMid() < xedges[i + 1]
+                        and yedges[j] <= b.yMid() < yedges[j + 1]
+                    ):
+                        assert new_bins[i + j * (len(xedges) - 1)].d_xmin == xedges[i]
+                        assert (
+                            new_bins[i + j * (len(xedges) - 1)].d_xmax == xedges[i + 1]
+                        )
+                        assert new_bins[i + j * (len(xedges) - 1)].d_ymin == yedges[j]
+                        assert (
+                            new_bins[i + j * (len(xedges) - 1)].d_ymax == yedges[j + 1]
+                        )
+                        assert (
+                            new_bins[i + j * (len(xedges) - 1)].d_xmin
+                            <= b.xMid()
+                            < new_bins[i + j * (len(xedges) - 1)].d_xmax
+                        )
+                        new_bins[i + j * (len(xedges) - 1)] += b
+        self.d_bins = new_bins
+
+        assert len(self.d_bins) == (len(self.xEdges()) - 1) * (len(self.yEdges()) - 1)
+
+    def rebinXTo(self, xedges: list[float]):
+        self.rebinXYTo(xedges, self.yEdges())
+
+    def rebinYTo(self, yedges: list[float]):
+        self.rebinXYTo(self.xEdges(), yedges)
+
+    def get_projector(self):
+        return Histo1D_v2
 
     def to_string(self) -> str:
         """Convert a YODA_HISTO2D_V2 object to a formatted string."""

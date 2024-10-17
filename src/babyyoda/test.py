@@ -111,7 +111,8 @@ def assert_bin2d(gb, yb):
 
 
 def assert_value2d(gb, yb):
-    assert gb.sumW() == yb.sumW()
+    assert gb.numEntries() == yb.numEntries(), f"{gb.numEntries()} != {yb.numEntries()}"
+    assert gb.sumW() == yb.sumW(), f"{gb.sumW()} != {yb.sumW()}"
     assert gb.sumW2() == yb.sumW2()
     assert gb.sumWX() == yb.sumWX(), f"{gb.sumWX()} != {yb.sumWX()}"
     assert gb.sumWX2() == yb.sumWX2()
@@ -121,7 +122,6 @@ def assert_value2d(gb, yb):
         assert gb.crossTerm(0, 1) == yb.crossTerm(0, 1)
     if hasattr(gb, "sumWXY") and hasattr(yb, "sumWXY"):
         assert gb.sumWXY() == yb.sumWXY()
-    assert gb.numEntries() == yb.numEntries()
 
 
 def assert_histo2d(gh1, yh1, includeFlow=True):
@@ -140,4 +140,6 @@ def assert_histo2d(gh1, yh1, includeFlow=True):
             assert_value2d(gb, yb)
 
     for gb, yb in zip(gh1.bins(), yh1.bins()):
+        print(f"gb: {gb.numEntries():=} {gb}")
+        print(f"yb: {yb.numEntries():=} {yb}")
         assert_value2d(gb, yb)

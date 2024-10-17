@@ -97,17 +97,23 @@ class UHICounter(UHIAnalysisObject):
     def variances(self):
         return self.sumW2()
 
-    def plot(self, *args, binwnorm=1.0, **kwargs):
-        import mplhep as hep
+    def plot(self, *args, **kwargs):
+        # TODO check UHI 0D plottable and mplhep hist plot 0D
+        import matplotlib.pyplot as plt
 
-        hep.histplot(
-            self,
-            *args,
-            yerr=self.variances() ** 0.5,
-            w2method="sqrt",
-            binwnorm=binwnorm,
-            **kwargs,
+        # Sample data
+        # This is after Projections and we nolonger divide by bin width!?!?
+        y = [self.values()]
+        yerr = [self.variances() ** 0.5]
+
+        # Plotting
+        plt.errorbar(
+            *args, x=[0] * len(y), y=y, yerr=yerr, fmt="o", capsize=5, **kwargs
         )
+        # Remove x-axis labels and ticks
+        plt.gca().get_xaxis().set_visible(False)
+        # Show the plot
+        plt.show()
 
     def _ipython_display_(self):
         with contextlib.suppress(ImportError):

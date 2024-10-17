@@ -3,7 +3,35 @@ import re
 from dataclasses import dataclass, field
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
+from babyyoda.grogu.counter_v3 import Counter_v3
 from babyyoda.histo1d import UHIHisto1D
+
+
+def Histo1D_v3(*args, title=None, **kwargs):
+    edges = []
+    if isinstance(args[0], list):
+        edges = args[0]
+    elif (
+        isinstance(args[0], int)
+        and isinstance(args[1], (float, int))
+        and isinstance(args[2], (float, int))
+    ):
+        nbins = args[0]
+        start = float(args[1])
+        end = float(args[2])
+        edges = [i * (end - start) / nbins for i in range(nbins + 1)]
+    else:
+        err = "Invalid arguments"
+        raise ValueError(err)
+    return GROGU_HISTO1D_V3(
+        d_edges=edges,
+        d_bins=[
+            GROGU_HISTO1D_V3.Bin()
+            for i in range(len(edges) + 1)  # add overflow and underflow
+        ],
+        d_annotations={"Title": title} if title else {},
+        **kwargs,
+    )
 
 
 @dataclass
@@ -227,6 +255,9 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         self.d_edges = edges
 
         assert len(self.d_bins) == len(self.xEdges()) - 1 + 2
+
+    def get_projector(self):
+        return Counter_v3
 
     @classmethod
     def from_string(cls, file_content: str) -> "GROGU_HISTO1D_V3":

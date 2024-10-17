@@ -4,7 +4,8 @@ import sys
 import numpy as np
 
 from babyyoda.analysisobject import UHIAnalysisObject
-from babyyoda.util import loc, overflow, rebin, underflow
+from babyyoda.counter import UHICounter
+from babyyoda.util import loc, overflow, project, rebin, rebinBy_to_rebinTo, underflow
 
 
 def set_bin1d(target, source):
@@ -159,42 +160,8 @@ class UHIHisto1D(UHIAnalysisObject):
         return sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
 
     def rebinXBy(self, factor: int, begin=1, end=sys.maxsize):
-        # Just compute the new edges and call rebinXTo
-        start = begin - 1
-        stop = end
-        if start is None:
-            start = 0
-        stop = len(self.bins()) if stop >= sys.maxsize else stop - 1
-        new_edges = []
-        # new_bins = []
-        # new_bins += [self.underflow()]
-        for i in range(start):
-            # new_bins.append(self.bins()[i].clone())
-            new_edges.append(self.xEdges()[i])
-            new_edges.append(self.xEdges()[i + 1])
-        last = None
-        for i in range(start, stop, factor):
-            if i + factor <= len(self.bins()):
-                xmin = self.xEdges()[i]
-                xmax = self.xEdges()[i + 1]
-                # nb = GROGU_HISTO1D_V3.Bin()
-                for j in range(factor):
-                    last = i + j
-                    # nb += self.bins()[i + j]
-                    xmin = min(xmin, self.xEdges()[i + j])
-                    xmax = max(xmax, self.xEdges()[i + j + 1])
-                # new_bins.append(nb)
-                # add both edges
-                new_edges.append(xmin)
-                new_edges.append(xmax)
-        for j in range(last + 1, len(self.bins())):
-            # new_bins.append(self.bins()[j].clone())
-            new_edges.append(self.xEdges()[j])
-            new_edges.append(self.xEdges()[j + 1])
-        # new_bins += [self.overflow()]
-        # self.d_bins = new_bins
-        # drop duplicate edges
-        self.rebinXTo(list(set(new_edges)))
+        new_edges = rebinBy_to_rebinTo(self.xEdges(), factor, begin, end)
+        self.rebinXTo(new_edges)
 
     def rebinBy(self, *args, **kwargs):
         self.rebinXBy(*args, **kwargs)
@@ -258,6 +225,9 @@ class UHIHisto1D(UHIAnalysisObject):
                 else:
                     stop += 1
                 sc.rebinBy(step.factor, start, stop)
+            elif step is project:
+                # Get the subset and then project
+                sc = self[item.start : item.stop].project()
             else:
                 if stop is not None:
                     stop += 1
@@ -302,6 +272,17 @@ class UHIHisto1D(UHIAnalysisObject):
         # integer index
         index = self.__get_index(slices)
         self.__set_by_index(index, value)
+
+    def project(self) -> UHICounter:
+        # sc = self.clone().rebinTo(self.xEdges()[0], self.xEdges()[-1])
+        p = self.get_projector()()
+        p.set(
+            sum([b.numEntries() for b in self.bins()]),
+            sum([b.sumW() for b in self.bins()]),
+            sum([b.sumW2() for b in self.bins()]),
+        )
+        p.setAnnotationsDict(self.annotationsDict())
+        return p
 
     def plot(self, *args, binwnorm=1.0, **kwargs):
         import mplhep as hep
