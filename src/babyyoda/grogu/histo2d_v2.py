@@ -293,22 +293,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         if includeOverflows:
             err = "includeFlow=True not supported in 2D v2 histograms"
             raise NotImplementedError(err)
-            # Possible padding implementation:
-            # warn= "includeFlow=True not supported in 2D v2 histograms => padding with empty bins"
-
-            # warnings.warn(warn)
-            ## return bins padded with empty under and over flow
-            # nobins = self.bins(includeOverflows=False)
-            # bins += [GROGU_HISTO2D_V2.Bin()] * (len(self.xEdges()))
-            # for j in range(len(nobins)):
-            #    if j % (len(self.xEdges()) - 1) == 0:
-            #        bins += [GROGU_HISTO2D_V2.Bin()]  # overflow
-            #        bins += [GROGU_HISTO2D_V2.Bin()]  # underflow
-            #    bins += [nobins[j]]
-            # bins += [GROGU_HISTO2D_V2.Bin()]  # overflow
-            # bins += [GROGU_HISTO2D_V2.Bin()]  # underflow
-            # bins += [GROGU_HISTO2D_V2.Bin()] * (len(self.xEdges()))
-            # return bins
+            # Possible padding implementation, but still in conflict with YODA1
         # sort the bins by xlow, then ylow
         # YODA-1
         # return sorted(self.d_bins, key=lambda b: (b.d_xmin, b.d_ymin))
