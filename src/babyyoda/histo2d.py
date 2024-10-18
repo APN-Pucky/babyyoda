@@ -273,14 +273,13 @@ class UHIHisto2D(UHIAnalysisObject):
         set_bin2d(self.__getitem__(slices), value)
 
     def __getitem__(self, slices):
-        # integer index
-        if slices is underflow:
-            err = "No underflow bin in 2D histogram"
-            raise TypeError(err)
-        if slices is overflow:
-            err = "No overflow bin in 2D histogram"
-            raise TypeError(err)
         if isinstance(slices, tuple) and len(slices) == 2:
+            if slices[0] is underflow or slices[1] is underflow:
+                err = "No underflow bin in 2D histogram"
+                raise TypeError(err)
+            if slices[0] is overflow or slices[1] is overflow:
+                err = "No overflow bin in 2D histogram"
+                raise TypeError(err)
             ix, iy = self.__get_indices(slices)
             if isinstance(ix, int) and isinstance(iy, int):
                 return self.__get_by_indices(ix, iy)
