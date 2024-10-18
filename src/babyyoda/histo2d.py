@@ -91,7 +91,7 @@ class UHIHisto2D(UHIAnalysisObject):
         bins = []
         try:
             bins = self.bins(True)
-        except NotImplementedError:
+        except NotImplementedError:  # TODO catch error from YODA1
             nobins = self.bins()
             bins += [GROGU_HISTO2D_V3.Bin()] * (len(self.xEdges()))
             for j in range(len(nobins)):
@@ -273,14 +273,13 @@ class UHIHisto2D(UHIAnalysisObject):
         set_bin2d(self.__getitem__(slices), value)
 
     def __getitem__(self, slices):
-        # integer index
-        if slices is underflow:
-            err = "No underflow bin in 2D histogram"
-            raise TypeError(err)
-        if slices is overflow:
-            err = "No overflow bin in 2D histogram"
-            raise TypeError(err)
         if isinstance(slices, tuple) and len(slices) == 2:
+            if slices[0] is underflow or slices[1] is underflow:
+                err = "No underflow bin in 2D histogram"
+                raise TypeError(err)
+            if slices[0] is overflow or slices[1] is overflow:
+                err = "No overflow bin in 2D histogram"
+                raise TypeError(err)
             ix, iy = self.__get_indices(slices)
             if isinstance(ix, int) and isinstance(iy, int):
                 return self.__get_by_indices(ix, iy)
@@ -342,7 +341,13 @@ class UHIHisto2D(UHIAnalysisObject):
         c.rebinXTo([self.xEdges()[0], self.xEdges()[-1]])
         # pick
         p = self.get_projector()(self.yEdges())
-        for pb, cb in zip(p.bins(), c.bins()):
+        try:
+            pbs = p.bins(True)
+            cbs = c.bins(True)
+        except NotImplementedError:  # TODO catch error from YODA1
+            pbs = p.bins()
+            cbs = c.bins()
+        for pb, cb in zip(pbs, cbs):
             pb.set(cb.numEntries(), [cb.sumW(), cb.sumWY()], [cb.sumW2(), cb.sumWY2()])
         p.setAnnotationsDict(self.annotationsDict())
         return p
@@ -353,7 +358,13 @@ class UHIHisto2D(UHIAnalysisObject):
         c.rebinYTo([self.yEdges()[0], self.yEdges()[-1]])
         # pick
         p = self.get_projector()(self.xEdges())
-        for pb, cb in zip(p.bins(), c.bins()):
+        try:
+            pbs = p.bins(True)
+            cbs = c.bins(True)
+        except NotImplementedError:  # TODO catch error from YODA1
+            pbs = p.bins()
+            cbs = c.bins()
+        for pb, cb in zip(pbs, cbs):
             pb.set(cb.numEntries(), [cb.sumW(), cb.sumWX()], [cb.sumW2(), cb.sumWX2()])
         p.setAnnotationsDict(self.annotationsDict())
         return p
