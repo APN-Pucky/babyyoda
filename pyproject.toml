@@ -131,3 +131,7 @@ ignore = [
   "RUF012",   # TODO: mutable class attributes
   "SIM115",   # TODO: use context manager for opening files
 ]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
