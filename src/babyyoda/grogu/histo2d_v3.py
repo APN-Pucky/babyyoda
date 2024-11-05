@@ -30,7 +30,7 @@ def Histo2D_v3(
     *args,
     title=None,
     **kwargs,
-):
+) -> "GROGU_HISTO2D_V3":
     xedges = []
     yedges = []
     if isinstance(args[0], list) and isinstance(args[1], list):
@@ -133,32 +133,32 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             self.d_sumwxy = sumWcross[0]
             self.d_numentries = numEntries
 
-        def sumW(self):
+        def sumW(self) -> float:
             return self.d_sumw
 
-        def sumW2(self):
+        def sumW2(self) -> float:
             return self.d_sumw2
 
-        def sumWX(self):
+        def sumWX(self) -> float:
             return self.d_sumwx
 
-        def sumWX2(self):
+        def sumWX2(self) -> float:
             return self.d_sumwx2
 
-        def sumWY(self):
+        def sumWY(self) -> float:
             return self.d_sumwy
 
-        def sumWY2(self):
+        def sumWY2(self) -> float:
             return self.d_sumwy2
 
-        def sumWXY(self):
+        def sumWXY(self) -> float:
             return self.d_sumwxy
 
-        def crossTerm(self, x, y):
+        def crossTerm(self, x, y) -> float:
             assert (x == 0 and y == 1) or (x == 1 and y == 0)
             return self.sumWXY()
 
-        def numEntries(self):
+        def numEntries(self) -> float:
             return self.d_numentries
 
         def __add__(self, other: "GROGU_HISTO2D_V3.Bin") -> "GROGU_HISTO2D_V3.Bin":
@@ -191,7 +191,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
     d_bins: list[Bin] = field(default_factory=list)
     d_edges: list[list[float]] = field(default_factory=list)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         GROGU_ANALYSIS_OBJECT.__post_init__(self)
         self.setAnnotation("Type", "Histo2D")
 
@@ -201,7 +201,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         )
 
     #
-    # YODA compatibilty code
+    # YODA compatibility code
     #
 
     def clone(self):
@@ -212,13 +212,13 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             d_edges=copy.deepcopy(self.d_edges),
         )
 
-    def xEdges(self):
+    def xEdges(self) -> list[float]:
         return self.d_edges[0]
 
-    def yEdges(self):
+    def yEdges(self) -> list[float]:
         return self.d_edges[1]
 
-    def fill(self, x, y, weight=1.0, fraction=1.0):
+    def fill(self, x, y, weight: float = 1.0, fraction: float = 1.0) -> None:
         # Also fill overflow bins
         self.bins(True)[to_index(x, y, self.xEdges(), self.yEdges())].fill(
             x, y, weight, fraction

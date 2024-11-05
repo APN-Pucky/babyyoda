@@ -1,5 +1,3 @@
-import warnings
-
 from babyyoda import grogu
 
 
@@ -7,10 +5,10 @@ def read(file_path: str):
     try:
         return read_yoda(file_path)
     except ImportError:
-        warnings.warn(
-            "yoda is not installed, falling back to python grogu implementation",
-            stacklevel=2,
-        )
+        # warnings.warn(
+        #    "yoda is not installed, falling back to python grogu implementation",
+        #    stacklevel=2,
+        # )
         return read_grogu(file_path)
 
 

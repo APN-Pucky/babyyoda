@@ -57,7 +57,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             )
 
         ########################################################
-        # YODA compatibilty code
+        # YODA compatibility code
         ########################################################
 
         def clone(self):
@@ -99,28 +99,30 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             self.d_sumwx2 = sumW2[1]
             self.d_numentries = numEntries
 
-        def xMin(self):
+        def xMin(self) -> Optional[float]:
             return self.d_xmin
 
-        def xMax(self):
+        def xMax(self) -> Optional[float]:
             return self.d_xmax
 
-        def xMid(self):
+        def xMid(self) -> Optional[float]:
+            if self.d_xmin is None or self.d_xmax is None:
+                return None
             return (self.d_xmin + self.d_xmax) / 2
 
-        def sumW(self):
+        def sumW(self) -> float:
             return self.d_sumw
 
-        def sumW2(self):
+        def sumW2(self) -> float:
             return self.d_sumw2
 
-        def sumWX(self):
+        def sumWX(self) -> float:
             return self.d_sumwx
 
-        def sumWX2(self):
+        def sumWX2(self) -> float:
             return self.d_sumwx2
 
-        def variance(self):
+        def variance(self) -> float:
             if self.d_sumw**2 - self.d_sumw2 == 0:
                 return 0
             return abs(
@@ -129,19 +131,21 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             )
             # return self.d_sumw2/self.d_numentries - (self.d_sumw/self.d_numentries)**2
 
-        def errW(self):
+        def errW(self) -> float:
             return self.d_sumw2**0.5
 
-        def stdDev(self):
+        def stdDev(self) -> float:
             return self.variance() ** 0.5
 
-        def effNumEntries(self):
+        def effNumEntries(self) -> float:
             return self.sumW() ** 2 / self.sumW2()
 
-        def stdErr(self):
+        def stdErr(self) -> float:
             return self.stdDev() / self.effNumEntries() ** 0.5
 
-        def dVol(self):
+        def dVol(self) -> Optional[float]:
+            if self.d_xmin is None or self.d_xmax is None:
+                return None
             return self.d_xmax - self.d_xmin
 
         def xVariance(self):
@@ -215,16 +219,16 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             return f"{label:8}\t{label:8}\t{bin.d_sumw:<12.6e}\t{bin.d_sumw2:<12.6e}\t{bin.d_sumwx:<12.6e}\t{bin.d_sumwx2:<12.6e}\t{bin.d_numentries:<12.6e}"
 
     d_bins: list[Bin] = field(default_factory=list)
-    d_overflow: Optional[Bin] = None
-    d_underflow: Optional[Bin] = None
-    d_total: Optional[Bin] = None
+    d_overflow: Bin = field(default_factory=Bin)
+    d_underflow: Bin = field(default_factory=Bin)
+    d_total: Bin = field(default_factory=Bin)
 
     def __post_init__(self):
         GROGU_ANALYSIS_OBJECT.__post_init__(self)
         self.setAnnotation("Type", "Histo1D")
 
     ############################################
-    # YODA compatibilty code
+    # YODA compatibility code
     ############################################
 
     def clone(self):
@@ -253,10 +257,10 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         if x < self.xMin() and self.d_underflow is not None:
             self.d_underflow.fill(x, weight, fraction)
 
-    def xMax(self):
+    def xMax(self) -> Optional[float]:
         return max([b.xMax() for b in self.d_bins])
 
-    def xMin(self):
+    def xMin(self) -> Optional[float]:
         return min([b.xMin() for b in self.d_bins])
 
     def bins(self, includeOverflows=False):
@@ -274,10 +278,10 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
                 return b
         return None
 
-    def binDim(self):
+    def binDim(self) -> int:
         return 1
 
-    def xEdges(self):
+    def xEdges(self) -> list[float]:
         return [b.xMin() for b in self.d_bins] + [self.xMax()]
 
     def rebinXTo(self, edges: list[float]):

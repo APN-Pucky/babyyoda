@@ -69,7 +69,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         d_numentries: float = 0.0
 
         ########################################################
-        # YODA compatibilty code
+        # YODA compatibility code
         ########################################################
 
         def clone(self):
@@ -204,14 +204,14 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             return f"{label:8}\t{label:8}\t{self.d_sumw:<12.6e}\t{self.d_sumw2:<12.6e}\t{self.d_sumwx:<12.6e}\t{self.d_sumwx2:<12.6e}\t{self.d_sumwy:<12.6e}\t{self.d_sumwy2:<12.6e}\t{self.d_sumwxy:<12.6e}\t{self.d_numentries:<12.6e}"
 
     d_bins: list[Bin] = field(default_factory=list)
-    d_total: Optional[Bin] = None
+    d_total: Bin = field(default_factory=Bin)
 
     def __post_init__(self):
         GROGU_ANALYSIS_OBJECT.__post_init__(self)
         self.setAnnotation("Type", "Histo2D")
 
     #
-    # YODA compatibilty code
+    # YODA compatibility code
     #
 
     def clone(self):
@@ -228,7 +228,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             if b.d_xmin <= x < b.d_xmax and b.d_ymin <= y < b.d_ymax:
                 b.fill(x, y, weight, fraction)
 
-    def xEdges(self):
+    def xEdges(self) -> list[float]:
         assert all(
             x == y
             for x, y in zip(
@@ -238,7 +238,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         )
         return sorted({b.d_xmin for b in self.d_bins} | {self.xMax()})
 
-    def yEdges(self):
+    def yEdges(self) -> list[float]:
         assert all(
             x == y
             for x, y in zip(
@@ -248,16 +248,16 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         )
         return sorted({b.d_ymin for b in self.d_bins} | {self.yMax()})
 
-    def xMin(self):
+    def xMin(self) -> float:
         return min(b.d_xmin for b in self.d_bins)
 
-    def yMin(self):
+    def yMin(self) -> float:
         return min(b.d_ymin for b in self.d_bins)
 
-    def xMax(self):
+    def xMax(self) -> float:
         return max(b.d_xmax for b in self.d_bins)
 
-    def yMax(self):
+    def yMax(self) -> float:
         return max(b.d_ymax for b in self.d_bins)
 
     def bins(self, includeOverflows=False):

@@ -1,5 +1,6 @@
 import contextlib
 import sys
+from typing import Any
 
 import numpy as np
 
@@ -8,7 +9,7 @@ from babyyoda.counter import UHICounter
 from babyyoda.util import loc, overflow, project, rebin, rebinBy_to_rebinTo, underflow
 
 
-def set_bin1d(target, source):
+def set_bin1d(target: Any, source: Any) -> None:
     # TODO allow modify those?
     # self.d_xmin = bin.xMin()
     # self.d_xmax = bin.xMax()
@@ -29,9 +30,12 @@ def Histo1D(*args, **kwargs):
     """
     try:
         from babyyoda import yoda
+
+        return yoda.Histo1D(*args, **kwargs)
     except ImportError:
-        import babyyoda.grogu as yoda
-    return yoda.Histo1D(*args, **kwargs)
+        from babyyoda import grogu
+
+        return grogu.Histo1D(*args, **kwargs)
 
 
 # TODO make this implementation independent (no V2 or V3...)
@@ -40,7 +44,7 @@ class UHIHisto1D(UHIAnalysisObject):
     # BACKENDS
     ######
 
-    def to_grogu_v2(self):
+    def to_grogu_v2(self) -> Any:
         from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 
         tot = GROGU_HISTO1D_V2.Bin()
@@ -87,7 +91,7 @@ class UHIHisto1D(UHIAnalysisObject):
             ),
         )
 
-    def to_grogu_v3(self):
+    def to_grogu_v3(self) -> Any:
         from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
 
         return GROGU_HISTO1D_V3(
@@ -124,11 +128,11 @@ class UHIHisto1D(UHIAnalysisObject):
             ],
         )
 
-    def to_yoda_v3(self):
+    def to_yoda_v3(self) -> Any:
         err = "Not implemented yet"
         raise NotImplementedError(err)
 
-    def to_string(self):
+    def to_string(self) -> str:
         # Now we need to map YODA to grogu and then call to_string
         # TODO do we want to hardcode v3 here?
         return self.to_grogu_v3().to_string()

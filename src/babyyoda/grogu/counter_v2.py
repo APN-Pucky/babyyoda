@@ -23,7 +23,7 @@ class GROGU_COUNTER_V2(GROGU_ANALYSIS_OBJECT, UHICounter):
         d_numentries: float = 0.0
 
         ########################################################
-        # YODA compatibilty code
+        # YODA compatibility code
         ########################################################
 
         def clone(self):
@@ -119,13 +119,13 @@ class GROGU_COUNTER_V2(GROGU_ANALYSIS_OBJECT, UHICounter):
 
     d_bins: list[Bin] = field(default_factory=list)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         GROGU_ANALYSIS_OBJECT.__post_init__(self)
         self.setAnnotation("Type", "Counter")
         assert len(self.d_bins) == 1
 
     ############################################
-    # YODA compatibilty code
+    # YODA compatibility code
     ############################################
 
     def sumW(self):

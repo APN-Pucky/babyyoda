@@ -1,12 +1,12 @@
 import re
 from dataclasses import dataclass, field
-from typing import Union
+from typing import Optional, Union
 
 from babyyoda.counter import UHICounter
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
 
 
-def Counter_v3(title=None, **kwargs):
+def Counter_v3(title: Optional[str] = None, **kwargs) -> "GROGU_COUNTER_V3":
     return GROGU_COUNTER_V3(
         d_bins=[GROGU_COUNTER_V3.Bin()],
         d_annotations={"Title": title} if title else {},
@@ -23,7 +23,7 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
         d_numentries: float = 0.0
 
         ########################################################
-        # YODA compatibilty code
+        # YODA compatibility code
         ########################################################
 
         def clone(self):
@@ -60,13 +60,13 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
             self.d_sumw2 = sumW2[0]
             self.d_numentries = numEntries
 
-        def sumW(self):
+        def sumW(self) -> float:
             return self.d_sumw
 
-        def sumW2(self):
+        def sumW2(self) -> float:
             return self.d_sumw2
 
-        def variance(self):
+        def variance(self) -> float:
             if self.d_sumw**2 - self.d_sumw2 == 0:
                 return 0
             return abs(
@@ -75,19 +75,19 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
             )
             # return self.d_sumw2/self.d_numentries - (self.d_sumw/self.d_numentries)**2
 
-        def errW(self):
+        def errW(self) -> float:
             return self.d_sumw2**0.5
 
-        def stdDev(self):
+        def stdDev(self) -> float:
             return self.variance() ** 0.5
 
-        def effNumEntries(self):
+        def effNumEntries(self) -> float:
             return self.sumW() ** 2 / self.sumW2()
 
-        def stdErr(self):
+        def stdErr(self) -> float:
             return self.stdDev() / self.effNumEntries() ** 0.5
 
-        def numEntries(self):
+        def numEntries(self) -> float:
             return self.d_numentries
 
         def __eq__(self, other):
@@ -119,22 +119,22 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
 
     d_bins: list[Bin] = field(default_factory=list)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         GROGU_ANALYSIS_OBJECT.__post_init__(self)
         self.setAnnotation("Type", "Counter")
         assert len(self.d_bins) == 1
 
     ############################################
-    # YODA compatibilty code
+    # YODA compatibility code
     ############################################
 
-    def sumW(self):
+    def sumW(self) -> float:
         return self.d_bins[0].sumW()
 
-    def sumW2(self):
+    def sumW2(self) -> float:
         return self.d_bins[0].sumW2()
 
-    def numEntries(self):
+    def numEntries(self) -> float:
         return self.d_bins[0].numEntries()
 
     def clone(self):

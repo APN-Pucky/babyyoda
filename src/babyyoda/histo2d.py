@@ -1,5 +1,6 @@
 import contextlib
 import sys
+from typing import Any, Optional, Union
 
 import numpy as np
 
@@ -16,7 +17,7 @@ from babyyoda.util import (
 )
 
 
-def set_bin2d(target, source):
+def set_bin2d(target: Any, source: Any) -> None:
     # TODO allow modify those?
     # self.d_xmin = bin.xMin()
     # self.d_xmax = bin.xMax()
@@ -32,23 +33,54 @@ def set_bin2d(target, source):
         raise NotImplementedError(err)
 
 
-def Histo2D(*args, **kwargs):
+def Histo2D(*args: list[Any], **kwargs: list[Any]) -> "UHIHisto2D":
     """
     Automatically select the correct version of the Histo2D class
     """
     try:
         from babyyoda import yoda
+
+        return yoda.Histo2D(*args, **kwargs)
     except ImportError:
-        import babyyoda.grogu as yoda
-    return yoda.Histo2D(*args, **kwargs)
+        from babyyoda import grogu
+
+        return grogu.Histo2D(*args, **kwargs)
 
 
 class UHIHisto2D(UHIAnalysisObject):
+    ######
+    # Minimum required functions
+    ######
+
+    def bins(self, includeOverflows: bool = False) -> list[Any]:
+        raise NotImplementedError
+
+    def xEdges(self) -> list[float]:
+        raise NotImplementedError
+
+    def yEdges(self) -> list[float]:
+        raise NotImplementedError
+
+    def rebinXTo(self, edges: list[float]) -> None:
+        raise NotImplementedError
+
+    def rebinYTo(self, edges: list[float]) -> None:
+        raise NotImplementedError
+
+    def annotationsDict(self) -> dict[str, Optional[str]]:
+        raise NotImplementedError
+
+    def clone(self) -> "UHIHisto2D":
+        raise NotImplementedError
+
+    def get_projector(self) -> Any:
+        raise NotImplementedError
+
     #####
     # BACKENDS
     #####
 
-    def to_grogu_v2(self):
+    def to_grogu_v2(self) -> Any:
         from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
 
         tot = GROGU_HISTO2D_V2.Bin()
@@ -85,7 +117,7 @@ class UHIHisto2D(UHIAnalysisObject):
             ],
         )
 
-    def to_grogu_v3(self):
+    def to_grogu_v3(self) -> Any:
         from babyyoda.grogu.histo2d_v3 import GROGU_HISTO2D_V3
 
         bins = []
@@ -122,11 +154,6 @@ class UHIHisto2D(UHIAnalysisObject):
             ],
         )
 
-    def to_string(self):
-        if hasattr(self.target, "to_string"):
-            return self.target.to_string()
-        return self.to_grogu_v3().to_string()
-
     # def bins(self, *args, **kwargs):
     #    # fix order
     #    return self.target.bins(*args, **kwargs)
@@ -147,50 +174,50 @@ class UHIHisto2D(UHIAnalysisObject):
     #    # This is a YODA-1 feature that is not present in YODA-2
     #    return self.bins(includeOverflows=True)[0]
 
-    def xMins(self):
+    def xMins(self) -> list[float]:
         return self.xEdges()[:-1]
         # return np.array(sorted(list(set([b.xMin() for b in self.bins()]))))
 
-    def xMaxs(self):
+    def xMaxs(self) -> list[float]:
         return self.xEdges()[1:]
         # return np.array(sorted(list(set([b.xMax() for b in self.bins()]))))
 
-    def yMins(self):
+    def yMins(self) -> list[float]:
         return self.yEdges()[:-1]
         # return np.array(sorted(list(set([b.yMin() for b in self.bins()]))))
 
-    def yMaxs(self):
+    def yMaxs(self) -> list[float]:
         return self.yEdges()[1:]
         # return np.array(sorted(list(set([b.yMax() for b in self.bins()]))))
 
-    def sumWs(self):
-        return np.array([b.sumW() for b in self.bins()])
+    def sumWs(self) -> list[float]:
+        return [b.sumW() for b in self.bins()]
 
-    def sumWXYs(self):
+    def sumWXYs(self) -> list[float]:
         return [b.crossTerm(0, 1) for b in self.bins()]
 
-    def xMean(self, includeOverflows=True):
-        return sum(b.sumWX() for b in self.d_bins) / sum(
-            b.sumW() for b in self.bins(includeOverflows=includeOverflows)
-        )
+    def xMean(self, includeOverflows: bool = True) -> float:
+        return sum(
+            b.sumWX() for b in self.bins(includeOverflows=includeOverflows)
+        ) / sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
 
-    def yMean(self, includeOverflows=True):
-        return sum(b.sumWY() for b in self.d_bins) / sum(
-            b.sumW() for b in self.bins(includeOverflows=includeOverflows)
-        )
+    def yMean(self, includeOverflows: bool = True) -> float:
+        return sum(
+            b.sumWY() for b in self.bins(includeOverflows=includeOverflows)
+        ) / sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
 
-    def integral(self, includeOverflows=True):
+    def integral(self, includeOverflows: bool = True) -> float:
         return sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
 
-    def rebinXBy(self, factor: int, begin=1, end=sys.maxsize):
+    def rebinXBy(self, factor: int, begin: int = 1, end: int = sys.maxsize) -> None:
         new_edges = rebinBy_to_rebinTo(self.xEdges(), factor, begin, end)
         self.rebinXTo(new_edges)
 
-    def rebinYBy(self, factor: int, begin=1, end=sys.maxsize):
+    def rebinYBy(self, factor: int, begin: int = 1, end: int = sys.maxsize) -> None:
         new_edges = rebinBy_to_rebinTo(self.yEdges(), factor, begin, end)
         self.rebinYTo(new_edges)
 
-    def dVols(self):
+    def dVols(self) -> list[float]:
         ret = []
         for iy in range(len(self.yMins())):
             for ix in range(len(self.xMins())):
@@ -198,59 +225,59 @@ class UHIHisto2D(UHIAnalysisObject):
                     (self.xMaxs()[ix] - self.xMins()[ix])
                     * (self.yMaxs()[iy] - self.yMins()[iy])
                 )
-        return np.array(ret)
+        return ret
 
     ########################################################
     # Generic UHI code
     ########################################################
 
     @property
-    def axes(self):
+    def axes(self) -> list[list[tuple[float, float]]]:
         return [
             list(zip(self.xMins(), self.xMaxs())),
             list(zip(self.yMins(), self.yMaxs())),
         ]
 
     @property
-    def kind(self):
+    def kind(self) -> str:
         # TODO reeavaluate this
         return "COUNT"
 
-    def values(self):
-        return self.sumWs().reshape((len(self.axes[1]), len(self.axes[0]))).T
+    def values(self) -> np.ndarray:
+        return np.array(self.sumWs()).reshape((len(self.axes[1]), len(self.axes[0]))).T
 
-    def variances(self):
+    def variances(self) -> np.ndarray:
         return (
             np.array([b.sumW2() for b in self.bins()])
             .reshape((len(self.axes[1]), len(self.axes[0])))
             .T
         )
 
-    def counts(self):
+    def counts(self) -> np.ndarray:
         return (
             np.array([b.numEntries() for b in self.bins()])
             .reshape((len(self.axes[1]), len(self.axes[0])))
             .T
         )
 
-    def __single_index(self, ix, iy):
+    def __single_index(self, ix: int, iy: int) -> int:
         return iy * len(self.axes[0]) + ix
         # return ix * len(self.axes[1]) + iy
 
-    def __get_by_indices(self, ix, iy):
+    def __get_by_indices(self, ix: int, iy: int) -> int:
         return self.bins()[
             self.__single_index(ix, iy)
         ]  # THIS is the fault with/without overflows!
 
-    def __get_index_by_loc(self, loc, bins):
+    def __get_index_by_loc(self, oloc: loc, bins: list[tuple[float, float]]) -> int:
         # find the index in bin where loc is
         for a, b in bins:
-            if a <= loc.value and loc.value < b:
-                return bins.index((a, b)) + loc.offset
-        err = f"loc {loc.value} is not in the range of {bins}"
+            if a <= oloc.value and oloc.value < b:
+                return bins.index((a, b)) + oloc.offset
+        err = f"loc {oloc.value} is not in the range of {bins}"
         raise ValueError(err)
 
-    def __get_x_index(self, slices):
+    def __get_x_index(self, slices: Union[int, loc]) -> int:
         ix = None
         if isinstance(slices, int):
             ix = slices
@@ -258,7 +285,7 @@ class UHIHisto2D(UHIAnalysisObject):
             ix = self.__get_index_by_loc(slices, self.axes[0])
         return ix
 
-    def __get_y_index(self, slices):
+    def __get_y_index(self, slices: Union[int, loc]) -> int:
         iy = None
         if isinstance(slices, int):
             iy = slices
@@ -266,10 +293,12 @@ class UHIHisto2D(UHIAnalysisObject):
             iy = self.__get_index_by_loc(slices, self.axes[1])
         return iy
 
-    def __get_indices(self, slices):
+    def __get_indices(
+        self, slices: tuple[Union[int, loc], Union[int, loc]]
+    ) -> tuple[int, int]:
         return self.__get_x_index(slices[0]), self.__get_y_index(slices[1])
 
-    def __setitem__(self, slices, value):
+    def __setitem__(self, slices, value: Any) -> None:
         set_bin2d(self.__getitem__(slices), value)
 
     def __getitem__(self, slices):
@@ -364,6 +393,9 @@ class UHIHisto2D(UHIAnalysisObject):
         if axis == 0:
             return self.projectX()
         return self.projectY()
+
+    def to_string(self) -> str:
+        return self.to_grogu_v3().to_string()
 
     def plot(self, *args, binwnorm=True, **kwargs):
         # # TODO should use histplot

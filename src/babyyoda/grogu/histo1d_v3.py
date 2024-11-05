@@ -45,7 +45,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         d_numentries: float = 0.0
 
         ########################################################
-        # YODA compatibilty code
+        # YODA compatibility code
         ########################################################
 
         def clone(self):
@@ -169,7 +169,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
     d_edges: list[float] = field(default_factory=list)
     d_bins: list[Bin] = field(default_factory=list)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         GROGU_ANALYSIS_OBJECT.__post_init__(self)
         self.setAnnotation("Type", "Histo1D")
         # one more edge than bins, subtract 2 for underflow and overflow
@@ -178,10 +178,10 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         ), f"{len(self.d_edges)} != {len(self.d_bins)} + 1 - 2"
 
     ############################################
-    # YODA compatibilty code
+    # YODA compatibility code
     ############################################
 
-    def clone(self):
+    def clone(self) -> "GROGU_HISTO1D_V3":
         return GROGU_HISTO1D_V3(
             d_key=self.d_key,
             d_annotations=self.annotationsDict(),
@@ -189,13 +189,13 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             d_bins=[b.clone() for b in self.d_bins],
         )
 
-    def underflow(self):
+    def underflow(self) -> Bin:
         return self.bins(includeOverflows=True)[0]
 
-    def overflow(self):
+    def overflow(self) -> Bin:
         return self.bins(includeOverflows=True)[-1]
 
-    def fill(self, x, weight=1.0, fraction=1.0):
+    def fill(self, x: float, weight: float = 1.0, fraction: float = 1.0) -> None:
         for i, b in enumerate(self.bins()):
             if self.xEdges()[i] <= x < self.xEdges()[i + 1]:
                 b.fill(x, weight, fraction)
@@ -204,10 +204,10 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         if x < self.xMin():
             self.underflow().fill(x, weight, fraction)
 
-    def xMax(self):
+    def xMax(self) -> float:
         return max(self.xEdges())
 
-    def xMin(self):
+    def xMin(self) -> float:
         return min(self.xEdges())
 
     def bins(self, includeOverflows=False):
@@ -223,10 +223,10 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
                 return b
         return None
 
-    def binDim(self):
+    def binDim(self) -> int:
         return 1
 
-    def xEdges(self):
+    def xEdges(self) -> list[float]:
         return self.d_edges
 
     def xMid(self, i):

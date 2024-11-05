@@ -7,7 +7,7 @@ from babyyoda.yoda.histo1d import Histo1D
 
 
 class Histo2D(babyyoda.UHIHisto2D):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """
         target is either a yoda or grogu HISTO2D_V2
         """

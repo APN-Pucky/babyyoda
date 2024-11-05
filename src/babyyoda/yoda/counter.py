@@ -1,3 +1,5 @@
+from typing import Any, Optional
+
 import yoda
 
 import babyyoda
@@ -5,7 +7,7 @@ from babyyoda.util import has_own_method
 
 
 class Counter(babyyoda.UHICounter):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: list[Any], **kwargs: dict[Any, Any]) -> None:
         """
         target is either a yoda or grogu Counter
         """
@@ -22,7 +24,7 @@ class Counter(babyyoda.UHICounter):
     # Relay all attribute access to the target object
     ########################################################
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str):
         # if we overwrite it here, use that
         if has_own_method(Counter, name):
             return getattr(self, name)
@@ -53,14 +55,14 @@ class Counter(babyyoda.UHICounter):
     #    err = f"'{type(self.target).__name__}' object is not callable"
     #    raise TypeError(err)
 
-    def bins(self, *args, **kwargs):
+    def bins(self, *args, **kwargs) -> Any:
         return self.target.bins(*args, **kwargs)
 
-    def clone(self):
+    def clone(self) -> "Counter":
         return Counter(self.target.clone())
 
     # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
-    def annotationsDict(self):
+    def annotationsDict(self) -> dict[str, Optional[str]]:
         d = {}
         for k in self.target.annotations():
             d[k] = self.target.annotation(k)

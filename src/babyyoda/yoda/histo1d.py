@@ -7,7 +7,7 @@ from babyyoda.yoda.counter import Counter
 
 
 class Histo1D(babyyoda.UHIHisto1D):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         """
         target is either a yoda or grogu HISTO1D_V2
         """
