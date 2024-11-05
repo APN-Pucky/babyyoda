@@ -25,3 +25,28 @@ repos:
     - id: ruff
       args: ["--fix", "--show-fixes"]
     - id: ruff-format
+
+-   repo: https://github.com/adamchainz/blacken-docs
+    rev: "1.19.1"  # replace with latest tag on GitHub
+    hooks:
+    -   id: blacken-docs
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.13.0'  # Use the sha / tag you want to point at
+    hooks:
+    -   id: mypy
+-   repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+    - id: codespell
+-   repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0  # Use the ref you want to point at
+    hooks:
+    -   id: python-use-type-annotations
+-   repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.18  # Use the ref you want to point at
+    hooks:
+    - id: mdformat
+      # Optionally add plugins
+      additional_dependencies:
+      - mdformat-gfm
+      - mdformat-black

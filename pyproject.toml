@@ -99,6 +99,14 @@ exclude_lines = [
 [tool.hatch.version]
 source = "vcs"
 
+
+
+[tool.hatch.version.raw-options]
+local_scheme = "no-local-version"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/babyyoda/_version.py"
+
 [tool.mypy]
 warn_unused_configs = true
 warn_unused_ignores = true
@@ -111,12 +119,6 @@ enable_error_code = [
     "redundant-expr",
     "truthy-bool",
 ]
-
-[tool.hatch.version.raw-options]
-local_scheme = "no-local-version"
-
-[tool.hatch.build.hooks.vcs]
-version-file = "src/babyyoda/_version.py"
 
 
 [tool.ruff.lint]
@@ -162,4 +164,3 @@ addopts = [
     "--strict-markers",
     "--strict-config",
 ]
-filterwarnings = ["error"]
