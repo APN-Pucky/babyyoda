@@ -6,22 +6,27 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'babyyoda'
-copyright = '2024, Alexander Puck Neuwirth'
-author = 'Alexander Puck Neuwirth'
+project = "babyyoda"
+copyright = "2024, Alexander Puck Neuwirth"
+author = "Alexander Puck Neuwirth"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.napoleon",
+]
 
-templates_path = ['_templates']
-exclude_patterns = []
-
+templates_path = ["_templates"]
+exclude_patterns = [
+    "**.ipynb_checkpoints",
+]
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
-html_static_path = ['_static']
+html_theme = "alabaster"
+html_static_path = ["_static"]
