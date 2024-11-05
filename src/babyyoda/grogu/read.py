@@ -1,5 +1,6 @@
 import gzip
 import re
+from typing import TextIO, Union
 
 from babyyoda.grogu.counter_v2 import GROGU_COUNTER_V2
 from babyyoda.grogu.counter_v3 import GROGU_COUNTER_V3
@@ -10,7 +11,7 @@ from babyyoda.grogu.histo2d_v3 import GROGU_HISTO2D_V3
 
 
 # Copied from pylhe
-def _extract_fileobj(filepath):
+def _extract_fileobj(filepath: str) -> TextIO:
     """
     Checks to see if a file is compressed, and if so, extract it with gzip
     so that the uncompressed file can be returned.
@@ -32,7 +33,19 @@ def _extract_fileobj(filepath):
     )
 
 
-def read(file_path: str):
+def read(
+    file_path: str,
+) -> dict[
+    str,
+    Union[
+        GROGU_COUNTER_V2,
+        GROGU_COUNTER_V3,
+        GROGU_HISTO1D_V2,
+        GROGU_HISTO1D_V3,
+        GROGU_HISTO2D_V2,
+        GROGU_HISTO2D_V3,
+    ],
+]:
     with _extract_fileobj(file_path) as f:
         content = f.read()
         content = content.decode("utf-8")

@@ -191,7 +191,7 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
             d_bins=bins,
         )
 
-    def to_string(self):
+    def to_string(self) -> str:
         """Convert a YODA_COUNTER_V3 object to a formatted string."""
         header = (
             f"BEGIN YODA_COUNTER_V3 {self.d_key}\n"

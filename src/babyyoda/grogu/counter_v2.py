@@ -1,12 +1,12 @@
 import re
 from dataclasses import dataclass, field
-from typing import Union
+from typing import Any, Optional, Union
 
 from babyyoda.counter import UHICounter
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
 
 
-def Counter_v2(title=None, **kwargs):
+def Counter_v2(title: Optional[str] = None, **kwargs: Any) -> "GROGU_COUNTER_V2":
     return GROGU_COUNTER_V2(
         d_bins=[GROGU_COUNTER_V2.Bin()],
         d_annotations={"Title": title} if title else {},

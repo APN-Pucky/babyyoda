@@ -24,7 +24,7 @@ class Counter(babyyoda.UHICounter):
     # Relay all attribute access to the target object
     ########################################################
 
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str) -> Any:
         # if we overwrite it here, use that
         if has_own_method(Counter, name):
             return getattr(self, name)
@@ -55,7 +55,7 @@ class Counter(babyyoda.UHICounter):
     #    err = f"'{type(self.target).__name__}' object is not callable"
     #    raise TypeError(err)
 
-    def bins(self, *args, **kwargs) -> Any:
+    def bins(self, *args: Any, **kwargs: Any) -> Any:
         return self.target.bins(*args, **kwargs)
 
     def clone(self) -> "Counter":

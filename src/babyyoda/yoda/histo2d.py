@@ -1,3 +1,5 @@
+from typing import Optional
+
 import yoda
 from packaging import version
 
@@ -79,7 +81,7 @@ class Histo2D(babyyoda.UHIHisto2D):
         return Histo1D
 
     # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
-    def annotationsDict(self):
+    def annotationsDict(self) -> dict[str, Optional[str]]:
         d = {}
         for k in self.target.annotations():
             d[k] = self.target.annotation(k)

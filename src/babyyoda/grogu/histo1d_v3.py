@@ -1,13 +1,14 @@
 import copy
 import re
 from dataclasses import dataclass, field
+from typing import Any
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
 from babyyoda.grogu.counter_v3 import Counter_v3
 from babyyoda.histo1d import UHIHisto1D
 
 
-def Histo1D_v3(*args, title=None, **kwargs):
+def Histo1D_v3(*args: Any, title=None, **kwargs: Any) -> "GROGU_HISTO1D_V3":
     edges = []
     if isinstance(args[0], list):
         edges = args[0]
@@ -90,19 +91,19 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         # def xMid(self):
         #    return (self.d_xmin + self.d_xmax) / 2
 
-        def sumW(self):
+        def sumW(self) -> float:
             return self.d_sumw
 
-        def sumW2(self):
+        def sumW2(self) -> float:
             return self.d_sumw2
 
-        def sumWX(self):
+        def sumWX(self) -> float:
             return self.d_sumwx
 
-        def sumWX2(self):
+        def sumWX2(self) -> float:
             return self.d_sumwx2
 
-        def variance(self):
+        def variance(self) -> float:
             if self.d_sumw**2 - self.d_sumw2 == 0:
                 return 0
             return abs(
@@ -111,28 +112,28 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             )
             # return self.d_sumw2/self.d_numentries - (self.d_sumw/self.d_numentries)**2
 
-        def errW(self):
+        def errW(self) -> float:
             return self.d_sumw2**0.5
 
-        def stdDev(self):
+        def stdDev(self) -> float:
             return self.variance() ** 0.5
 
-        def effNumEntries(self):
+        def effNumEntries(self) -> float:
             return self.sumW() ** 2 / self.sumW2()
 
-        def stdErr(self):
+        def stdErr(self) -> float:
             return self.stdDev() / self.effNumEntries() ** 0.5
 
-        def xVariance(self):
+        def xVariance(self) -> float:
             # return self.d_sumwx2/self.d_sumw - (self.d_sumwx/self.d_sumw)**2
             if self.d_sumw**2 - self.d_sumw2 == 0:
-                return 0
+                return 0.0
             return abs(
                 (self.d_sumwx2 * self.d_sumw - self.d_sumwx**2)
                 / (self.d_sumw**2 - self.d_sumw2)
             )
 
-        def numEntries(self):
+        def numEntries(self) -> float:
             return self.d_numentries
 
         def __eq__(self, other):

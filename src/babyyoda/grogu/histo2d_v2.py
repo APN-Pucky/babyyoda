@@ -128,53 +128,64 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             self.d_sumwxy = sumWcross[0]
             self.d_numentries = numEntries
 
-        def xMin(self):
+        def xMin(self) -> Optional[float]:
             return self.d_xmin
 
-        def xMax(self):
+        def xMax(self) -> Optional[float]:
             return self.d_xmax
 
-        def xMid(self):
+        def xMid(self) -> Optional[float]:
+            if self.d_xmin is None or self.d_xmax is None:
+                return None
             return (self.d_xmin + self.d_xmax) / 2
 
-        def yMid(self):
+        def yMid(self) -> Optional[float]:
+            if self.d_ymin is None or self.d_ymax is None:
+                return None
             return (self.d_ymin + self.d_ymax) / 2
 
-        def yMin(self):
+        def yMin(self) -> Optional[float]:
             return self.d_ymin
 
-        def yMax(self):
+        def yMax(self) -> Optional[float]:
             return self.d_ymax
 
-        def sumW(self):
+        def sumW(self) -> float:
             return self.d_sumw
 
-        def sumW2(self):
+        def sumW2(self) -> float:
             return self.d_sumw2
 
-        def sumWX(self):
+        def sumWX(self) -> float:
             return self.d_sumwx
 
-        def sumWX2(self):
+        def sumWX2(self) -> float:
             return self.d_sumwx2
 
-        def sumWY(self):
+        def sumWY(self) -> float:
             return self.d_sumwy
 
-        def sumWY2(self):
+        def sumWY2(self) -> float:
             return self.d_sumwy2
 
-        def sumWXY(self):
+        def sumWXY(self) -> float:
             return self.d_sumwxy
 
-        def dVol(self):
+        def dVol(self) -> Optional[float]:
+            if (
+                self.d_xmin is None
+                or self.d_xmax is None
+                or self.d_ymin is None
+                or self.d_ymax is None
+            ):
+                return None
             return (self.d_xmax - self.d_xmin) * (self.d_ymax - self.d_ymin)
 
-        def crossTerm(self, x, y):
+        def crossTerm(self, x, y) -> float:
             assert (x == 0 and y == 1) or (x == 1 and y == 0)
             return self.sumWXY()
 
-        def numEntries(self):
+        def numEntries(self) -> float:
             return self.d_numentries
 
         def __add__(self, other):
@@ -260,7 +271,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
     def yMax(self) -> float:
         return max(b.d_ymax for b in self.d_bins)
 
-    def bins(self, includeOverflows=False):
+    def bins(self, includeOverflows: bool = False) -> list[Bin]:
         if includeOverflows:
             err = "includeFlow=True not supported"
             raise NotImplementedError(err)
@@ -270,16 +281,23 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         # YODA-2
         return sorted(self.d_bins, key=lambda b: (b.d_ymin, b.d_xmin))
 
-    def bin(self, index):
+    def bin(self, index: int) -> Bin:
         return self.bins()[index]
 
-    def binAt(self, x, y):
+    def binAt(self, x: float, y: float) -> Bin:
         for b in self.bins():
-            if b.d_xmin <= x < b.d_xmax and b.d_ymin <= y < b.d_ymax:
+            if (
+                b.d_xmin is not None
+                and b.d_xmax is not None
+                and b.d_ymin is not None
+                and b.d_ymax is not None
+                and b.d_xmin <= x < b.d_xmax
+                and b.d_ymin <= y < b.d_ymax
+            ):
                 return b
         return None
 
-    def rebinXYTo(self, xedges: list[float], yedges: list[float]):
+    def rebinXYTo(self, xedges: list[float], yedges: list[float]) -> None:
         own_xedges = self.xEdges()
         for e in xedges:
             assert e in own_xedges, f"Edge {e} not found in own edges {own_xedges}"
@@ -323,10 +341,10 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
 
         assert len(self.d_bins) == (len(self.xEdges()) - 1) * (len(self.yEdges()) - 1)
 
-    def rebinXTo(self, xedges: list[float]):
+    def rebinXTo(self, xedges: list[float]) -> None:
         self.rebinXYTo(xedges, self.yEdges())
 
-    def rebinYTo(self, yedges: list[float]):
+    def rebinYTo(self, yedges: list[float]) -> None:
         self.rebinXYTo(self.xEdges(), yedges)
 
     def get_projector(self):

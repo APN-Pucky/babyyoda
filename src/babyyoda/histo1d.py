@@ -1,6 +1,6 @@
 import contextlib
 import sys
-from typing import Any
+from typing import Any, Optional
 
 import numpy as np
 
@@ -24,7 +24,7 @@ def set_bin1d(target: Any, source: Any) -> None:
         raise NotImplementedError(err)
 
 
-def Histo1D(*args, **kwargs):
+def Histo1D(*args: Any, **kwargs: Any) -> "UHIHisto1D":
     """
     Automatically select the correct version of the Histo1D class
     """
@@ -40,6 +40,19 @@ def Histo1D(*args, **kwargs):
 
 # TODO make this implementation independent (no V2 or V3...)
 class UHIHisto1D(UHIAnalysisObject):
+    ######
+    # Minimum required functions
+    ######
+
+    def bins(self, includeOverflows: bool = False) -> list[Any]:
+        raise NotImplementedError
+
+    def xEdges(self) -> list[float]:
+        raise NotImplementedError
+
+    def annotationsDict(self) -> dict[str, Optional[str]]:
+        raise NotImplementedError
+
     ######
     # BACKENDS
     ######
@@ -141,10 +154,10 @@ class UHIHisto1D(UHIAnalysisObject):
     # YODA compatibility code (dropped legacy code?)
     ########################################################
 
-    def overflow(self):
+    def overflow(self) -> Any:
         return self.bins(includeOverflows=True)[-1]
 
-    def underflow(self):
+    def underflow(self) -> Any:
         return self.bins(includeOverflows=True)[0]
 
     def errWs(self):
@@ -187,7 +200,7 @@ class UHIHisto1D(UHIAnalysisObject):
     ########################################################
 
     @property
-    def axes(self):
+    def axes(self) -> list[list[tuple[float, float]]]:
         return [list(zip(self.xMins(), self.xMaxs()))]
 
     @property

@@ -1,3 +1,5 @@
+from typing import Any, Optional
+
 import yoda
 from packaging import version
 
@@ -7,7 +9,7 @@ from babyyoda.yoda.counter import Counter
 
 
 class Histo1D(babyyoda.UHIHisto1D):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         target is either a yoda or grogu HISTO1D_V2
         """
@@ -25,7 +27,7 @@ class Histo1D(babyyoda.UHIHisto1D):
     # Relay all attribute access to the target object
     ########################################################
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         # if we overwrite it here, use that
         if has_own_method(Histo1D, name):
             return getattr(self, name)
@@ -56,7 +58,7 @@ class Histo1D(babyyoda.UHIHisto1D):
     #    err = f"'{type(self.target).__name__}' object is not callable"
     #    raise TypeError(err)
 
-    def bins(self, includeOverflows=False, *args, **kwargs):
+    def bins(self, includeOverflows: bool = False, *args: Any, **kwargs: Any) -> Any:
         import yoda
 
         if version.parse(yoda.__version__) >= version.parse("2.0.0"):
@@ -70,31 +72,31 @@ class Histo1D(babyyoda.UHIHisto1D):
             ]
         return self.target.bins(*args, **kwargs)
 
-    def rebinXTo(self, *args, **kwargs):
+    def rebinXTo(self, *args: Any, **kwargs: Any) -> None:
         import yoda
 
         if version.parse(yoda.__version__) >= version.parse("2.0.0"):
-            return self.target.rebinXTo(*args, **kwargs)
-        return self.target.rebinTo(*args, **kwargs)
+            self.target.rebinXTo(*args, **kwargs)
+        self.target.rebinTo(*args, **kwargs)
 
-    def rebinXBy(self, *args, **kwargs):
+    def rebinXBy(self, *args: Any, **kwargs: Any) -> None:
         import yoda
 
         if version.parse(yoda.__version__) >= version.parse("2.0.0"):
-            return self.target.rebinXBy(*args, **kwargs)
-        return self.target.rebinBy(*args, **kwargs)
+            self.target.rebinXBy(*args, **kwargs)
+        self.target.rebinBy(*args, **kwargs)
 
-    def __getitem__(self, slices):
+    def __getitem__(self, slices: Any) -> Any:
         return super().__getitem__(slices)
 
-    def clone(self):
+    def clone(self) -> "Histo1D":
         return Histo1D(self.target.clone())
 
     def get_projector(self):
         return Counter
 
     # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
-    def annotationsDict(self):
+    def annotationsDict(self) -> dict[str, Optional[str]]:
         d = {}
         for k in self.target.annotations():
             d[k] = self.target.annotation(k)

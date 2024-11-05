@@ -16,7 +16,7 @@ def set_bin0d(target: Any, source: Any) -> None:
         raise NotImplementedError(err)
 
 
-def Counter(*args, **kwargs) -> "UHICounter":
+def Counter(*args: Any, **kwargs: Any) -> "UHICounter":
     """
     Automatically select the correct version of the Histo1D class
     """
@@ -103,24 +103,24 @@ class UHICounter(UHIAnalysisObject):
     ########################################################
 
     @property
-    def axes(self):
+    def axes(self) -> list[list[tuple[float, float]]]:
         return []
 
     @property
-    def kind(self):
+    def kind(self) -> str:
         # TODO reeavaluate this
         return "COUNT"
 
-    def counts(self):
+    def counts(self) -> float:
         return self.numEntries()
 
-    def values(self):
+    def values(self) -> float:
         return self.sumW()
 
-    def variances(self):
+    def variances(self) -> float:
         return self.sumW2()
 
-    def plot(self, *args, **kwargs):
+    def plot(self, *args: Any, **kwargs: Any) -> None:
         # TODO check UHI 0D plottable and mplhep hist plot 0D
         import matplotlib.pyplot as plt
 
@@ -138,7 +138,7 @@ class UHICounter(UHIAnalysisObject):
         # Show the plot
         # plt.show()
 
-    def _ipython_display_(self):
+    def _ipython_display_(self) -> None:
         with contextlib.suppress(ImportError):
             self.plot()
         return self
