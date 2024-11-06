@@ -196,12 +196,12 @@ class UHIHisto2D(UHIAnalysisObject):
     def sumWXYs(self) -> list[float]:
         return [b.crossTerm(0, 1) for b in self.bins()]
 
-    def xMean(self, includeOverflows: bool = True) -> float:
+    def xMean(self, includeOverflows: bool = True) -> Any:
         return sum(
             float(b.sumWX()) for b in self.bins(includeOverflows=includeOverflows)
         ) / sum(float(b.sumW()) for b in self.bins(includeOverflows=includeOverflows))
 
-    def yMean(self, includeOverflows: bool = True) -> float:
+    def yMean(self, includeOverflows: bool = True) -> Any:
         return sum(
             float(b.sumWY()) for b in self.bins(includeOverflows=includeOverflows)
         ) / sum(float(b.sumW()) for b in self.bins(includeOverflows=includeOverflows))
@@ -279,7 +279,7 @@ class UHIHisto2D(UHIAnalysisObject):
         err = f"loc {oloc.value} is not in the range of {bins}"
         raise ValueError(err)
 
-    def __get_x_index(self, slices: Union[int, loc]) -> Optional[int]:
+    def __get_x_index(self, slices: Union[int, loc, slice]) -> Optional[int]:
         ix = None
         if isinstance(slices, int):
             ix = slices
@@ -287,7 +287,7 @@ class UHIHisto2D(UHIAnalysisObject):
             ix = self.__get_index_by_loc(slices, self.axes[0])
         return ix
 
-    def __get_y_index(self, slices: Union[int, loc]) -> Optional[int]:
+    def __get_y_index(self, slices: Union[int, loc, slice]) -> Optional[int]:
         iy = None
         if isinstance(slices, int):
             iy = slices
@@ -296,7 +296,7 @@ class UHIHisto2D(UHIAnalysisObject):
         return iy
 
     def __get_indices(
-        self, slices: tuple[Union[int, loc], Union[int, loc]]
+        self, slices: tuple[Union[int, loc, slice], Union[int, loc, slice]]
     ) -> tuple[Optional[int], Optional[int]]:
         return self.__get_x_index(slices[0]), self.__get_y_index(slices[1])
 
@@ -366,9 +366,8 @@ class UHIHisto2D(UHIAnalysisObject):
                 return sc
             err = "Slice with Index not implemented"
             raise NotImplementedError(err)
-
         # TODO implement slice
-        err = "Invalid argument type"
+        err = "Invalid argument type"  # type: ignore[unreachable]
         raise TypeError(err)
 
     def projectX(self) -> Any:

@@ -1,6 +1,7 @@
 import contextlib
 from typing import Any, Optional
 
+import babyyoda
 from babyyoda.analysisobject import UHIAnalysisObject
 
 
@@ -70,7 +71,7 @@ class UHICounter(UHIAnalysisObject):
             ],
         )
 
-    def to_grogu_v3(self) -> Any:
+    def to_grogu_v3(self) -> "babyyoda.grogu.counter_v3.GROGU_COUNTER_V3":
         from babyyoda.grogu.counter_v3 import GROGU_COUNTER_V3
 
         return GROGU_COUNTER_V3(

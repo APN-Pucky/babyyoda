@@ -24,13 +24,15 @@ Histograms = Union[uhiHistograms, ggHistograms]
 
 
 def write(
-    histograms: Union[list[Histograms], dict[str, Histograms]], file_path: str, gz=False
+    histograms: Union[list[Histograms], dict[str, Histograms]],
+    file_path: str,
+    gz: bool = False,
 ) -> None:
     """Write multiple histograms to a file in YODA format."""
     with open_write_file(file_path, gz=gz) as f:
         # if dict loop over values
         if isinstance(histograms, dict):
-            histograms = histograms.values()
+            histograms = list(histograms.values())
         for histo in histograms:
             f.write(histo.to_string())
             f.write("\n")

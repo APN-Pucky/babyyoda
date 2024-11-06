@@ -51,8 +51,8 @@ def read(
     Histograms,
 ]:
     with _extract_fileobj(file_path) as f:
-        content = f.read()
-        content = content.decode("utf-8")
+        bcontent = f.read()
+        content = bcontent.decode("utf-8")
     pattern = re.compile(
         r"(BEGIN (YODA_[A-Z0-9_]+) ([^\n]+)\n(.*?)\nEND \2)", re.DOTALL
     )
@@ -62,23 +62,17 @@ def read(
 
     for full_match, hist_type, name, _body in matches:
         if hist_type == "YODA_COUNTER_V2":
-            hist = GROGU_COUNTER_V2.from_string(full_match)
-            histograms[name] = hist
+            histograms[name] = GROGU_COUNTER_V2.from_string(full_match)
         elif hist_type == "YODA_COUNTER_V3":
-            hist = GROGU_COUNTER_V3.from_string(full_match)
-            histograms[name] = hist
+            histograms[name] = GROGU_COUNTER_V3.from_string(full_match)
         elif hist_type == "YODA_HISTO1D_V2":
-            hist = GROGU_HISTO1D_V2.from_string(full_match)
-            histograms[name] = hist
+            histograms[name] = GROGU_HISTO1D_V2.from_string(full_match)
         elif hist_type == "YODA_HISTO1D_V3":
-            hist = GROGU_HISTO1D_V3.from_string(full_match)
-            histograms[name] = hist
+            histograms[name] = GROGU_HISTO1D_V3.from_string(full_match)
         elif hist_type == "YODA_HISTO2D_V2":
-            hist = GROGU_HISTO2D_V2.from_string(full_match)
-            histograms[name] = hist
+            histograms[name] = GROGU_HISTO2D_V2.from_string(full_match)
         elif hist_type == "YODA_HISTO2D_V3":
-            hist = GROGU_HISTO2D_V3.from_string(full_match)
-            histograms[name] = hist
+            histograms[name] = GROGU_HISTO2D_V3.from_string(full_match)
         else:
             # Add other parsing logic for different types if necessary
             print(f"Unknown type: {hist_type}, skipping...")

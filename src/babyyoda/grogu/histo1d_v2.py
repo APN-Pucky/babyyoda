@@ -261,32 +261,22 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
                 b.fill(x, weight, fraction)
         xmax = self.xMax()
         xmin = self.xMin()
-        if xmax is not None and x >= xmax and self.d_overflow is not None:
+        if x >= xmax and self.d_overflow is not None:
             self.d_overflow.fill(x, weight, fraction)
-        if xmin is not None and x < xmin and self.d_underflow is not None:
+        if x < xmin and self.d_underflow is not None:
             self.d_underflow.fill(x, weight, fraction)
 
-    def xMax(self) -> Optional[float]:
-        ret: Optional[float] = None
-        for b in self.d_bins:
-            xmax = b.xMax()
-            if xmax is not None and (ret is None or xmax > ret):
-                ret = b.xMax()
-        return ret
+    def xMax(self) -> float:
+        return max(b.d_xmax for b in self.d_bins if b.d_xmax is not None)
 
-    def xMin(self) -> Optional[float]:
-        ret: Optional[float] = None
-        for b in self.d_bins:
-            xmin = b.xMin()
-            if xmin is not None and (ret is None or xmin < ret):
-                ret = b.xMin()
-        return ret
+    def xMin(self) -> float:
+        return min(b.d_xmin for b in self.d_bins if b.d_xmin is not None)
 
     def bins(self, includeOverflows: bool = False) -> list[Bin]:
         if includeOverflows:
             return [self.d_underflow, *self.d_bins, self.d_overflow]
         # TODO sorted needed here?
-        return sorted(self.d_bins, key=lambda b: b.d_xmin)
+        return sorted(self.d_bins, key=lambda b: b.d_xmin or -float("inf"))
 
     def bin(self, *indices: int) -> list[Bin]:
         return [self.bins()[i] for i in indices]
@@ -301,9 +291,11 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         return 1
 
     def xEdges(self) -> list[float]:
-        return [b.xMin() for b in self.d_bins] + [self.xMax()]
+        return list(
+            {b.d_xmin for b in self.d_bins if b.d_xmin is not None} | {self.xMax()}
+        )
 
-    def rebinXTo(self, edges: list[float]):
+    def rebinXTo(self, edges: list[float]) -> None:
         own_edges = self.xEdges()
         for e in edges:
             assert e in own_edges, f"Edge {e} not found in own edges {own_edges}"
@@ -397,6 +389,9 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
                 bins.append(cls.Bin.from_string(line))
 
         # Create and return the YODA_HISTO1D_V2 object
+        if underflow is None or overflow is None or total is None:
+            err = "Underflow, overflow or total bin not found"
+            raise ValueError(err)
         return cls(
             d_key=key,
             d_annotations=annotations,

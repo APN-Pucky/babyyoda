@@ -6,7 +6,6 @@ import numpy as np
 
 import babyyoda
 from babyyoda.analysisobject import UHIAnalysisObject
-from babyyoda.counter import UHICounter
 from babyyoda.util import loc, overflow, project, rebin, rebinBy_to_rebinTo, underflow
 
 
@@ -232,14 +231,14 @@ class UHIHisto1D(UHIAnalysisObject):
     def __getitem__(
         self,
         slices: Union[
-            int, loc, type[babyyoda.util.underflow], type[babyyoda.util.overflow]
+            int, loc, slice, type[babyyoda.util.underflow], type[babyyoda.util.overflow]
         ],
     ) -> Any:
         index = self.__get_index(slices)
         # integer index
-        if isinstance(slices, int):
+        if isinstance(slices, int) and index is not None:
             return self.bins()[index]
-        if isinstance(slices, loc):
+        if isinstance(slices, loc) and index is not None:
             return self.bins()[index]
         if slices is underflow:
             return self.underflow()
@@ -281,9 +280,12 @@ class UHIHisto1D(UHIAnalysisObject):
         raise TypeError(err)
 
     def __get_index(
-        self, slices: Union[int, loc, babyyoda.util.underflow, babyyoda.util.overflow]
-    ) -> Optional[Union[int, babyyoda.util.underflow, babyyoda.util.overflow]]:
-        index: Optional[Union[int, underflow, overflow]] = None
+        self,
+        slices: Union[
+            int, loc, slice, type[babyyoda.util.underflow], type[babyyoda.util.overflow]
+        ],
+    ) -> Optional[int]:
+        index: Optional[int] = None
         if isinstance(slices, int):
             index = slices
             while index < 0:
@@ -297,30 +299,38 @@ class UHIHisto1D(UHIAnalysisObject):
                     and slices.value < self.xEdges()[i + 1]
                 ):
                     idx = i
-            index = idx + slices.offset
+            if idx is not None:
+                index = idx + slices.offset
         if slices is underflow:
-            index = underflow
+            index = None
         if slices is overflow:
-            index = overflow
+            index = None
         return index
 
     def __set_by_index(
-        self, index: Union[type[underflow], type[overflow], int], value
+        self,
+        index: Union[type[babyyoda.util.underflow], type[babyyoda.util.overflow], int],
+        value: Any,
     ) -> None:
-        if index == underflow:
+        if index is underflow:
             set_bin1d(self.underflow(), value)
             return
-        if index == overflow:
+        if index is overflow:
             set_bin1d(self.overflow(), value)
             return
-        set_bin1d(self.bins()[index], value)
+        if isinstance(index, int):
+            set_bin1d(self.bins()[index], value)
+            return
+        err = "Invalid argument type"
+        raise TypeError(err)
 
     def __setitem__(self, slices: Any, value: Any) -> None:
         # integer index
         index = self.__get_index(slices)
-        self.__set_by_index(index, value)
+        if index is not None:
+            self.__set_by_index(index, value)
 
-    def project(self) -> UHICounter:
+    def project(self) -> Any:
         # sc = self.clone().rebinTo(self.xEdges()[0], self.xEdges()[-1])
         p = self.get_projector()()
         p.set(
@@ -331,7 +341,7 @@ class UHIHisto1D(UHIAnalysisObject):
         p.setAnnotationsDict(self.annotationsDict())
         return p
 
-    def plot(self, *args, binwnorm: float = 1.0, **kwargs) -> None:
+    def plot(self, *args: Any, binwnorm: float = 1.0, **kwargs: Any) -> None:
         import mplhep as hep
 
         hep.histplot(
