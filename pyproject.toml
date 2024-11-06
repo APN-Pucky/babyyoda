@@ -164,3 +164,7 @@ addopts = [
     "--strict-markers",
     "--strict-config",
 ]
+filterwarnings = [
+  "error",
+  "ignore:Integer weights indicate poissonian data:UserWarning"
+]
