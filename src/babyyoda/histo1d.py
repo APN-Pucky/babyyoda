@@ -236,9 +236,7 @@ class UHIHisto1D(UHIAnalysisObject):
     ) -> Any:
         index = self.__get_index(slices)
         # integer index
-        if isinstance(slices, int) and index is not None:
-            return self.bins()[index]
-        if isinstance(slices, loc) and index is not None:
+        if isinstance(index, int):  # loc and int
             return self.bins()[index]
         if slices is underflow:
             return self.underflow()
@@ -254,6 +252,11 @@ class UHIHisto1D(UHIAnalysisObject):
                 self.__get_index(item.stop),
                 item.step,
             )
+            if not (start is None or isinstance(start, int)) or not (
+                stop is None or isinstance(stop, int)
+            ):
+                err = "Invalid argument type"
+                raise TypeError(err)
 
             sc = self.clone()
             if isinstance(step, rebin):
@@ -284,8 +287,12 @@ class UHIHisto1D(UHIAnalysisObject):
         slices: Union[
             int, loc, slice, type[babyyoda.util.underflow], type[babyyoda.util.overflow]
         ],
-    ) -> Optional[int]:
-        index: Optional[int] = None
+    ) -> Optional[
+        Union[int, type[babyyoda.util.underflow], type[babyyoda.util.overflow]]
+    ]:
+        index: Optional[
+            Union[type[Union[babyyoda.util.underflow, babyyoda.util.overflow]], int]
+        ] = None
         if isinstance(slices, int):
             index = slices
             while index < 0:
@@ -302,9 +309,9 @@ class UHIHisto1D(UHIAnalysisObject):
             if idx is not None:
                 index = idx + slices.offset
         if slices is underflow:
-            index = None
+            index = underflow
         if slices is overflow:
-            index = None
+            index = overflow
         return index
 
     def __set_by_index(
