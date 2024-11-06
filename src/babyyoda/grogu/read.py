@@ -1,6 +1,7 @@
 import gzip
 import re
-from typing import TextIO, Union
+from io import BufferedReader
+from typing import Union
 
 from babyyoda.grogu.counter_v2 import GROGU_COUNTER_V2
 from babyyoda.grogu.counter_v3 import GROGU_COUNTER_V3
@@ -11,7 +12,7 @@ from babyyoda.grogu.histo2d_v3 import GROGU_HISTO2D_V3
 
 
 # Copied from pylhe
-def _extract_fileobj(filepath: str) -> TextIO:
+def _extract_fileobj(filepath: str) -> Union[gzip.GzipFile, BufferedReader]:
     """
     Checks to see if a file is compressed, and if so, extract it with gzip
     so that the uncompressed file can be returned.
@@ -33,18 +34,21 @@ def _extract_fileobj(filepath: str) -> TextIO:
     )
 
 
+Histograms = Union[
+    GROGU_COUNTER_V2,
+    GROGU_COUNTER_V3,
+    GROGU_HISTO1D_V2,
+    GROGU_HISTO1D_V3,
+    GROGU_HISTO2D_V2,
+    GROGU_HISTO2D_V3,
+]
+
+
 def read(
     file_path: str,
 ) -> dict[
     str,
-    Union[
-        GROGU_COUNTER_V2,
-        GROGU_COUNTER_V3,
-        GROGU_HISTO1D_V2,
-        GROGU_HISTO1D_V3,
-        GROGU_HISTO2D_V2,
-        GROGU_HISTO2D_V3,
-    ],
+    Histograms,
 ]:
     with _extract_fileobj(file_path) as f:
         content = f.read()
@@ -54,7 +58,7 @@ def read(
     )
     matches = pattern.findall(content)
 
-    histograms = {}
+    histograms: dict[str, Histograms] = {}
 
     for full_match, hist_type, name, _body in matches:
         if hist_type == "YODA_COUNTER_V2":

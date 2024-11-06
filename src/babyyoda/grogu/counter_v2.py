@@ -26,20 +26,20 @@ class GROGU_COUNTER_V2(GROGU_ANALYSIS_OBJECT, UHICounter):
         # YODA compatibility code
         ########################################################
 
-        def clone(self):
+        def clone(self) -> "GROGU_COUNTER_V2.Bin":
             return GROGU_COUNTER_V2.Bin(
                 d_sumw=self.d_sumw,
                 d_sumw2=self.d_sumw2,
                 d_numentries=self.d_numentries,
             )
 
-        def fill(self, weight: float = 1.0, fraction: float = 1.0) -> bool:
+        def fill(self, weight: float = 1.0, fraction: float = 1.0) -> None:
             sf = fraction * weight
             self.d_sumw += sf
             self.d_sumw2 += sf * weight
             self.d_numentries += fraction
 
-        def set_bin(self, bin):
+        def set_bin(self, bin: Any) -> None:
             self.d_sumw = bin.sumW()
             self.d_sumw2 = bin.sumW2()
             self.d_numentries = bin.numEntries()
@@ -49,7 +49,7 @@ class GROGU_COUNTER_V2(GROGU_ANALYSIS_OBJECT, UHICounter):
             numEntries: float,
             sumW: Union[list[float], float],
             sumW2: Union[list[float], float],
-        ):
+        ) -> None:
             if isinstance(sumW, float):
                 sumW = [sumW]
             if isinstance(sumW2, float):
@@ -60,13 +60,13 @@ class GROGU_COUNTER_V2(GROGU_ANALYSIS_OBJECT, UHICounter):
             self.d_sumw2 = sumW2[0]
             self.d_numentries = numEntries
 
-        def sumW(self):
+        def sumW(self) -> float:
             return self.d_sumw
 
-        def sumW2(self):
+        def sumW2(self) -> float:
             return self.d_sumw2
 
-        def variance(self):
+        def variance(self) -> float:
             if self.d_sumw**2 - self.d_sumw2 == 0:
                 return 0
             return abs(
@@ -75,22 +75,22 @@ class GROGU_COUNTER_V2(GROGU_ANALYSIS_OBJECT, UHICounter):
             )
             # return self.d_sumw2/self.d_numentries - (self.d_sumw/self.d_numentries)**2
 
-        def errW(self):
+        def errW(self) -> Any:
             return self.d_sumw2**0.5
 
-        def stdDev(self):
+        def stdDev(self) -> Any:
             return self.variance() ** 0.5
 
-        def effNumEntries(self):
+        def effNumEntries(self) -> Any:
             return self.sumW() ** 2 / self.sumW2()
 
-        def stdErr(self):
+        def stdErr(self) -> Any:
             return self.stdDev() / self.effNumEntries() ** 0.5
 
-        def numEntries(self):
+        def numEntries(self) -> float:
             return self.d_numentries
 
-        def __eq__(self, other):
+        def __eq__(self, other: object) -> bool:
             return (
                 isinstance(other, GROGU_COUNTER_V2.Bin)
                 and self.d_sumw == other.d_sumw
@@ -98,7 +98,7 @@ class GROGU_COUNTER_V2(GROGU_ANALYSIS_OBJECT, UHICounter):
                 and self.d_numentries == other.d_numentries
             )
 
-        def __add__(self, other):
+        def __add__(self, other: Any) -> "GROGU_COUNTER_V2.Bin":
             assert isinstance(other, GROGU_COUNTER_V2.Bin)
             return GROGU_COUNTER_V2.Bin(
                 self.d_sumw + other.d_sumw,
@@ -128,30 +128,30 @@ class GROGU_COUNTER_V2(GROGU_ANALYSIS_OBJECT, UHICounter):
     # YODA compatibility code
     ############################################
 
-    def sumW(self):
+    def sumW(self) -> float:
         return self.d_bins[0].sumW()
 
-    def sumW2(self):
+    def sumW2(self) -> float:
         return self.d_bins[0].sumW2()
 
-    def numEntries(self):
+    def numEntries(self) -> float:
         return self.d_bins[0].numEntries()
 
-    def clone(self):
+    def clone(self) -> "GROGU_COUNTER_V2":
         return GROGU_COUNTER_V2(
             d_key=self.d_key,
             d_annotations=self.annotationsDict(),
             d_bins=[b.clone() for b in self.d_bins],
         )
 
-    def fill(self, weight=1.0, fraction=1.0):
+    def fill(self, weight: float = 1.0, fraction: float = 1.0) -> None:
         for b in self.bins():
             b.fill(weight=weight, fraction=fraction)
 
-    def set(self, *args, **kwargs):
+    def set(self, *args: Any, **kwargs: Any) -> None:
         self.d_bins[0].set(*args, **kwargs)
 
-    def bins(self):
+    def bins(self) -> list[Bin]:
         return self.d_bins
 
     @classmethod
@@ -191,7 +191,7 @@ class GROGU_COUNTER_V2(GROGU_ANALYSIS_OBJECT, UHICounter):
             d_bins=bins,
         )
 
-    def to_string(self):
+    def to_string(self) -> str:
         """Convert a YODA_COUNTER_V2 object to a formatted string."""
         header = (
             f"BEGIN YODA_COUNTER_V2 {self.d_key}\n"

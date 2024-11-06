@@ -92,7 +92,7 @@ class UHICounter(UHIAnalysisObject):
     def to_string(self) -> str:
         # Now we need to map YODA to grogu and then call to_string
         # TODO do we want to hardcode v3 here?
-        return self.to_grogu_v3().to_string()
+        return str(self.to_grogu_v3().to_string())
 
     ########################################################
     # YODA compatibility code (dropped legacy code?)
@@ -138,7 +138,7 @@ class UHICounter(UHIAnalysisObject):
         # Show the plot
         # plt.show()
 
-    def _ipython_display_(self) -> None:
+    def _ipython_display_(self) -> "UHICounter":
         with contextlib.suppress(ImportError):
             self.plot()
         return self

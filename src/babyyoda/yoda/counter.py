@@ -20,6 +20,35 @@ class Counter(babyyoda.UHICounter):
 
         super().__setattr__("target", target)
 
+    ##########################
+    # Basic needed functions for UHI directly relayed to target
+    ##########################
+
+    def path(self) -> str:
+        return str(self.target.path())
+
+    def sumW(self) -> float:
+        return float(self.target.sumW())
+
+    def sumW2(self) -> float:
+        return float(self.target.sumW2())
+
+    def numEntries(self) -> float:
+        return float(self.target.numEntries())
+
+    def bins(self, *args: Any, **kwargs: Any) -> Any:
+        return self.target.bins(*args, **kwargs)
+
+    def clone(self) -> "Counter":
+        return Counter(self.target.clone())
+
+    # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
+    def annotationsDict(self) -> dict[str, Optional[str]]:
+        d = {}
+        for k in self.target.annotations():
+            d[k] = self.target.annotation(k)
+        return d
+
     ########################################################
     # Relay all attribute access to the target object
     ########################################################
@@ -54,16 +83,3 @@ class Counter(babyyoda.UHICounter):
     #        return self.target(*args, **kwargs)
     #    err = f"'{type(self.target).__name__}' object is not callable"
     #    raise TypeError(err)
-
-    def bins(self, *args: Any, **kwargs: Any) -> Any:
-        return self.target.bins(*args, **kwargs)
-
-    def clone(self) -> "Counter":
-        return Counter(self.target.clone())
-
-    # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
-    def annotationsDict(self) -> dict[str, Optional[str]]:
-        d = {}
-        for k in self.target.annotations():
-            d[k] = self.target.annotation(k)
-        return d

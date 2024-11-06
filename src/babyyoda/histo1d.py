@@ -1,9 +1,10 @@
 import contextlib
 import sys
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import numpy as np
 
+import babyyoda
 from babyyoda.analysisobject import UHIAnalysisObject
 from babyyoda.counter import UHICounter
 from babyyoda.util import loc, overflow, project, rebin, rebinBy_to_rebinTo, underflow
@@ -51,6 +52,15 @@ class UHIHisto1D(UHIAnalysisObject):
         raise NotImplementedError
 
     def annotationsDict(self) -> dict[str, Optional[str]]:
+        raise NotImplementedError
+
+    def clone(self) -> "UHIHisto1D":
+        raise NotImplementedError
+
+    def get_projector(self) -> UHICounter:
+        raise NotImplementedError
+
+    def rebinXTo(self, bins: list[float]) -> None:
         raise NotImplementedError
 
     ######
@@ -148,7 +158,7 @@ class UHIHisto1D(UHIAnalysisObject):
     def to_string(self) -> str:
         # Now we need to map YODA to grogu and then call to_string
         # TODO do we want to hardcode v3 here?
-        return self.to_grogu_v3().to_string()
+        return str(self.to_grogu_v3().to_string())
 
     ########################################################
     # YODA compatibility code (dropped legacy code?)
@@ -160,39 +170,41 @@ class UHIHisto1D(UHIAnalysisObject):
     def underflow(self) -> Any:
         return self.bins(includeOverflows=True)[0]
 
-    def errWs(self):
+    def errWs(self) -> np.ndarray:
         return np.sqrt(np.array([b.sumW2() for b in self.bins()]))
 
-    def xMins(self):
+    def xMins(self) -> list[float]:
         return self.xEdges()[:-1]
         # return np.array([b.xMin() for b in self.bins()])
 
-    def xMaxs(self):
+    def xMaxs(self) -> list[float]:
         return self.xEdges()[1:]
         # return np.array([b.xMax() for b in self.bins()])
 
-    def sumWs(self):
-        return np.array([b.sumW() for b in self.bins()])
+    def sumWs(self) -> list[float]:
+        return [b.sumW() for b in self.bins()]
 
-    def sumW2s(self):
-        return np.array([b.sumW2() for b in self.bins()])
+    def sumW2s(self) -> list[float]:
+        return [b.sumW2() for b in self.bins()]
 
-    def xMean(self, includeOverflows=True):
+    def xMean(self, includeOverflows: bool = True) -> float:
         return sum(
-            b.sumWX() for b in self.bins(includeOverflows=includeOverflows)
-        ) / sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
+            float(b.sumWX()) for b in self.bins(includeOverflows=includeOverflows)
+        ) / sum(float(b.sumW()) for b in self.bins(includeOverflows=includeOverflows))
 
-    def integral(self, includeOverflows=True):
-        return sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
+    def integral(self, includeOverflows: bool = True) -> float:
+        return sum(
+            float(b.sumW()) for b in self.bins(includeOverflows=includeOverflows)
+        )
 
-    def rebinXBy(self, factor: int, begin=1, end=sys.maxsize):
+    def rebinXBy(self, factor: int, begin: int = 1, end: int = sys.maxsize) -> None:
         new_edges = rebinBy_to_rebinTo(self.xEdges(), factor, begin, end)
         self.rebinXTo(new_edges)
 
-    def rebinBy(self, *args, **kwargs):
+    def rebinBy(self, *args: Any, **kwargs: Any) -> None:
         self.rebinXBy(*args, **kwargs)
 
-    def rebinTo(self, *args, **kwargs):
+    def rebinTo(self, *args: Any, **kwargs: Any) -> None:
         self.rebinXTo(*args, **kwargs)
 
     ########################################################
@@ -204,20 +216,25 @@ class UHIHisto1D(UHIAnalysisObject):
         return [list(zip(self.xMins(), self.xMaxs()))]
 
     @property
-    def kind(self):
+    def kind(self) -> str:
         # TODO reeavaluate this
         return "COUNT"
 
-    def counts(self):
+    def counts(self) -> np.ndarray:
         return np.array([b.numEntries() for b in self.bins()])
 
-    def values(self):
+    def values(self) -> np.ndarray:
         return np.array([b.sumW() for b in self.bins()])
 
-    def variances(self):
+    def variances(self) -> np.ndarray:
         return np.array([(b.sumW2()) for b in self.bins()])
 
-    def __getitem__(self, slices):
+    def __getitem__(
+        self,
+        slices: Union[
+            int, loc, type[babyyoda.util.underflow], type[babyyoda.util.overflow]
+        ],
+    ) -> Any:
         index = self.__get_index(slices)
         # integer index
         if isinstance(slices, int):
@@ -263,8 +280,10 @@ class UHIHisto1D(UHIAnalysisObject):
         err = "Invalid argument type"
         raise TypeError(err)
 
-    def __get_index(self, slices):
-        index = None
+    def __get_index(
+        self, slices: Union[int, loc, babyyoda.util.underflow, babyyoda.util.overflow]
+    ) -> Optional[Union[int, babyyoda.util.underflow, babyyoda.util.overflow]]:
+        index: Optional[Union[int, underflow, overflow]] = None
         if isinstance(slices, int):
             index = slices
             while index < 0:
@@ -285,7 +304,9 @@ class UHIHisto1D(UHIAnalysisObject):
             index = overflow
         return index
 
-    def __set_by_index(self, index, value):
+    def __set_by_index(
+        self, index: Union[type[underflow], type[overflow], int], value
+    ) -> None:
         if index == underflow:
             set_bin1d(self.underflow(), value)
             return
@@ -294,7 +315,7 @@ class UHIHisto1D(UHIAnalysisObject):
             return
         set_bin1d(self.bins()[index], value)
 
-    def __setitem__(self, slices, value):
+    def __setitem__(self, slices: Any, value: Any) -> None:
         # integer index
         index = self.__get_index(slices)
         self.__set_by_index(index, value)
@@ -310,7 +331,7 @@ class UHIHisto1D(UHIAnalysisObject):
         p.setAnnotationsDict(self.annotationsDict())
         return p
 
-    def plot(self, *args, binwnorm=1.0, **kwargs):
+    def plot(self, *args, binwnorm: float = 1.0, **kwargs) -> None:
         import mplhep as hep
 
         hep.histplot(
@@ -322,7 +343,7 @@ class UHIHisto1D(UHIAnalysisObject):
             **kwargs,
         )
 
-    def _ipython_display_(self):
+    def _ipython_display_(self) -> "UHIHisto1D":
         with contextlib.suppress(ImportError):
             self.plot()
         return self

@@ -1,12 +1,12 @@
 import re
 from dataclasses import dataclass, field
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from babyyoda.counter import UHICounter
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
 
 
-def Counter_v3(title: Optional[str] = None, **kwargs) -> "GROGU_COUNTER_V3":
+def Counter_v3(title: Optional[str] = None, **kwargs: Any) -> "GROGU_COUNTER_V3":
     return GROGU_COUNTER_V3(
         d_bins=[GROGU_COUNTER_V3.Bin()],
         d_annotations={"Title": title} if title else {},
@@ -26,20 +26,20 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
         # YODA compatibility code
         ########################################################
 
-        def clone(self):
+        def clone(self) -> "GROGU_COUNTER_V3.Bin":
             return GROGU_COUNTER_V3.Bin(
                 d_sumw=self.d_sumw,
                 d_sumw2=self.d_sumw2,
                 d_numentries=self.d_numentries,
             )
 
-        def fill(self, weight: float = 1.0, fraction: float = 1.0) -> bool:
+        def fill(self, weight: float = 1.0, fraction: float = 1.0) -> None:
             sf = fraction * weight
             self.d_sumw += sf
             self.d_sumw2 += sf * weight
             self.d_numentries += fraction
 
-        def set_bin(self, bin):
+        def set_bin(self, bin: Any) -> None:
             self.d_sumw = bin.sumW()
             self.d_sumw2 = bin.sumW2()
             self.d_numentries = bin.numEntries()
@@ -49,7 +49,7 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
             numEntries: float,
             sumW: Union[list[float], float],
             sumW2: Union[list[float], float],
-        ):
+        ) -> None:
             if isinstance(sumW, float):
                 sumW = [sumW]
             if isinstance(sumW2, float):
@@ -75,22 +75,22 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
             )
             # return self.d_sumw2/self.d_numentries - (self.d_sumw/self.d_numentries)**2
 
-        def errW(self) -> float:
+        def errW(self) -> Any:
             return self.d_sumw2**0.5
 
-        def stdDev(self) -> float:
+        def stdDev(self) -> Any:
             return self.variance() ** 0.5
 
-        def effNumEntries(self) -> float:
+        def effNumEntries(self) -> Any:
             return self.sumW() ** 2 / self.sumW2()
 
-        def stdErr(self) -> float:
+        def stdErr(self) -> Any:
             return self.stdDev() / self.effNumEntries() ** 0.5
 
         def numEntries(self) -> float:
             return self.d_numentries
 
-        def __eq__(self, other):
+        def __eq__(self, other: object) -> bool:
             return (
                 isinstance(other, GROGU_COUNTER_V3.Bin)
                 and self.d_sumw == other.d_sumw
@@ -98,7 +98,7 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
                 and self.d_numentries == other.d_numentries
             )
 
-        def __add__(self, other):
+        def __add__(self, other: Any) -> "GROGU_COUNTER_V3.Bin":
             assert isinstance(other, GROGU_COUNTER_V3.Bin)
             return GROGU_COUNTER_V3.Bin(
                 self.d_sumw + other.d_sumw,
@@ -137,21 +137,21 @@ class GROGU_COUNTER_V3(GROGU_ANALYSIS_OBJECT, UHICounter):
     def numEntries(self) -> float:
         return self.d_bins[0].numEntries()
 
-    def clone(self):
+    def clone(self) -> "GROGU_COUNTER_V3":
         return GROGU_COUNTER_V3(
             d_key=self.d_key,
             d_annotations=self.annotationsDict(),
             d_bins=[b.clone() for b in self.d_bins],
         )
 
-    def fill(self, weight=1.0, fraction=1.0):
+    def fill(self, weight: float = 1.0, fraction: float = 1.0) -> None:
         for b in self.bins():
             b.fill(weight=weight, fraction=fraction)
 
-    def set(self, *args, **kwargs):
+    def set(self, *args: Any, **kwargs: Any) -> None:
         self.d_bins[0].set(*args, **kwargs)
 
-    def bins(self):
+    def bins(self) -> list[Bin]:
         return self.d_bins
 
     @classmethod

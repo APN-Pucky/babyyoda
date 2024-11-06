@@ -1,13 +1,15 @@
 import re
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Optional
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
 from babyyoda.grogu.counter_v2 import Counter_v2
 from babyyoda.histo1d import UHIHisto1D
 
 
-def Histo1D_v2(*args, title=None, **kwargs):
+def Histo1D_v2(
+    *args: Any, title: Optional[str] = None, **kwargs: Any
+) -> "GROGU_HISTO1D_V2":
     edges = []
     if isinstance(args[0], list):
         edges = args[0]
@@ -51,7 +53,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         d_sumwx2: float = 0.0
         d_numentries: float = 0.0
 
-        def __post_init__(self):
+        def __post_init__(self) -> None:
             assert (
                 self.d_xmin is None or self.d_xmax is None or self.d_xmin < self.d_xmax
             )
@@ -60,7 +62,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         # YODA compatibility code
         ########################################################
 
-        def clone(self):
+        def clone(self) -> "GROGU_HISTO1D_V2.Bin":
             return GROGU_HISTO1D_V2.Bin(
                 d_xmin=self.d_xmin,
                 d_xmax=self.d_xmax,
@@ -71,7 +73,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
                 d_numentries=self.d_numentries,
             )
 
-        def fill(self, x: float, weight: float = 1.0, fraction: float = 1.0) -> bool:
+        def fill(self, x: float, weight: float = 1.0, fraction: float = 1.0) -> None:
             # if (self.d_xmin is None or x > self.d_xmin) and (self.d_xmax is None or x < self.d_xmax):
             sf = fraction * weight
             self.d_sumw += sf
@@ -80,7 +82,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             self.d_sumwx2 += sf * x**2
             self.d_numentries += fraction
 
-        def set_bin(self, bin):
+        def set_bin(self, bin: Any) -> None:
             # TODO allow modify those?
             # self.d_xmin = bin.xMin()
             # self.d_xmax = bin.xMax()
@@ -90,7 +92,12 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             self.d_sumwx2 = bin.sumWX2()
             self.d_numentries = bin.numEntries()
 
-        def set(self, numEntries: float, sumW: list[float], sumW2: list[float]):
+        def contains(self, x: float) -> bool:
+            if self.d_xmin is None or self.d_xmax is None:
+                return False
+            return x >= self.d_xmin and x < self.d_xmax
+
+        def set(self, numEntries: float, sumW: list[float], sumW2: list[float]) -> None:
             assert len(sumW) == 2
             assert len(sumW2) == 2
             self.d_sumw = sumW[0]
@@ -131,16 +138,16 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             )
             # return self.d_sumw2/self.d_numentries - (self.d_sumw/self.d_numentries)**2
 
-        def errW(self) -> float:
+        def errW(self) -> Any:
             return self.d_sumw2**0.5
 
-        def stdDev(self) -> float:
+        def stdDev(self) -> Any:
             return self.variance() ** 0.5
 
-        def effNumEntries(self) -> float:
+        def effNumEntries(self) -> Any:
             return self.sumW() ** 2 / self.sumW2()
 
-        def stdErr(self) -> float:
+        def stdErr(self) -> Any:
             return self.stdDev() / self.effNumEntries() ** 0.5
 
         def dVol(self) -> Optional[float]:
@@ -148,7 +155,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
                 return None
             return self.d_xmax - self.d_xmin
 
-        def xVariance(self):
+        def xVariance(self) -> float:
             # return self.d_sumwx2/self.d_sumw - (self.d_sumwx/self.d_sumw)**2
             if self.d_sumw**2 - self.d_sumw2 == 0:
                 return 0
@@ -157,7 +164,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
                 / (self.d_sumw**2 - self.d_sumw2)
             )
 
-        def numEntries(self):
+        def numEntries(self) -> float:
             return self.d_numentries
 
         # def __eq__(self, other):
@@ -172,7 +179,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         #        and self.d_numentries == other.d_numentries
         #    )
 
-        def __add__(self, other):
+        def __add__(self, other: Any) -> "GROGU_HISTO1D_V2.Bin":
             assert isinstance(other, GROGU_HISTO1D_V2.Bin)
             return GROGU_HISTO1D_V2.Bin(
                 self.d_xmin,
@@ -212,7 +219,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
                 float(values[6]),
             )
 
-        def to_string(bin, label=None) -> str:
+        def to_string(bin, label: Optional[str] = None) -> str:
             """Convert a Histo1DBin object to a formatted string."""
             if label is None:
                 return f"{bin.d_xmin:<12.6e}\t{bin.d_xmax:<12.6e}\t{bin.d_sumw:<12.6e}\t{bin.d_sumw2:<12.6e}\t{bin.d_sumwx:<12.6e}\t{bin.d_sumwx2:<12.6e}\t{bin.d_numentries:<12.6e}"
@@ -223,7 +230,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
     d_underflow: Bin = field(default_factory=Bin)
     d_total: Bin = field(default_factory=Bin)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         GROGU_ANALYSIS_OBJECT.__post_init__(self)
         self.setAnnotation("Type", "Histo1D")
 
@@ -231,7 +238,7 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
     # YODA compatibility code
     ############################################
 
-    def clone(self):
+    def clone(self) -> "GROGU_HISTO1D_V2":
         return GROGU_HISTO1D_V2(
             d_key=self.d_key,
             d_annotations=self.annotationsDict(),
@@ -241,16 +248,16 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             d_total=self.d_total,
         )
 
-    def underflow(self):
+    def underflow(self) -> Bin:
         return self.d_underflow
 
-    def overflow(self):
+    def overflow(self) -> Bin:
         return self.d_overflow
 
-    def fill(self, x, weight=1.0, fraction=1.0):
+    def fill(self, x: float, weight: float = 1.0, fraction: float = 1.0) -> None:
         self.d_total.fill(x, weight, fraction)
         for b in self.d_bins:
-            if b.xMin() <= x < b.xMax():
+            if b.contains(x):
                 b.fill(x, weight, fraction)
         if x >= self.xMax() and self.d_overflow is not None:
             self.d_overflow.fill(x, weight, fraction)
@@ -258,23 +265,36 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             self.d_underflow.fill(x, weight, fraction)
 
     def xMax(self) -> Optional[float]:
-        return max([b.xMax() for b in self.d_bins])
+        ret = None
+        for b in self.d_bins:
+            if b.xMax() is not None and (ret is None or b.xMax() > ret):
+                ret = b.xMax()
+        return ret
+        # return max([b.xMax() for b in self.d_bins])
+        # filtere out None values
+        # return max((b.xMax() for b in self.d_bins).filter(lambda x: x is not None))
 
     def xMin(self) -> Optional[float]:
-        return min([b.xMin() for b in self.d_bins])
+        ret = None
+        for b in self.d_bins:
+            if b.xMin() is not None and (ret is None or b.xMin() < ret):
+                ret = b.xMin()
+        return ret
+        # return min([b.xMin() for b in self.d_bins])
+        # return min((b.xMin() for b in self.d_bins).filter(lambda x: x is not None))
 
-    def bins(self, includeOverflows=False):
+    def bins(self, includeOverflows: bool = False) -> list[Bin]:
         if includeOverflows:
             return [self.d_underflow, *self.d_bins, self.d_overflow]
         # TODO sorted needed here?
         return sorted(self.d_bins, key=lambda b: b.d_xmin)
 
-    def bin(self, *indices):
+    def bin(self, *indices: int) -> list[Bin]:
         return [self.bins()[i] for i in indices]
 
-    def binAt(self, x):
+    def binAt(self, x: float) -> Optional[Bin]:
         for b in self.bins():
-            if b.d_xmin <= x < b.d_xmax:
+            if b.contains(x):
                 return b
         return None
 
@@ -293,20 +313,24 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         for i in range(len(edges) - 1):
             new_bins.append(GROGU_HISTO1D_V2.Bin(d_xmin=edges[i], d_xmax=edges[i + 1]))
         for b in self.bins():
-            if b.xMid() < min(edges):
+            bm = b.xMid()
+            if bm is None:
+                err = "Bin has no xMid"
+                raise ValueError(err)
+            if bm < min(edges):
                 self.d_underflow += b
-            elif b.xMid() > max(edges):
+            elif bm > max(edges):
                 self.d_overflow += b
             else:
                 for i in range(len(edges) - 1):
-                    if edges[i] <= b.xMid() and b.xMid() <= edges[i + 1]:
+                    if edges[i] <= bm <= edges[i + 1]:
                         new_bins[i] += b
         self.d_bins = new_bins
 
         assert len(self.d_bins) == len(self.xEdges()) - 1
         # return self
 
-    def get_projector(self):
+    def get_projector(self) -> Any:
         return Counter_v2
 
     def to_string(histo) -> str:

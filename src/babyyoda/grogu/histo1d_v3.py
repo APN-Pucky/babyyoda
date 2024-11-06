@@ -1,14 +1,16 @@
 import copy
 import re
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Optional
 
 from babyyoda.grogu.analysis_object import GROGU_ANALYSIS_OBJECT
 from babyyoda.grogu.counter_v3 import Counter_v3
 from babyyoda.histo1d import UHIHisto1D
 
 
-def Histo1D_v3(*args: Any, title=None, **kwargs: Any) -> "GROGU_HISTO1D_V3":
+def Histo1D_v3(
+    *args: Any, title: Optional[str] = None, **kwargs: Any
+) -> "GROGU_HISTO1D_V3":
     edges = []
     if isinstance(args[0], list):
         edges = args[0]
@@ -49,7 +51,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         # YODA compatibility code
         ########################################################
 
-        def clone(self):
+        def clone(self) -> "GROGU_HISTO1D_V3.Bin":
             return GROGU_HISTO1D_V3.Bin(
                 d_sumw=self.d_sumw,
                 d_sumw2=self.d_sumw2,
@@ -58,7 +60,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
                 d_numentries=self.d_numentries,
             )
 
-        def fill(self, x: float, weight: float = 1.0, fraction: float = 1.0) -> bool:
+        def fill(self, x: float, weight: float = 1.0, fraction: float = 1.0) -> None:
             sf = fraction * weight
             self.d_sumw += sf
             self.d_sumw2 += sf * weight
@@ -66,14 +68,14 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             self.d_sumwx2 += sf * x**2
             self.d_numentries += fraction
 
-        def set_bin(self, bin):
+        def set_bin(self, bin: Any) -> None:
             self.d_sumw = bin.sumW()
             self.d_sumw2 = bin.sumW2()
             self.d_sumwx = bin.sumWX()
             self.d_sumwx2 = bin.sumWX2()
             self.d_numentries = bin.numEntries()
 
-        def set(self, numEntries: float, sumW: list[float], sumW2: list[float]):
+        def set(self, numEntries: float, sumW: list[float], sumW2: list[float]) -> None:
             assert len(sumW) == 2
             assert len(sumW2) == 2
             self.d_sumw = sumW[0]
@@ -112,16 +114,16 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             )
             # return self.d_sumw2/self.d_numentries - (self.d_sumw/self.d_numentries)**2
 
-        def errW(self) -> float:
+        def errW(self) -> Any:
             return self.d_sumw2**0.5
 
-        def stdDev(self) -> float:
+        def stdDev(self) -> Any:
             return self.variance() ** 0.5
 
-        def effNumEntries(self) -> float:
+        def effNumEntries(self) -> Any:
             return self.sumW() ** 2 / self.sumW2()
 
-        def stdErr(self) -> float:
+        def stdErr(self) -> Any:
             return self.stdDev() / self.effNumEntries() ** 0.5
 
         def xVariance(self) -> float:
@@ -136,7 +138,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         def numEntries(self) -> float:
             return self.d_numentries
 
-        def __eq__(self, other):
+        def __eq__(self, other: object) -> bool:
             return (
                 isinstance(other, GROGU_HISTO1D_V3.Bin)
                 and self.d_sumw == other.d_sumw
@@ -146,7 +148,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
                 and self.d_numentries == other.d_numentries
             )
 
-        def __add__(self, other):
+        def __add__(self, other: Any) -> "GROGU_HISTO1D_V3.Bin":
             assert isinstance(other, GROGU_HISTO1D_V3.Bin)
             return GROGU_HISTO1D_V3.Bin(
                 self.d_sumw + other.d_sumw,
@@ -211,13 +213,13 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
     def xMin(self) -> float:
         return min(self.xEdges())
 
-    def bins(self, includeOverflows=False):
+    def bins(self, includeOverflows: bool = False) -> list[Bin]:
         return self.d_bins[1:-1] if not includeOverflows else self.d_bins
 
-    def bin(self, *indices):
+    def bin(self, *indices: int) -> list[Bin]:
         return [self.bins()[i] for i in indices]
 
-    def binAt(self, x):
+    def binAt(self, x: float) -> Optional[Bin]:
         # TODO add tests for binAt
         for i, b in enumerate(self.bins()):
             if self.xEdges()[i] <= x < self.xEdges()[i + 1]:
@@ -230,10 +232,10 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
     def xEdges(self) -> list[float]:
         return self.d_edges
 
-    def xMid(self, i):
+    def xMid(self, i: int) -> float:
         return (self.xEdges()[i] + self.xEdges()[i + 1]) / 2
 
-    def rebinXTo(self, edges: list[float]):
+    def rebinXTo(self, edges: list[float]) -> None:
         own_edges = self.xEdges()
         for e in edges:
             assert e in own_edges, f"Edge {e} not found in own edges {own_edges}"
@@ -257,7 +259,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
 
         assert len(self.d_bins) == len(self.xEdges()) - 1 + 2
 
-    def get_projector(self):
+    def get_projector(self) -> Any:
         return Counter_v3
 
     @classmethod
@@ -305,7 +307,7 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
             d_edges=edges,
         )
 
-    def to_string(self):
+    def to_string(self) -> str:
         """Convert a YODA_HISTO1D_V3 object to a formatted string."""
         header = (
             f"BEGIN YODA_HISTO1D_V3 {self.d_key}\n"

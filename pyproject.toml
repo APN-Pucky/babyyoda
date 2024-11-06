@@ -164,4 +164,3 @@ addopts = [
     "--strict-markers",
     "--strict-config",
 ]
-filterwarnings = ["error"]

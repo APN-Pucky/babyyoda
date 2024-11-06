@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional, cast
 
 import yoda
 from packaging import version
@@ -9,7 +9,7 @@ from babyyoda.yoda.histo1d import Histo1D
 
 
 class Histo2D(babyyoda.UHIHisto2D):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """
         target is either a yoda or grogu HISTO2D_V2
         """
@@ -23,11 +23,56 @@ class Histo2D(babyyoda.UHIHisto2D):
         # Store the target object where calls and attributes will be forwarded
         super().__setattr__("target", target)
 
+    ##########################
+    # Basic needed functions for UHI directly relayed to target
+    ##########################
+
+    def clone(self) -> "Histo2D":
+        return Histo2D(self.target.clone())
+
+    def path(self) -> str:
+        return str(self.target.path())
+
+    def bins(self, includeOverflows: bool = False, *args: Any, **kwargs: Any) -> Any:
+        import yoda
+
+        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
+            return self.target.bins(*args, includeOverflows=includeOverflows, **kwargs)
+        if not includeOverflows:
+            # YODA1 bins are not sorted than YODA2
+            return sorted(
+                self.target.bins(*args, **kwargs), key=lambda b: (b.yMin(), b.xMin())
+            )
+        err = "YODA1 backend can not include overflows"
+        raise NotImplementedError(err)
+
+    def xEdges(self) -> list[float]:
+        return cast(list[float], self.target.xEdges())
+
+    def yEdges(self) -> list[float]:
+        return cast(list[float], self.target.yEdges())
+
+    def rebinXTo(self, bins: list[float]) -> None:
+        self.target.rebinXTo(bins)
+
+    def rebinYTo(self, bins: list[float]) -> None:
+        self.target.rebinYTo(bins)
+
+    def get_projector(self) -> Any:
+        return Histo1D
+
+    # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
+    def annotationsDict(self) -> dict[str, Optional[str]]:
+        d = {}
+        for k in self.target.annotations():
+            d[k] = self.target.annotation(k)
+        return d
+
     ########################################################
     # Relay all attribute access to the target object
     ########################################################
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: Any) -> Any:
         # if we overwrite it here, use that
         if has_own_method(Histo2D, name):
             return getattr(self, name)
@@ -58,31 +103,5 @@ class Histo2D(babyyoda.UHIHisto2D):
     #    err = f"'{type(self.target).__name__}' object is not callable"
     #    raise TypeError(err)
 
-    def bins(self, includeOverflows=False, *args, **kwargs):
-        import yoda
-
-        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
-            return self.target.bins(*args, includeOverflows=includeOverflows, **kwargs)
-        if not includeOverflows:
-            # YODA1 bins are not sorted than YODA2
-            return sorted(
-                self.target.bins(*args, **kwargs), key=lambda b: (b.yMin(), b.xMin())
-            )
-        err = "YODA1 backend can not include overflows"
-        raise NotImplementedError(err)
-
-    def __getitem__(self, slices):
+    def __getitem__(self, slices: Any) -> Any:
         return super().__getitem__(slices)
-
-    def clone(self):
-        return Histo2D(self.target.clone())
-
-    def get_projector(self):
-        return Histo1D
-
-    # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
-    def annotationsDict(self) -> dict[str, Optional[str]]:
-        d = {}
-        for k in self.target.annotations():
-            d[k] = self.target.annotation(k)
-        return d

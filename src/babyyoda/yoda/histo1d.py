@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import yoda
 from packaging import version
@@ -22,6 +22,59 @@ class Histo1D(babyyoda.UHIHisto1D):
             target = yoda.Histo1D(*args, **kwargs)
 
         super().__setattr__("target", target)
+
+    ##########################
+    # Basic needed functions for UHI directly relayed to target
+    ##########################
+
+    def path(self) -> str:
+        return str(self.target.path())
+
+    def clone(self) -> "Histo1D":
+        return Histo1D(self.target.clone())
+
+    def get_projector(self) -> Any:
+        return Counter
+
+    def xEdges(self) -> list[float]:
+        return cast(list[float], self.target.xEdges())
+
+    def bins(self, includeOverflows: bool = False, *args: Any, **kwargs: Any) -> Any:
+        import yoda
+
+        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
+            return self.target.bins(*args, includeOverflows=includeOverflows, **kwargs)
+        # YODA1 does not offer inlcudeOverflows
+        if includeOverflows:
+            return [
+                self.target.underflow(),
+                *self.target.bins(),
+                self.target.overflow(),
+            ]
+        return self.target.bins(*args, **kwargs)
+
+    def rebinXTo(self, *args: Any, **kwargs: Any) -> None:
+        import yoda
+
+        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
+            self.target.rebinXTo(*args, **kwargs)
+        else:
+            self.target.rebinTo(*args, **kwargs)
+
+    def rebinXBy(self, *args: Any, **kwargs: Any) -> None:
+        import yoda
+
+        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
+            self.target.rebinXBy(*args, **kwargs)
+        else:
+            self.target.rebinBy(*args, **kwargs)
+
+    # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
+    def annotationsDict(self) -> dict[str, Optional[str]]:
+        d = {}
+        for k in self.target.annotations():
+            d[k] = self.target.annotation(k)
+        return d
 
     ########################################################
     # Relay all attribute access to the target object
@@ -58,46 +111,5 @@ class Histo1D(babyyoda.UHIHisto1D):
     #    err = f"'{type(self.target).__name__}' object is not callable"
     #    raise TypeError(err)
 
-    def bins(self, includeOverflows: bool = False, *args: Any, **kwargs: Any) -> Any:
-        import yoda
-
-        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
-            return self.target.bins(*args, includeOverflows=includeOverflows, **kwargs)
-        # YODA1 does not offer inlcudeOverflows
-        if includeOverflows:
-            return [
-                self.target.underflow(),
-                *self.target.bins(),
-                self.target.overflow(),
-            ]
-        return self.target.bins(*args, **kwargs)
-
-    def rebinXTo(self, *args: Any, **kwargs: Any) -> None:
-        import yoda
-
-        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
-            self.target.rebinXTo(*args, **kwargs)
-        self.target.rebinTo(*args, **kwargs)
-
-    def rebinXBy(self, *args: Any, **kwargs: Any) -> None:
-        import yoda
-
-        if version.parse(yoda.__version__) >= version.parse("2.0.0"):
-            self.target.rebinXBy(*args, **kwargs)
-        self.target.rebinBy(*args, **kwargs)
-
     def __getitem__(self, slices: Any) -> Any:
         return super().__getitem__(slices)
-
-    def clone(self) -> "Histo1D":
-        return Histo1D(self.target.clone())
-
-    def get_projector(self):
-        return Counter
-
-    # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
-    def annotationsDict(self) -> dict[str, Optional[str]]:
-        d = {}
-        for k in self.target.annotations():
-            d[k] = self.target.annotation(k)
-        return d

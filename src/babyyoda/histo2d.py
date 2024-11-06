@@ -5,6 +5,7 @@ from typing import Any, Optional, Union
 import numpy as np
 
 from babyyoda.analysisobject import UHIAnalysisObject
+from babyyoda.histo1d import UHIHisto1D
 from babyyoda.util import (
     loc,
     overflow,
@@ -73,7 +74,7 @@ class UHIHisto2D(UHIAnalysisObject):
     def clone(self) -> "UHIHisto2D":
         raise NotImplementedError
 
-    def get_projector(self) -> Any:
+    def get_projector(self) -> type[UHIHisto1D]:
         raise NotImplementedError
 
     #####
@@ -198,16 +199,18 @@ class UHIHisto2D(UHIAnalysisObject):
 
     def xMean(self, includeOverflows: bool = True) -> float:
         return sum(
-            b.sumWX() for b in self.bins(includeOverflows=includeOverflows)
-        ) / sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
+            float(b.sumWX()) for b in self.bins(includeOverflows=includeOverflows)
+        ) / sum(float(b.sumW()) for b in self.bins(includeOverflows=includeOverflows))
 
     def yMean(self, includeOverflows: bool = True) -> float:
         return sum(
-            b.sumWY() for b in self.bins(includeOverflows=includeOverflows)
-        ) / sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
+            float(b.sumWY()) for b in self.bins(includeOverflows=includeOverflows)
+        ) / sum(float(b.sumW()) for b in self.bins(includeOverflows=includeOverflows))
 
     def integral(self, includeOverflows: bool = True) -> float:
-        return sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
+        return sum(
+            float(b.sumW()) for b in self.bins(includeOverflows=includeOverflows)
+        )
 
     def rebinXBy(self, factor: int, begin: int = 1, end: int = sys.maxsize) -> None:
         new_edges = rebinBy_to_rebinTo(self.xEdges(), factor, begin, end)
@@ -264,7 +267,7 @@ class UHIHisto2D(UHIAnalysisObject):
         return iy * len(self.axes[0]) + ix
         # return ix * len(self.axes[1]) + iy
 
-    def __get_by_indices(self, ix: int, iy: int) -> int:
+    def __get_by_indices(self, ix: int, iy: int) -> Any:
         return self.bins()[
             self.__single_index(ix, iy)
         ]  # THIS is the fault with/without overflows!
@@ -277,7 +280,7 @@ class UHIHisto2D(UHIAnalysisObject):
         err = f"loc {oloc.value} is not in the range of {bins}"
         raise ValueError(err)
 
-    def __get_x_index(self, slices: Union[int, loc]) -> int:
+    def __get_x_index(self, slices: Union[int, loc]) -> Optional[int]:
         ix = None
         if isinstance(slices, int):
             ix = slices
@@ -285,7 +288,7 @@ class UHIHisto2D(UHIAnalysisObject):
             ix = self.__get_index_by_loc(slices, self.axes[0])
         return ix
 
-    def __get_y_index(self, slices: Union[int, loc]) -> int:
+    def __get_y_index(self, slices: Union[int, loc]) -> Optional[int]:
         iy = None
         if isinstance(slices, int):
             iy = slices
@@ -295,21 +298,25 @@ class UHIHisto2D(UHIAnalysisObject):
 
     def __get_indices(
         self, slices: tuple[Union[int, loc], Union[int, loc]]
-    ) -> tuple[int, int]:
+    ) -> tuple[Optional[int], Optional[int]]:
         return self.__get_x_index(slices[0]), self.__get_y_index(slices[1])
 
-    def __setitem__(self, slices, value: Any) -> None:
+    def __setitem__(
+        self, slices: tuple[Union[int, slice, loc], Union[int, slice, loc]], value: Any
+    ) -> None:
         set_bin2d(self.__getitem__(slices), value)
 
-    def __getitem__(self, slices):
+    def __getitem__(
+        self, slices: tuple[Union[int, slice, loc], Union[int, slice, loc]]
+    ) -> Any:
         # integer index
-        if slices is underflow:
+        if slices is underflow:  # type: ignore[comparison-overlap]
             err = "No underflow bin in 2D histogram"
             raise TypeError(err)
-        if slices is overflow:
+        if slices is overflow:  # type: ignore[comparison-overlap]
             err = "No overflow bin in 2D histogram"
             raise TypeError(err)
-        if isinstance(slices, tuple) and len(slices) == 2:
+        if isinstance(slices, tuple) and len(slices) == 2:  # type: ignore[redundant-expr]
             ix, iy = self.__get_indices(slices)
             if isinstance(ix, int) and isinstance(iy, int):
                 return self.__get_by_indices(ix, iy)
@@ -317,18 +324,18 @@ class UHIHisto2D(UHIAnalysisObject):
                 slices = (slices[0], slice(iy, iy + 1, project))
             if isinstance(ix, int) and isinstance(slices[1], slice):
                 slices = (slice(ix, ix + 1, project), slices[1])
-            ix, iy = slices
+            s_ix, s_iy = slices
             sc = self.clone()
-            if isinstance(ix, slice) and isinstance(iy, slice):
+            if isinstance(s_ix, slice) and isinstance(s_iy, slice):
                 xstart, xstop, xstep = (
-                    self.__get_x_index(ix.start),
-                    self.__get_x_index(ix.stop),
-                    ix.step,
+                    self.__get_x_index(s_ix.start),
+                    self.__get_x_index(s_ix.stop),
+                    s_ix.step,
                 )
                 ystart, ystop, ystep = (
-                    self.__get_y_index(iy.start),
-                    self.__get_y_index(iy.stop),
-                    iy.step,
+                    self.__get_y_index(s_iy.start),
+                    self.__get_y_index(s_iy.stop),
+                    s_iy.step,
                 )
 
                 if isinstance(ystep, rebin):
@@ -365,7 +372,7 @@ class UHIHisto2D(UHIAnalysisObject):
         err = "Invalid argument type"
         raise TypeError(err)
 
-    def projectX(self):
+    def projectX(self) -> Any:
         # Sum
         c = self.clone()
         c.rebinXTo([self.xEdges()[0], self.xEdges()[-1]])
@@ -376,7 +383,7 @@ class UHIHisto2D(UHIAnalysisObject):
         p.setAnnotationsDict(self.annotationsDict())
         return p
 
-    def projectY(self):
+    def projectY(self) -> Any:
         # Sum
         c = self.clone()
         c.rebinYTo([self.yEdges()[0], self.yEdges()[-1]])
@@ -388,16 +395,16 @@ class UHIHisto2D(UHIAnalysisObject):
         return p
 
     # TODO maybe N dim project
-    def project(self, axis: int = 0):
+    def project(self, axis: int = 0) -> Any:
         assert axis in [0, 1]
         if axis == 0:
             return self.projectX()
         return self.projectY()
 
     def to_string(self) -> str:
-        return self.to_grogu_v3().to_string()
+        return str(self.to_grogu_v3().to_string())
 
-    def plot(self, *args, binwnorm=True, **kwargs):
+    def plot(self, *args: Any, binwnorm: bool = True, **kwargs: Any) -> None:
         # # TODO should use histplot
         # import mplhep as hep
 
@@ -415,7 +422,7 @@ class UHIHisto2D(UHIAnalysisObject):
             # Hack in the temporary division by dVol
             saved_values = self.values
 
-            def temp_values():
+            def temp_values() -> np.ndarray:
                 return (
                     np.array(
                         [b.sumW() / vol for b, vol in zip(self.bins(), self.dVols())]
@@ -424,12 +431,12 @@ class UHIHisto2D(UHIAnalysisObject):
                     .T
                 )
 
-            self.values = temp_values
+            self.values = temp_values  # type: ignore[method-assign]
         hep.hist2dplot(self, *args, **kwargs)
         if binwnorm:
-            self.values = saved_values
+            self.values = saved_values  # type: ignore[method-assign]
 
-    def _ipython_display_(self):
+    def _ipython_display_(self) -> "UHIHisto2D":
         with contextlib.suppress(ImportError):
             self.plot()
         return self
