@@ -1,14 +1,15 @@
 import contextlib
 import sys
+from typing import Any, Optional, Union
 
 import numpy as np
 
+import babyyoda
 from babyyoda.analysisobject import UHIAnalysisObject
-from babyyoda.counter import UHICounter
 from babyyoda.util import loc, overflow, project, rebin, rebinBy_to_rebinTo, underflow
 
 
-def set_bin1d(target, source):
+def set_bin1d(target: Any, source: Any) -> None:
     # TODO allow modify those?
     # self.d_xmin = bin.xMin()
     # self.d_xmax = bin.xMax()
@@ -23,24 +24,49 @@ def set_bin1d(target, source):
         raise NotImplementedError(err)
 
 
-def Histo1D(*args, **kwargs):
+def Histo1D(*args: Any, **kwargs: Any) -> "UHIHisto1D":
     """
     Automatically select the correct version of the Histo1D class
     """
     try:
         from babyyoda import yoda
+
+        return yoda.Histo1D(*args, **kwargs)
     except ImportError:
-        import babyyoda.grogu as yoda
-    return yoda.Histo1D(*args, **kwargs)
+        from babyyoda import grogu
+
+        return grogu.Histo1D(*args, **kwargs)
 
 
 # TODO make this implementation independent (no V2 or V3...)
 class UHIHisto1D(UHIAnalysisObject):
     ######
+    # Minimum required functions
+    ######
+
+    def bins(self, includeOverflows: bool = False) -> list[Any]:
+        raise NotImplementedError
+
+    def xEdges(self) -> list[float]:
+        raise NotImplementedError
+
+    def annotationsDict(self) -> dict[str, Optional[str]]:
+        raise NotImplementedError
+
+    def clone(self) -> "UHIHisto1D":
+        raise NotImplementedError
+
+    def get_projector(self) -> Any:
+        raise NotImplementedError
+
+    def rebinXTo(self, bins: list[float]) -> None:
+        raise NotImplementedError
+
+    ######
     # BACKENDS
     ######
 
-    def to_grogu_v2(self):
+    def to_grogu_v2(self) -> Any:
         from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 
         tot = GROGU_HISTO1D_V2.Bin()
@@ -87,7 +113,7 @@ class UHIHisto1D(UHIAnalysisObject):
             ),
         )
 
-    def to_grogu_v3(self):
+    def to_grogu_v3(self) -> Any:
         from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
 
         return GROGU_HISTO1D_V3(
@@ -124,58 +150,60 @@ class UHIHisto1D(UHIAnalysisObject):
             ],
         )
 
-    def to_yoda_v3(self):
+    def to_yoda_v3(self) -> Any:
         err = "Not implemented yet"
         raise NotImplementedError(err)
 
-    def to_string(self):
+    def to_string(self) -> str:
         # Now we need to map YODA to grogu and then call to_string
         # TODO do we want to hardcode v3 here?
-        return self.to_grogu_v3().to_string()
+        return str(self.to_grogu_v3().to_string())
 
     ########################################################
     # YODA compatibility code (dropped legacy code?)
     ########################################################
 
-    def overflow(self):
+    def overflow(self) -> Any:
         return self.bins(includeOverflows=True)[-1]
 
-    def underflow(self):
+    def underflow(self) -> Any:
         return self.bins(includeOverflows=True)[0]
 
-    def errWs(self):
+    def errWs(self) -> np.ndarray:
         return np.sqrt(np.array([b.sumW2() for b in self.bins()]))
 
-    def xMins(self):
+    def xMins(self) -> list[float]:
         return self.xEdges()[:-1]
         # return np.array([b.xMin() for b in self.bins()])
 
-    def xMaxs(self):
+    def xMaxs(self) -> list[float]:
         return self.xEdges()[1:]
         # return np.array([b.xMax() for b in self.bins()])
 
-    def sumWs(self):
-        return np.array([b.sumW() for b in self.bins()])
+    def sumWs(self) -> list[float]:
+        return [b.sumW() for b in self.bins()]
 
-    def sumW2s(self):
-        return np.array([b.sumW2() for b in self.bins()])
+    def sumW2s(self) -> list[float]:
+        return [b.sumW2() for b in self.bins()]
 
-    def xMean(self, includeOverflows=True):
+    def xMean(self, includeOverflows: bool = True) -> float:
         return sum(
-            b.sumWX() for b in self.bins(includeOverflows=includeOverflows)
-        ) / sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
+            float(b.sumWX()) for b in self.bins(includeOverflows=includeOverflows)
+        ) / sum(float(b.sumW()) for b in self.bins(includeOverflows=includeOverflows))
 
-    def integral(self, includeOverflows=True):
-        return sum(b.sumW() for b in self.bins(includeOverflows=includeOverflows))
+    def integral(self, includeOverflows: bool = True) -> float:
+        return sum(
+            float(b.sumW()) for b in self.bins(includeOverflows=includeOverflows)
+        )
 
-    def rebinXBy(self, factor: int, begin=1, end=sys.maxsize):
+    def rebinXBy(self, factor: int, begin: int = 1, end: int = sys.maxsize) -> None:
         new_edges = rebinBy_to_rebinTo(self.xEdges(), factor, begin, end)
         self.rebinXTo(new_edges)
 
-    def rebinBy(self, *args, **kwargs):
+    def rebinBy(self, *args: Any, **kwargs: Any) -> None:
         self.rebinXBy(*args, **kwargs)
 
-    def rebinTo(self, *args, **kwargs):
+    def rebinTo(self, *args: Any, **kwargs: Any) -> None:
         self.rebinXTo(*args, **kwargs)
 
     ########################################################
@@ -183,29 +211,32 @@ class UHIHisto1D(UHIAnalysisObject):
     ########################################################
 
     @property
-    def axes(self):
+    def axes(self) -> list[list[tuple[float, float]]]:
         return [list(zip(self.xMins(), self.xMaxs()))]
 
     @property
-    def kind(self):
+    def kind(self) -> str:
         # TODO reeavaluate this
         return "COUNT"
 
-    def counts(self):
+    def counts(self) -> np.ndarray:
         return np.array([b.numEntries() for b in self.bins()])
 
-    def values(self):
+    def values(self) -> np.ndarray:
         return np.array([b.sumW() for b in self.bins()])
 
-    def variances(self):
+    def variances(self) -> np.ndarray:
         return np.array([(b.sumW2()) for b in self.bins()])
 
-    def __getitem__(self, slices):
+    def __getitem__(
+        self,
+        slices: Union[
+            int, loc, slice, type[babyyoda.util.underflow], type[babyyoda.util.overflow]
+        ],
+    ) -> Any:
         index = self.__get_index(slices)
         # integer index
-        if isinstance(slices, int):
-            return self.bins()[index]
-        if isinstance(slices, loc):
+        if isinstance(index, int):  # loc and int
             return self.bins()[index]
         if slices is underflow:
             return self.underflow()
@@ -221,6 +252,11 @@ class UHIHisto1D(UHIAnalysisObject):
                 self.__get_index(item.stop),
                 item.step,
             )
+            if not (start is None or isinstance(start, int)) or not (
+                stop is None or isinstance(stop, int)
+            ):
+                err = "Invalid argument type"
+                raise TypeError(err)
 
             sc = self.clone()
             if isinstance(step, rebin):
@@ -246,8 +282,17 @@ class UHIHisto1D(UHIAnalysisObject):
         err = "Invalid argument type"
         raise TypeError(err)
 
-    def __get_index(self, slices):
-        index = None
+    def __get_index(
+        self,
+        slices: Union[
+            int, loc, slice, type[babyyoda.util.underflow], type[babyyoda.util.overflow]
+        ],
+    ) -> Optional[
+        Union[int, type[babyyoda.util.underflow], type[babyyoda.util.overflow]]
+    ]:
+        index: Optional[
+            Union[type[Union[babyyoda.util.underflow, babyyoda.util.overflow]], int]
+        ] = None
         if isinstance(slices, int):
             index = slices
             while index < 0:
@@ -261,28 +306,38 @@ class UHIHisto1D(UHIAnalysisObject):
                     and slices.value < self.xEdges()[i + 1]
                 ):
                     idx = i
-            index = idx + slices.offset
+            if idx is not None:
+                index = idx + slices.offset
         if slices is underflow:
             index = underflow
         if slices is overflow:
             index = overflow
         return index
 
-    def __set_by_index(self, index, value):
-        if index == underflow:
+    def __set_by_index(
+        self,
+        index: Union[type[babyyoda.util.underflow], type[babyyoda.util.overflow], int],
+        value: Any,
+    ) -> None:
+        if index is underflow:
             set_bin1d(self.underflow(), value)
             return
-        if index == overflow:
+        if index is overflow:
             set_bin1d(self.overflow(), value)
             return
-        set_bin1d(self.bins()[index], value)
+        if isinstance(index, int):
+            set_bin1d(self.bins()[index], value)
+            return
+        err = "Invalid argument type"
+        raise TypeError(err)
 
-    def __setitem__(self, slices, value):
+    def __setitem__(self, slices: Any, value: Any) -> None:
         # integer index
         index = self.__get_index(slices)
-        self.__set_by_index(index, value)
+        if index is not None:
+            self.__set_by_index(index, value)
 
-    def project(self) -> UHICounter:
+    def project(self) -> Any:
         # sc = self.clone().rebinTo(self.xEdges()[0], self.xEdges()[-1])
         p = self.get_projector()()
         p.set(
@@ -293,7 +348,7 @@ class UHIHisto1D(UHIAnalysisObject):
         p.setAnnotationsDict(self.annotationsDict())
         return p
 
-    def plot(self, *args, binwnorm=1.0, **kwargs):
+    def plot(self, *args: Any, binwnorm: float = 1.0, **kwargs: Any) -> None:
         import mplhep as hep
 
         hep.histplot(
@@ -305,7 +360,7 @@ class UHIHisto1D(UHIAnalysisObject):
             **kwargs,
         )
 
-    def _ipython_display_(self):
+    def _ipython_display_(self) -> "UHIHisto1D":
         with contextlib.suppress(ImportError):
             self.plot()
         return self

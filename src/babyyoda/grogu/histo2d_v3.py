@@ -2,6 +2,7 @@ import copy
 import re
 import sys
 from dataclasses import dataclass, field
+from typing import Any, Optional
 
 import numpy as np
 
@@ -10,14 +11,14 @@ from babyyoda.grogu.histo1d_v3 import Histo1D_v3
 from babyyoda.histo2d import UHIHisto2D
 
 
-def to_index(x, y, xedges, yedges):
+def to_index(x: float, y: float, xedges: list[float], yedges: list[float]) -> float:
     # get ix and iy to map to correct bin
-    fix = None
+    fix = 0
     for ix, xEdge in enumerate([*xedges, sys.float_info.max]):
         fix = ix
         if x < xEdge:
             break
-    fiy = None
+    fiy = 0
     for iy, yEdge in enumerate([*yedges, sys.float_info.max]):
         fiy = iy
         if y < yEdge:
@@ -27,10 +28,10 @@ def to_index(x, y, xedges, yedges):
 
 
 def Histo2D_v3(
-    *args,
-    title=None,
-    **kwargs,
-):
+    *args: Any,
+    title: Optional[str] = None,
+    **kwargs: Any,
+) -> "GROGU_HISTO2D_V3":
     xedges = []
     yedges = []
     if isinstance(args[0], list) and isinstance(args[1], list):
@@ -81,7 +82,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         d_sumwxy: float = 0.0
         d_numentries: float = 0.0
 
-        def clone(self):
+        def clone(self) -> "GROGU_HISTO2D_V3.Bin":
             return GROGU_HISTO2D_V3.Bin(
                 d_sumw=self.d_sumw,
                 d_sumw2=self.d_sumw2,
@@ -93,7 +94,9 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
                 d_numentries=self.d_numentries,
             )
 
-        def fill(self, x: float, y: float, weight: float = 1.0, fraction=1.0):
+        def fill(
+            self, x: float, y: float, weight: float = 1.0, fraction: float = 1.0
+        ) -> None:
             sf = fraction * weight
             self.d_sumw += sf
             self.d_sumw2 += sf * weight
@@ -104,7 +107,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             self.d_sumwxy += sf * x * y
             self.d_numentries += fraction
 
-        def set_bin(self, bin):
+        def set_bin(self, bin: Any) -> None:
             self.d_sumw = bin.sumW()
             self.d_sumw2 = bin.sumW2()
             self.d_sumwx = bin.sumWX()
@@ -120,7 +123,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             sumW: list[float],
             sumW2: list[float],
             sumWcross: list[float],
-        ):
+        ) -> None:
             assert len(sumW) == 3
             assert len(sumW2) == 3
             assert len(sumWcross) == 1
@@ -133,32 +136,32 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             self.d_sumwxy = sumWcross[0]
             self.d_numentries = numEntries
 
-        def sumW(self):
+        def sumW(self) -> float:
             return self.d_sumw
 
-        def sumW2(self):
+        def sumW2(self) -> float:
             return self.d_sumw2
 
-        def sumWX(self):
+        def sumWX(self) -> float:
             return self.d_sumwx
 
-        def sumWX2(self):
+        def sumWX2(self) -> float:
             return self.d_sumwx2
 
-        def sumWY(self):
+        def sumWY(self) -> float:
             return self.d_sumwy
 
-        def sumWY2(self):
+        def sumWY2(self) -> float:
             return self.d_sumwy2
 
-        def sumWXY(self):
+        def sumWXY(self) -> float:
             return self.d_sumwxy
 
-        def crossTerm(self, x, y):
+        def crossTerm(self, x: int, y: int) -> float:
             assert (x == 0 and y == 1) or (x == 1 and y == 0)
             return self.sumWXY()
 
-        def numEntries(self):
+        def numEntries(self) -> float:
             return self.d_numentries
 
         def __add__(self, other: "GROGU_HISTO2D_V3.Bin") -> "GROGU_HISTO2D_V3.Bin":
@@ -191,7 +194,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
     d_bins: list[Bin] = field(default_factory=list)
     d_edges: list[list[float]] = field(default_factory=list)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         GROGU_ANALYSIS_OBJECT.__post_init__(self)
         self.setAnnotation("Type", "Histo2D")
 
@@ -201,10 +204,10 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         )
 
     #
-    # YODA compatibilty code
+    # YODA compatibility code
     #
 
-    def clone(self):
+    def clone(self) -> "GROGU_HISTO2D_V3":
         return GROGU_HISTO2D_V3(
             d_key=self.d_key,
             d_annotations=self.annotationsDict(),
@@ -212,35 +215,37 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             d_edges=copy.deepcopy(self.d_edges),
         )
 
-    def xEdges(self):
+    def xEdges(self) -> list[float]:
         return self.d_edges[0]
 
-    def yEdges(self):
+    def yEdges(self) -> list[float]:
         return self.d_edges[1]
 
-    def fill(self, x, y, weight=1.0, fraction=1.0):
+    def fill(
+        self, x: float, y: float, weight: float = 1.0, fraction: float = 1.0
+    ) -> None:
         # Also fill overflow bins
         self.bins(True)[to_index(x, y, self.xEdges(), self.yEdges())].fill(
             x, y, weight, fraction
         )
 
-    def xMax(self):
+    def xMax(self) -> float:
         assert max(self.xEdges()) == self.xEdges()[-1], "xMax is not the last edge"
         return self.xEdges()[-1]
 
-    def xMin(self):
+    def xMin(self) -> float:
         assert min(self.xEdges()) == self.xEdges()[0], "xMin is not the first edge"
         return self.xEdges()[0]
 
-    def yMax(self):
+    def yMax(self) -> float:
         assert max(self.yEdges()) == self.yEdges()[-1], "yMax is not the last edge"
         return self.yEdges()[-1]
 
-    def yMin(self):
+    def yMin(self) -> float:
         assert min(self.yEdges()) == self.yEdges()[0], "yMin is not the first edge"
         return self.yEdges()[0]
 
-    def bins(self, includeOverflows=False):
+    def bins(self, includeOverflows: bool = False) -> np.ndarray:
         if includeOverflows:
             return self.d_bins
         # TODO consider represent data always as numpy
@@ -250,7 +255,7 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
             .flatten()
         )
 
-    def rebinXYTo(self, xedges: list[float], yedges: list[float]):
+    def rebinXYTo(self, xedges: list[float], yedges: list[float]) -> None:
         # print(f"rebinXYTo : {self.xEdges()} -> {xedges}, {self.yEdges()} -> {yedges}")
         own_xedges = self.xEdges()
         for e in xedges:
@@ -308,13 +313,13 @@ class GROGU_HISTO2D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
 
         assert len(self.d_bins) == (len(xedges) + 1) * (len(yedges) + 1)
 
-    def rebinXTo(self, xedges: list[float]):
+    def rebinXTo(self, xedges: list[float]) -> None:
         self.rebinXYTo(xedges, self.yEdges())
 
-    def rebinYTo(self, yedges: list[float]):
+    def rebinYTo(self, yedges: list[float]) -> None:
         self.rebinXYTo(self.xEdges(), yedges)
 
-    def get_projector(self):
+    def get_projector(self) -> Any:
         return Histo1D_v3
 
     def to_string(self) -> str:

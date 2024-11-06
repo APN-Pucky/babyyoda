@@ -1,5 +1,7 @@
 import gzip
 import re
+from io import BufferedReader
+from typing import Union
 
 from babyyoda.grogu.counter_v2 import GROGU_COUNTER_V2
 from babyyoda.grogu.counter_v3 import GROGU_COUNTER_V3
@@ -10,7 +12,7 @@ from babyyoda.grogu.histo2d_v3 import GROGU_HISTO2D_V3
 
 
 # Copied from pylhe
-def _extract_fileobj(filepath):
+def _extract_fileobj(filepath: str) -> Union[gzip.GzipFile, BufferedReader]:
     """
     Checks to see if a file is compressed, and if so, extract it with gzip
     so that the uncompressed file can be returned.
@@ -32,36 +34,45 @@ def _extract_fileobj(filepath):
     )
 
 
-def read(file_path: str):
+Histograms = Union[
+    GROGU_COUNTER_V2,
+    GROGU_COUNTER_V3,
+    GROGU_HISTO1D_V2,
+    GROGU_HISTO1D_V3,
+    GROGU_HISTO2D_V2,
+    GROGU_HISTO2D_V3,
+]
+
+
+def read(
+    file_path: str,
+) -> dict[
+    str,
+    Histograms,
+]:
     with _extract_fileobj(file_path) as f:
-        content = f.read()
-        content = content.decode("utf-8")
+        bcontent = f.read()
+        content = bcontent.decode("utf-8")
     pattern = re.compile(
         r"(BEGIN (YODA_[A-Z0-9_]+) ([^\n]+)\n(.*?)\nEND \2)", re.DOTALL
     )
     matches = pattern.findall(content)
 
-    histograms = {}
+    histograms: dict[str, Histograms] = {}
 
     for full_match, hist_type, name, _body in matches:
         if hist_type == "YODA_COUNTER_V2":
-            hist = GROGU_COUNTER_V2.from_string(full_match)
-            histograms[name] = hist
+            histograms[name] = GROGU_COUNTER_V2.from_string(full_match)
         elif hist_type == "YODA_COUNTER_V3":
-            hist = GROGU_COUNTER_V3.from_string(full_match)
-            histograms[name] = hist
+            histograms[name] = GROGU_COUNTER_V3.from_string(full_match)
         elif hist_type == "YODA_HISTO1D_V2":
-            hist = GROGU_HISTO1D_V2.from_string(full_match)
-            histograms[name] = hist
+            histograms[name] = GROGU_HISTO1D_V2.from_string(full_match)
         elif hist_type == "YODA_HISTO1D_V3":
-            hist = GROGU_HISTO1D_V3.from_string(full_match)
-            histograms[name] = hist
+            histograms[name] = GROGU_HISTO1D_V3.from_string(full_match)
         elif hist_type == "YODA_HISTO2D_V2":
-            hist = GROGU_HISTO2D_V2.from_string(full_match)
-            histograms[name] = hist
+            histograms[name] = GROGU_HISTO2D_V2.from_string(full_match)
         elif hist_type == "YODA_HISTO2D_V3":
-            hist = GROGU_HISTO2D_V3.from_string(full_match)
-            histograms[name] = hist
+            histograms[name] = GROGU_HISTO2D_V3.from_string(full_match)
         else:
             # Add other parsing logic for different types if necessary
             print(f"Unknown type: {hist_type}, skipping...")

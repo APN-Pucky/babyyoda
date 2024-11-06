@@ -1,10 +1,15 @@
+from typing import Any
+
 from babyyoda import grogu
 
 
-def write(anyhistograms, file_path: str, *args, **kwargs):
+def write(anyhistograms: Any, file_path: str, *args: Any, **kwargs: Any) -> None:
+    listhistograms: list[Any] = []
     # if dict loop over values
     if isinstance(anyhistograms, dict):
-        listhistograms = anyhistograms.values()
+        listhistograms = list(anyhistograms.values())
+    elif isinstance(anyhistograms, list):
+        listhistograms = anyhistograms
     # check if all histograms are yoda => use yoda
     use_yoda = True
     try:
@@ -24,11 +29,11 @@ def write(anyhistograms, file_path: str, *args, **kwargs):
 
 
 # These functions are just to be similar to the read functions
-def write_grogu(histograms, file_path: str, gz=False):
+def write_grogu(histograms: Any, file_path: str, gz: bool = False) -> None:
     grogu.write(histograms, file_path, gz=gz)
 
 
-def write_yoda(histograms, file_path: str, gz=False):
+def write_yoda(histograms: Any, file_path: str, gz: bool = False) -> None:
     # TODO we could force convert to YODA in Histo{1,2}D here ...
     from babyyoda import yoda
 

@@ -1,9 +1,11 @@
 import contextlib
+from typing import Any, Optional
 
+import babyyoda
 from babyyoda.analysisobject import UHIAnalysisObject
 
 
-def set_bin0d(target, source):
+def set_bin0d(target: Any, source: Any) -> None:
     if hasattr(target, "set"):
         target.set(
             source.numEntries(),
@@ -15,24 +17,46 @@ def set_bin0d(target, source):
         raise NotImplementedError(err)
 
 
-def Counter(*args, **kwargs):
+def Counter(*args: Any, **kwargs: Any) -> "UHICounter":
     """
     Automatically select the correct version of the Histo1D class
     """
     try:
         from babyyoda import yoda
+
+        return yoda.Counter(*args, **kwargs)
     except ImportError:
-        import babyyoda.grogu as yoda
-    return yoda.Counter(*args, **kwargs)
+        from babyyoda import grogu
+
+        return grogu.Counter(*args, **kwargs)
 
 
 # TODO make this implementation independent (no V2 or V3...)
 class UHICounter(UHIAnalysisObject):
     ######
+    # Minimum required functions
+    ######
+
+    def sumW(self) -> float:
+        raise NotImplementedError
+
+    def sumW2(self) -> float:
+        raise NotImplementedError
+
+    def numEntries(self) -> float:
+        raise NotImplementedError
+
+    def annotationsDict(self) -> dict[str, Optional[str]]:
+        raise NotImplementedError
+
+    def clone(self) -> "UHICounter":
+        raise NotImplementedError
+
+    ######
     # BACKENDS
     ######
 
-    def to_grogu_v2(self):
+    def to_grogu_v2(self) -> Any:
         from babyyoda.grogu.counter_v2 import GROGU_COUNTER_V2
 
         return GROGU_COUNTER_V2(
@@ -47,7 +71,7 @@ class UHICounter(UHIAnalysisObject):
             ],
         )
 
-    def to_grogu_v3(self):
+    def to_grogu_v3(self) -> "babyyoda.grogu.counter_v3.GROGU_COUNTER_V3":
         from babyyoda.grogu.counter_v3 import GROGU_COUNTER_V3
 
         return GROGU_COUNTER_V3(
@@ -62,14 +86,14 @@ class UHICounter(UHIAnalysisObject):
             ],
         )
 
-    def to_yoda_v3(self):
+    def to_yoda_v3(self) -> Any:
         err = "Not implemented yet"
         raise NotImplementedError(err)
 
-    def to_string(self):
+    def to_string(self) -> str:
         # Now we need to map YODA to grogu and then call to_string
         # TODO do we want to hardcode v3 here?
-        return self.to_grogu_v3().to_string()
+        return str(self.to_grogu_v3().to_string())
 
     ########################################################
     # YODA compatibility code (dropped legacy code?)
@@ -80,24 +104,24 @@ class UHICounter(UHIAnalysisObject):
     ########################################################
 
     @property
-    def axes(self):
+    def axes(self) -> list[list[tuple[float, float]]]:
         return []
 
     @property
-    def kind(self):
+    def kind(self) -> str:
         # TODO reeavaluate this
         return "COUNT"
 
-    def counts(self):
+    def counts(self) -> float:
         return self.numEntries()
 
-    def values(self):
+    def values(self) -> float:
         return self.sumW()
 
-    def variances(self):
+    def variances(self) -> float:
         return self.sumW2()
 
-    def plot(self, *args, **kwargs):
+    def plot(self, *args: Any, **kwargs: Any) -> None:
         # TODO check UHI 0D plottable and mplhep hist plot 0D
         import matplotlib.pyplot as plt
 
@@ -115,7 +139,7 @@ class UHICounter(UHIAnalysisObject):
         # Show the plot
         # plt.show()
 
-    def _ipython_display_(self):
+    def _ipython_display_(self) -> "UHICounter":
         with contextlib.suppress(ImportError):
             self.plot()
         return self
