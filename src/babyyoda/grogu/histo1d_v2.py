@@ -259,29 +259,28 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         for b in self.d_bins:
             if b.contains(x):
                 b.fill(x, weight, fraction)
-        if x >= self.xMax() and self.d_overflow is not None:
+        xmax = self.xMax()
+        xmin = self.xMin()
+        if xmax is not None and x >= xmax and self.d_overflow is not None:
             self.d_overflow.fill(x, weight, fraction)
-        if x < self.xMin() and self.d_underflow is not None:
+        if xmin is not None and x < xmin and self.d_underflow is not None:
             self.d_underflow.fill(x, weight, fraction)
 
     def xMax(self) -> Optional[float]:
-        ret = None
+        ret: Optional[float] = None
         for b in self.d_bins:
-            if b.xMax() is not None and (ret is None or b.xMax() > ret):
+            xmax = b.xMax()
+            if xmax is not None and (ret is None or xmax > ret):
                 ret = b.xMax()
         return ret
-        # return max([b.xMax() for b in self.d_bins])
-        # filtere out None values
-        # return max((b.xMax() for b in self.d_bins).filter(lambda x: x is not None))
 
     def xMin(self) -> Optional[float]:
-        ret = None
+        ret: Optional[float] = None
         for b in self.d_bins:
-            if b.xMin() is not None and (ret is None or b.xMin() < ret):
+            xmin = b.xMin()
+            if xmin is not None and (ret is None or xmin < ret):
                 ret = b.xMin()
         return ret
-        # return min([b.xMin() for b in self.d_bins])
-        # return min((b.xMin() for b in self.d_bins).filter(lambda x: x is not None))
 
     def bins(self, includeOverflows: bool = False) -> list[Bin]:
         if includeOverflows:

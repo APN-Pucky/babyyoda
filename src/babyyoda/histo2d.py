@@ -5,7 +5,6 @@ from typing import Any, Optional, Union
 import numpy as np
 
 from babyyoda.analysisobject import UHIAnalysisObject
-from babyyoda.histo1d import UHIHisto1D
 from babyyoda.util import (
     loc,
     overflow,
@@ -74,7 +73,7 @@ class UHIHisto2D(UHIAnalysisObject):
     def clone(self) -> "UHIHisto2D":
         raise NotImplementedError
 
-    def get_projector(self) -> type[UHIHisto1D]:
+    def get_projector(self) -> Any:
         raise NotImplementedError
 
     #####

@@ -13,12 +13,12 @@ from babyyoda.histo2d import UHIHisto2D
 
 def to_index(x: float, y: float, xedges: list[float], yedges: list[float]) -> float:
     # get ix and iy to map to correct bin
-    fix = None
+    fix = 0
     for ix, xEdge in enumerate([*xedges, sys.float_info.max]):
         fix = ix
         if x < xEdge:
             break
-    fiy = None
+    fiy = 0
     for iy, yEdge in enumerate([*yedges, sys.float_info.max]):
         fiy = iy
         if y < yEdge:

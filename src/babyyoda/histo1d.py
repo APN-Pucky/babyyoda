@@ -57,7 +57,7 @@ class UHIHisto1D(UHIAnalysisObject):
     def clone(self) -> "UHIHisto1D":
         raise NotImplementedError
 
-    def get_projector(self) -> UHICounter:
+    def get_projector(self) -> Any:
         raise NotImplementedError
 
     def rebinXTo(self, bins: list[float]) -> None:

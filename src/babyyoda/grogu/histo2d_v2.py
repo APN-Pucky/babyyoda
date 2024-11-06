@@ -217,7 +217,7 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
                 d_numentries=self.d_numentries + other.d_numentries,
             )
 
-        def to_string(self, label=None) -> str:
+        def to_string(self, label: Optional[str] = None) -> str:
             if label is None:
                 return (
                     f"{self.d_xmin:<12.6e}\t{self.d_xmax:<12.6e}\t{self.d_ymin:<12.6e}\t{self.d_ymax:<12.6e}\t"
@@ -273,7 +273,9 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
                 sorted({b.d_ymax for b in self.d_bins if b.d_ymax is not None})[:-1],
             )
         )
-        return sorted({b.d_ymin for b in self.d_bins} | {self.yMax()})
+        return sorted(
+            {b.d_ymin for b in self.d_bins if b.d_ymin is not None} | {self.yMax()}
+        )
 
     def xMin(self) -> float:
         return min(b.d_xmin for b in self.d_bins if b.d_xmin is not None)
@@ -470,10 +472,12 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
                         numEntries,
                     )
                 )
-
-        return cls(
-            d_key=key,
-            d_annotations=annotations,
-            d_bins=bins,
-            d_total=total,
-        )
+        if total is not None:
+            return cls(
+                d_key=key,
+                d_annotations=annotations,
+                d_bins=bins,
+                d_total=total,
+            )
+        err = "Total bin not found in the histogram"
+        raise ValueError(err)
