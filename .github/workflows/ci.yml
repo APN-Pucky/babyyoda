@@ -66,6 +66,6 @@ jobs:
       with:
         fail_ci_if_error: true
         files: ./coverage.xml
-        flags: unittests-${{ matrix.python-version }}
+        flags: unittests-python-${{ matrix.python-version }}
         name: babyyoda
         token: ${{ secrets.CODECOV_TOKEN }}
