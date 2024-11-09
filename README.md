@@ -2,8 +2,10 @@
 
 [![PyPI - Version](https://img.shields.io/pypi/v/babyyoda.svg)](https://pypi.org/project/babyyoda)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/babyyoda.svg)](https://pypi.org/project/babyyoda)
+[![GitHub Actions Status: CI](https://github.com/APN-Pucky/babyyoda/workflows/CI/badge.svg)](https://github.com/APN-Pucky/babyyoda/actions)
+[![Code Coverage](https://codecov.io/gh/APN-Pucky/babyyoda/graph/badge.svg?branch=master)](https://codecov.io/gh/APN-Pucky/babyyoda?branch=master)
 
------
+______________________________________________________________________
 
 ## Differences to yoda
 
@@ -21,7 +23,6 @@ and the disadvantages to `yoda` are that it
 - is not as feature complete.
 - is not as well tested.
 - only has histogram support.
-
 
 ## Installation
 
