@@ -2,7 +2,7 @@
 
 [![PyPI - Version](https://img.shields.io/pypi/v/babyyoda.svg)](https://pypi.org/project/babyyoda)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/babyyoda.svg)](https://pypi.org/project/babyyoda)
-[![GitHub Actions Status: CI](https://github.com/APN-Pucky/babyyoda/workflows/CI/badge.svg)](https://github.com/APN-Pucky/babyyoda/actions)
+[![CI/CD](https://github.com/APN-Pucky/babyyoda/actions/workflows/ci.yml/badge.svg)](https://github.com/APN-Pucky/babyyoda/actions/workflows/ci.yml)
 [![Code Coverage](https://codecov.io/gh/APN-Pucky/babyyoda/graph/badge.svg?branch=master)](https://codecov.io/gh/APN-Pucky/babyyoda?branch=master)
 
 ______________________________________________________________________
