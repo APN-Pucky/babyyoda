@@ -2,6 +2,7 @@ import contextlib
 import sys
 from typing import Any, Optional, Union
 
+import mplhep as hep
 import numpy as np
 
 import babyyoda
@@ -349,8 +350,6 @@ class UHIHisto1D(UHIAnalysisObject):
         return p
 
     def plot(self, *args: Any, binwnorm: float = 1.0, **kwargs: Any) -> None:
-        import mplhep as hep
-
         hep.histplot(
             self,
             *args,

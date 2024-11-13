@@ -31,7 +31,8 @@ classifiers = [
   "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-  "numpy"
+  "numpy",
+  "mplhep>=0.3.35"
 ]
 [project.optional-dependencies]
 lint = [
