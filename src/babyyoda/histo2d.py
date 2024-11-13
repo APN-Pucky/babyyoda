@@ -2,6 +2,7 @@ import contextlib
 import sys
 from typing import Any, Optional, Union
 
+import mplhep as hep
 import numpy as np
 
 from babyyoda.analysisobject import UHIAnalysisObject
@@ -402,8 +403,8 @@ class UHIHisto2D(UHIAnalysisObject):
     def to_string(self) -> str:
         return str(self.to_grogu_v3().to_string())
 
-    def plot(self, *args: Any, binwnorm: bool = True, **kwargs: Any) -> None:
-        # # TODO should use histplot
+    def plot(self, *args: Any, binwnorm: float = 1.0, **kwargs: Any) -> None:
+        # # TODO should use histplot?
         # import mplhep as hep
 
         # hep.histplot(
@@ -414,25 +415,7 @@ class UHIHisto2D(UHIAnalysisObject):
         #    binwnorm=binwnorm,
         #    **kwargs,
         # )
-        import mplhep as hep
-
-        if binwnorm:
-            # Hack in the temporary division by dVol
-            saved_values = self.values
-
-            def temp_values() -> np.ndarray:
-                return (
-                    np.array(
-                        [b.sumW() / vol for b, vol in zip(self.bins(), self.dVols())]
-                    )
-                    .reshape((len(self.axes[1]), len(self.axes[0])))
-                    .T
-                )
-
-            self.values = temp_values  # type: ignore[method-assign]
-        hep.hist2dplot(self, *args, **kwargs)
-        if binwnorm:
-            self.values = saved_values  # type: ignore[method-assign]
+        hep.hist2dplot(self, *args, binwnorm=binwnorm, **kwargs)
 
     def _ipython_display_(self) -> "UHIHisto2D":
         with contextlib.suppress(ImportError):
