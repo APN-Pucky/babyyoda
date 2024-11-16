@@ -64,7 +64,7 @@ import babyyoda.yoda as yoda
 | [uproot](https://github.com/scikit-hep/uproot)                   | ❔     |                                                                                                                      |
 | [hist](https://github.com/scikit-hep/hist)                       | ❔     |                                                                                                                      |
 | [boost-histogram](https://github.com/scikit-hep/boost-histogram) | ❔     |                                                                                                                      |
-| [cuda-histogram](https://github.com/scikit-hep/cuda-histogram)   | ❌     |                                                                                                                      |
+| [cuda-histogram](https://github.com/scikit-hep/cuda-histogram)   | ❔     |                                                                                                                      |
 | [boost-histogram](https://github.com/scikit-hep/cuda-histogram)  | ❔     |                                                                                                                      |
 | [ROOT](https://github.com/root-project/root)                     | ❔     |                                                                                                                      |
 
