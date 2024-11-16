@@ -216,9 +216,6 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
     def bins(self, includeOverflows: bool = False) -> list[Bin]:
         return self.d_bins[1:-1] if not includeOverflows else self.d_bins
 
-    def bin(self, *indices: int) -> list[Bin]:
-        return [self.bins()[i] for i in indices]
-
     def binAt(self, x: float) -> Optional[Bin]:
         # TODO add tests for binAt
         for i, b in enumerate(self.bins()):

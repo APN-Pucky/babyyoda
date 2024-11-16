@@ -74,6 +74,9 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
     def bins(self, includeOverflows: bool = False) -> list[Any]:
         raise NotImplementedError
 
+    def bin(self, i: int) -> Any:
+        return self.bins()[i]
+
     def xEdges(self) -> list[float]:
         raise NotImplementedError
 

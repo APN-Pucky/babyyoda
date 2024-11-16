@@ -68,6 +68,9 @@ class UHIHisto1D(
     def bins(self, includeOverflows: bool = False) -> list[Any]:
         raise NotImplementedError
 
+    def bin(self, i: int) -> Any:
+        return self.bins()[i]
+
     def xEdges(self) -> list[float]:
         raise NotImplementedError
 
@@ -99,7 +102,7 @@ class UHIHisto1D(
         )
         for i in range(len(self.xEdges()) - 1):
             # we do not carry over numEntries nor sumWX...
-            h[i] = (self.bins()[i].sumW(), self.bins()[i].sumW2())
+            h[i] = (self.bin(i).sumW(), self.bin(i).sumW2())
         return h
 
     def to_hist(self) -> Any:
@@ -114,7 +117,7 @@ class UHIHisto1D(
         )
         for i in range(len(self.xEdges()) - 1):
             # we do not carry over numEntries nor sumWX...
-            h[i] = (self.bins()[i].sumW(), self.bins()[i].sumW2())
+            h[i] = (self.bin(i).sumW(), self.bin(i).sumW2())
         return h
 
     def to_grogu_v2(self) -> Any:
@@ -294,7 +297,7 @@ class UHIHisto1D(
         index = self.__get_index(slices)
         # integer index
         if isinstance(index, int):  # loc and int
-            return self.bins()[index]
+            return self.bin(index)
         if slices is underflow:
             return self.underflow()
         if slices is overflow:
@@ -383,7 +386,7 @@ class UHIHisto1D(
             set_bin1d(self.overflow(), value)
             return
         if isinstance(index, int):
-            set_bin1d(self.bins()[index], value)
+            set_bin1d(self.bin(index), value)
             return
         err = "Invalid argument type"
         raise TypeError(err)
