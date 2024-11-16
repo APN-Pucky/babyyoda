@@ -62,8 +62,8 @@ import babyyoda.yoda as yoda
 | [mplhep](https://github.com/scikit-hep/mplhep)                   | ✅     | [mplhep histo1d](examples/interface/mplhep/histo1d.ipynb), [mplhep histo2d](examples/interface/mplhep/histo2d.ipynb) |
 | [plothist](https://github.com/scikit-hep/plothist)               | ❌     | Does not support UHI/PlottableProtocol, only boost-histogram                                                         |
 | [uproot](https://github.com/scikit-hep/uproot)                   | ❌     | WIP: [uproot histo1d](examples/interface/uproot/histo1d.ipynb)                                                       |
-| [hist](https://github.com/scikit-hep/hist)                       | ❌     | WIP: Unidirectional conversion planned                                                                               |
-| [boost-histogram](https://github.com/scikit-hep/boost-histogram) | ❌     | WIP: Unidirectional conversion planned                                                                               |
+| [hist](https://github.com/scikit-hep/hist)                       | ❌     | WIP: Bidirectional conversion planned                                                                                |
+| [boost-histogram](https://github.com/scikit-hep/boost-histogram) | ❌     | WIP: Bidirectional conversion planned                                                                                |
 | [cuda-histogram](https://github.com/scikit-hep/cuda-histogram)   | ❔     |                                                                                                                      |
 | [ROOT](https://github.com/root-project/root)                     | ❔     |                                                                                                                      |
 

@@ -74,6 +74,36 @@ class UHIHisto1D(
     # BACKENDS
     ######
 
+    def to_boost_histogram(self) -> Any:
+        import boost_histogram as bh
+
+        h = bh.Histogram(
+            # TODO also carry over overflow and underflow?
+            bh.axis.Variable(
+                self.xEdges(), underflow=False, overflow=False
+            ),  # Regular float axis
+            storage=bh.storage.Weight(),  # Weighted storage
+        )
+        for i, _ in enumerate(self.xEdges()):
+            # we do not carry over numEntries nor sumWX...
+            h[i] = (self.bins()[i].sumW(), self.bins()[i].sumW2())
+        return h
+
+    def to_hist(self) -> Any:
+        import hist
+
+        h = hist.Hist(
+            # TODO also carry over overflow and underflow?
+            hist.axis.Variable(
+                self.xEdges(), underflow=False, overflow=False
+            ),  # Regular float axis
+            storage=hist.storage.Weight(),  # Weighted storage
+        )
+        for i, _ in enumerate(self.xEdges()):
+            # we do not carry over numEntries nor sumWX...
+            h[i] = (self.bins()[i].sumW(), self.bins()[i].sumW2())
+        return h
+
     def to_grogu_v2(self) -> Any:
         from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 

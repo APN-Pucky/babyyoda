@@ -41,6 +41,8 @@ lint = [
     "ruff",
 ]
 test = [
+    "boost_histogram",
+    "hist",
     "uhi",
     "histoprint",
     "mplhep",
