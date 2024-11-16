@@ -207,6 +207,12 @@ class UHIHisto1D(UHIAnalysisObject):
     def rebinTo(self, *args: Any, **kwargs: Any) -> None:
         self.rebinXTo(*args, **kwargs)
 
+    def dVols(self) -> list[float]:
+        ret = []
+        for ix in range(len(self.xMins())):
+            ret.append(self.xMaxs()[ix] - self.xMins()[ix])
+        return ret
+
     ########################################################
     # Generic UHI code
     ########################################################
@@ -217,7 +223,7 @@ class UHIHisto1D(UHIAnalysisObject):
 
     @property
     def kind(self) -> str:
-        # TODO reeavaluate this
+        # TODO reevaluate this
         return "COUNT"
 
     def counts(self) -> np.ndarray:

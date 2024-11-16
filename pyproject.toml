@@ -32,7 +32,7 @@ classifiers = [
 ]
 dependencies = [
   "numpy",
-  "mplhep>=0.3.35"
+  "mplhep>=0.3.55"
 ]
 [project.optional-dependencies]
 lint = [
