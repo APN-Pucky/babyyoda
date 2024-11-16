@@ -37,7 +37,7 @@ def main():
                 continue
 
             if isinstance(v, (UHIHisto1D, UHIHisto2D)):
-                if args.operation == "print":
+                if args.operation == "print" and isinstance(v, UHIHisto1D):
                     print(k)
                     print_hist(v, summary=True, title=v.title())
                 if args.operation == "plot":

@@ -56,17 +56,17 @@ import babyyoda.yoda as yoda
 
 ## Interfaces
 
-| Interface                                                        | Status | Examples                                               |
-| ---------------------------------------------------------------- | ------ | ------------------------------------------------------ |
-| [histoprint](https://github.com/scikit-hep/histoprint)           | ✅     | [histoprint1d](examples/interface/histoprint/1d.ipynb) |
-| [mplhep](https://github.com/scikit-hep/mplhep)                   | ✅     | [mplhep1d](examples/interface/mplhep/1d.ipynb)         |
-| [plothist](https://github.com/scikit-hep/plothist)               | ✅     | [histoprint1d](examples/interface/plothist/1d.ipynb)   |
-| [uproot](https://github.com/scikit-hep/uproot)                   | ❔     |                                                        |
-| [hist](https://github.com/scikit-hep/hist)                       | ❔     |                                                        |
-| [boost-histogram](https://github.com/scikit-hep/boost-histogram) | ❔     |                                                        |
-| [cuda-histogram](https://github.com/scikit-hep/cuda-histogram)   | ❌     |                                                        |
-| [boost-histogram](https://github.com/scikit-hep/cuda-histogram)  | ❔     |                                                        |
-| [ROOT](https://github.com/root-project/root)                     | ❔     |                                                        |
+| Interface                                                        | Status | Examples                                                                                                             |
+| ---------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
+| [histoprint](https://github.com/scikit-hep/histoprint)           | ✅     | [histoprint histo1d](examples/interface/histoprint/histo1d.ipynb)                                                    |
+| [mplhep](https://github.com/scikit-hep/mplhep)                   | ✅     | [mplhep histo1d](examples/interface/mplhep/histo1d.ipynb), [mplhep histo2d](examples/interface/mplhep/histo2d.ipynb) |
+| [plothist](https://github.com/scikit-hep/plothist)               | ✅     | [plothist1d](examples/interface/plothist/1d.ipynb)                                                                   |
+| [uproot](https://github.com/scikit-hep/uproot)                   | ❔     |                                                                                                                      |
+| [hist](https://github.com/scikit-hep/hist)                       | ❔     |                                                                                                                      |
+| [boost-histogram](https://github.com/scikit-hep/boost-histogram) | ❔     |                                                                                                                      |
+| [cuda-histogram](https://github.com/scikit-hep/cuda-histogram)   | ❌     |                                                                                                                      |
+| [boost-histogram](https://github.com/scikit-hep/cuda-histogram)  | ❔     |                                                                                                                      |
+| [ROOT](https://github.com/root-project/root)                     | ❔     |                                                                                                                      |
 
 ## License
 
