@@ -50,7 +50,7 @@ def test_hist_histo1d_v3(mod):
 def test_hist_histo2d_v2(mod):
     hists = mod("tests/test_histo2d_v2.yoda")
     for _, v in hists.items():
-        assert isinstance(v, babyyoda.histo1d.UHIHisto2D)
+        assert isinstance(v, babyyoda.histo2d.UHIHisto2D)
         v.to_hist()
 
 
@@ -66,5 +66,5 @@ def test_hist_histo2d_v2(mod):
 def test_hist_histo2d_v3(mod):
     hists = mod("tests/test_histo2d_v3.yoda")
     for _, v in hists.items():
-        assert isinstance(v, babyyoda.histo1d.UHIHisto2D)
+        assert isinstance(v, babyyoda.histo2d.UHIHisto2D)
         v.to_hist()

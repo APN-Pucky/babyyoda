@@ -56,7 +56,7 @@ import babyyoda.yoda as yoda
 
 ## Interfaces
 
-| Interface                                                        | Status | Examples                                                                                                                 |
+| Interface                                                        | Status | Examples and Notes                                                                                                       |
 | ---------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------ |
 | [histoprint](https://github.com/scikit-hep/histoprint)           | ✅     | [histo1d](examples/interface/histoprint/histo1d.ipynb)                                                                   |
 | [mplhep](https://github.com/scikit-hep/mplhep)                   | ✅     | [histo1d](examples/interface/mplhep/histo1d.ipynb), [histo2d](examples/interface/mplhep/histo2d.ipynb)                   |
@@ -69,4 +69,4 @@ import babyyoda.yoda as yoda
 
 ## License
 
-`babyyoda` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+`babyyoda` is distributed under the terms of the [BSD-3-Clause](https://spdx.org/licenses/BSD-3-Clause.html) license.
