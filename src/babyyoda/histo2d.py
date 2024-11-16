@@ -115,10 +115,14 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
             ),  # Regular float axis
             storage=bh.storage.Weight(),  # Weighted storage
         )
-        for i in range(len(self.xEdges()) - 1):
-            for j in range(len(self.yEdges()) - 1):
-                # we do not carry over numEntries nor sumWX...
-                h[i, j] = self[i, j].sumW(), self[i, j].sumW2()
+        w = self.values()
+        w2 = self.variances()
+        h[:, :] = np.array(list(zip(w.ravel(), w2.ravel()))).reshape((*w.shape, 2))
+        # for i in range(len(self.xEdges()) - 1):
+        #    for j in range(len(self.yEdges()) - 1):
+        #        # we do not carry over numEntries nor sumWX...
+        #        b = self[i, j]
+        #        h[i, j] = b.sumW(), b.sumW2()
         return h
 
     def to_hist(self) -> Any:
@@ -134,10 +138,14 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
             ),  # Regular float axis
             storage=hist.storage.Weight(),  # Weighted storage
         )
-        for i in range(len(self.xEdges()) - 1):
-            for j in range(len(self.yEdges()) - 1):
-                # we do not carry over numEntries nor sumWX...
-                h[i, j] = self[i, j].sumW(), self[i, j].sumW2()
+        w = self.values()
+        w2 = self.variances()
+        h[:, :] = np.array(list(zip(w.ravel(), w2.ravel()))).reshape((*w.shape, 2))
+        # for i in range(len(self.xEdges()) - 1):
+        #    for j in range(len(self.yEdges()) - 1):
+        #        # we do not carry over numEntries nor sumWX...
+        #        b = self[i, j]
+        #        h[i, j] = b.sumW(), b.sumW2()
         return h
 
     def to_grogu_v2(self) -> Any:

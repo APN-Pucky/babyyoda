@@ -100,9 +100,11 @@ class UHIHisto1D(
             ),  # Regular float axis
             storage=bh.storage.Weight(),  # Weighted storage
         )
-        for i in range(len(self.xEdges()) - 1):
-            # we do not carry over numEntries nor sumWX...
-            h[i] = (self.bin(i).sumW(), self.bin(i).sumW2())
+        h[:] = [(b.sumW(), b.sumW2()) for b in self.bins()]
+        # for i in range(len(self.xEdges()) - 1):
+        #    # we do not carry over numEntries nor sumWX...
+        #    b = self.bin(i)
+        #    h[i] = (b.sumW(), b.sumW2())
         return h
 
     def to_hist(self) -> Any:
@@ -115,9 +117,11 @@ class UHIHisto1D(
             ),  # Regular float axis
             storage=hist.storage.Weight(),  # Weighted storage
         )
-        for i in range(len(self.xEdges()) - 1):
-            # we do not carry over numEntries nor sumWX...
-            h[i] = (self.bin(i).sumW(), self.bin(i).sumW2())
+        h[:] = [(b.sumW(), b.sumW2()) for b in self.bins()]
+        # for i in range(len(self.xEdges()) - 1):
+        #    # we do not carry over numEntries nor sumWX...
+        #    b = self.bin(i)
+        #    h[i] = (b.sumW(), b.sumW2())
         return h
 
     def to_grogu_v2(self) -> Any:

@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 import babyyoda
@@ -51,7 +53,12 @@ def test_hist_histo2d_v2(mod):
     hists = mod("tests/test_histo2d_v2.yoda")
     for _, v in hists.items():
         assert isinstance(v, babyyoda.histo2d.UHIHisto2D)
-        v.to_hist()
+        h = v.to_hist()
+        # takes too long to test all bins
+        for i in random.sample(range(len(v.xEdges()) - 1), 5):
+            for j in random.sample(range(len(v.yEdges()) - 1), 5):
+                assert h[i, j].value == v[i, j].sumW()
+                assert h[i, j].variance == v[i, j].sumW2()
 
 
 @pytest.mark.parametrize(
@@ -67,4 +74,8 @@ def test_hist_histo2d_v3(mod):
     hists = mod("tests/test_histo2d_v3.yoda")
     for _, v in hists.items():
         assert isinstance(v, babyyoda.histo2d.UHIHisto2D)
-        v.to_hist()
+        h = v.to_hist()
+        for i in range(len(v.xEdges()) - 1):
+            for j in range(len(v.yEdges()) - 1):
+                assert h[i, j].value == v[i, j].sumW()
+                assert h[i, j].variance == v[i, j].sumW2()
