@@ -4,8 +4,12 @@ from typing import Any, Optional, Union
 
 import mplhep as hep
 import numpy as np
+from uhi.typing.plottable import (
+    PlottableHistogram,
+)
 
 from babyyoda.analysisobject import UHIAnalysisObject
+from babyyoda.axis import UHIAxis
 from babyyoda.util import (
     loc,
     overflow,
@@ -48,7 +52,7 @@ def Histo2D(*args: list[Any], **kwargs: list[Any]) -> "UHIHisto2D":
         return grogu.Histo2D(*args, **kwargs)
 
 
-class UHIHisto2D(UHIAnalysisObject):
+class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
     ######
     # Minimum required functions
     ######
@@ -235,10 +239,10 @@ class UHIHisto2D(UHIAnalysisObject):
     ########################################################
 
     @property
-    def axes(self) -> list[list[tuple[float, float]]]:
+    def axes(self) -> list[UHIAxis]:
         return [
-            list(zip(self.xMins(), self.xMaxs())),
-            list(zip(self.yMins(), self.yMaxs())),
+            UHIAxis(list(zip(self.xMins(), self.xMaxs()))),
+            UHIAxis(list(zip(self.yMins(), self.yMaxs()))),
         ]
 
     @property
@@ -246,17 +250,17 @@ class UHIHisto2D(UHIAnalysisObject):
         # TODO reeavaluate this
         return "COUNT"
 
-    def values(self) -> np.ndarray:
+    def values(self) -> np.typing.NDArray[Any]:
         return np.array(self.sumWs()).reshape((len(self.axes[1]), len(self.axes[0]))).T
 
-    def variances(self) -> np.ndarray:
+    def variances(self) -> np.typing.NDArray[Any]:
         return (
             np.array([b.sumW2() for b in self.bins()])
             .reshape((len(self.axes[1]), len(self.axes[0])))
             .T
         )
 
-    def counts(self) -> np.ndarray:
+    def counts(self) -> np.typing.NDArray[Any]:
         return (
             np.array([b.numEntries() for b in self.bins()])
             .reshape((len(self.axes[1]), len(self.axes[0])))
@@ -272,7 +276,9 @@ class UHIHisto2D(UHIAnalysisObject):
             self.__single_index(ix, iy)
         ]  # THIS is the fault with/without overflows!
 
-    def __get_index_by_loc(self, oloc: loc, bins: list[tuple[float, float]]) -> int:
+    def __get_index_by_loc(
+        self, oloc: loc, bins: Union[list[tuple[float, float]], UHIAxis]
+    ) -> int:
         # find the index in bin where loc is
         for a, b in bins:
             if a <= oloc.value and oloc.value < b:

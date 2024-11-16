@@ -4,9 +4,13 @@ from typing import Any, Optional, Union
 
 import mplhep as hep
 import numpy as np
+from uhi.typing.plottable import (
+    PlottableHistogram,
+)
 
 import babyyoda
 from babyyoda.analysisobject import UHIAnalysisObject
+from babyyoda.axis import UHIAxis
 from babyyoda.util import loc, overflow, project, rebin, rebinBy_to_rebinTo, underflow
 
 
@@ -40,7 +44,10 @@ def Histo1D(*args: Any, **kwargs: Any) -> "UHIHisto1D":
 
 
 # TODO make this implementation independent (no V2 or V3...)
-class UHIHisto1D(UHIAnalysisObject):
+class UHIHisto1D(
+    UHIAnalysisObject,
+    PlottableHistogram,
+):
     ######
     # Minimum required functions
     ######
@@ -170,7 +177,7 @@ class UHIHisto1D(UHIAnalysisObject):
     def underflow(self) -> Any:
         return self.bins(includeOverflows=True)[0]
 
-    def errWs(self) -> np.ndarray:
+    def errWs(self) -> Any:
         return np.sqrt(np.array([b.sumW2() for b in self.bins()]))
 
     def xMins(self) -> list[float]:
@@ -218,21 +225,21 @@ class UHIHisto1D(UHIAnalysisObject):
     ########################################################
 
     @property
-    def axes(self) -> list[list[tuple[float, float]]]:
-        return [list(zip(self.xMins(), self.xMaxs()))]
+    def axes(self) -> list[UHIAxis]:
+        return [UHIAxis(list(zip(self.xMins(), self.xMaxs())))]
 
     @property
     def kind(self) -> str:
         # TODO reevaluate this
         return "COUNT"
 
-    def counts(self) -> np.ndarray:
+    def counts(self) -> np.typing.NDArray[Any]:
         return np.array([b.numEntries() for b in self.bins()])
 
-    def values(self) -> np.ndarray:
+    def values(self) -> np.typing.NDArray[Any]:
         return np.array([b.sumW() for b in self.bins()])
 
-    def variances(self) -> np.ndarray:
+    def variances(self) -> np.typing.NDArray[Any]:
         return np.array([(b.sumW2()) for b in self.bins()])
 
     def __getitem__(
