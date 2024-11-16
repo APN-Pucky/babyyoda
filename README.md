@@ -61,7 +61,7 @@ import babyyoda.yoda as yoda
 | [histoprint](https://github.com/scikit-hep/histoprint)           | ✅     | [histoprint histo1d](examples/interface/histoprint/histo1d.ipynb)                                                    |
 | [mplhep](https://github.com/scikit-hep/mplhep)                   | ✅     | [mplhep histo1d](examples/interface/mplhep/histo1d.ipynb), [mplhep histo2d](examples/interface/mplhep/histo2d.ipynb) |
 | [plothist](https://github.com/scikit-hep/plothist)               | ❌     | Does not support UHI/PlottableProtocol, only boost-histogram                                                         |
-| [uproot](https://github.com/scikit-hep/uproot)                   | ❔     |                                                                                                                      |
+| [uproot](https://github.com/scikit-hep/uproot)                   | ❌     | WIP: [uproot histo1d](examples/interface/uproot/histo1d.ipynb)                                                       |
 | [hist](https://github.com/scikit-hep/hist)                       | ❔     |                                                                                                                      |
 | [boost-histogram](https://github.com/scikit-hep/boost-histogram) | ❔     |                                                                                                                      |
 | [cuda-histogram](https://github.com/scikit-hep/cuda-histogram)   | ❔     |                                                                                                                      |
