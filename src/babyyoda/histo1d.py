@@ -19,11 +19,24 @@ def set_bin1d(target: Any, source: Any) -> None:
     # self.d_xmin = bin.xMin()
     # self.d_xmax = bin.xMax()
     if hasattr(target, "set"):
-        target.set(
-            source.numEntries(),
-            [source.sumW(), source.sumWX()],
-            [source.sumW2(), source.sumWX2()],
-        )
+        if (
+            hasattr(source, "sumW")
+            and hasattr(source, "sumWX")
+            and hasattr(source, "sumW2")
+            and hasattr(source, "sumWX2")
+            and hasattr(source, "numEntries")
+        ):
+            target.set(
+                source.numEntries(),
+                [source.sumW(), source.sumWX()],
+                [source.sumW2(), source.sumWX2()],
+            )
+        # else if tuple with 3 elements
+        elif len(source) == 3:
+            target.set(source[0], source[1], source[2])
+        else:
+            err = "Invalid argument type"
+            raise NotImplementedError(err)
     else:
         err = "YODA1 backend can not set bin values"
         raise NotImplementedError(err)
