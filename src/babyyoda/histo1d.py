@@ -84,7 +84,7 @@ class UHIHisto1D(
             ),  # Regular float axis
             storage=bh.storage.Weight(),  # Weighted storage
         )
-        for i, _ in enumerate(self.xEdges()):
+        for i in range(len(self.xEdges()) - 1):
             # we do not carry over numEntries nor sumWX...
             h[i] = (self.bins()[i].sumW(), self.bins()[i].sumW2())
         return h
@@ -99,7 +99,7 @@ class UHIHisto1D(
             ),  # Regular float axis
             storage=hist.storage.Weight(),  # Weighted storage
         )
-        for i, _ in enumerate(self.xEdges()):
+        for i in range(len(self.xEdges()) - 1):
             # we do not carry over numEntries nor sumWX...
             h[i] = (self.bins()[i].sumW(), self.bins()[i].sumW2())
         return h

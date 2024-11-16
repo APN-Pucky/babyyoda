@@ -58,12 +58,12 @@ import babyyoda.yoda as yoda
 
 | Interface                                                        | Status | Examples                                                                                                             |
 | ---------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
-| [histoprint](https://github.com/scikit-hep/histoprint)           | ✅     | [histoprint histo1d](examples/interface/histoprint/histo1d.ipynb)                                                    |
-| [mplhep](https://github.com/scikit-hep/mplhep)                   | ✅     | [mplhep histo1d](examples/interface/mplhep/histo1d.ipynb), [mplhep histo2d](examples/interface/mplhep/histo2d.ipynb) |
+| [histoprint](https://github.com/scikit-hep/histoprint)           | ✅     | [histo1d](examples/interface/histoprint/histo1d.ipynb)                                                    |
+| [mplhep](https://github.com/scikit-hep/mplhep)                   | ✅     | [histo1d](examples/interface/mplhep/histo1d.ipynb), [histo2d](examples/interface/mplhep/histo2d.ipynb) |
 | [plothist](https://github.com/scikit-hep/plothist)               | ❌     | Does not support UHI/PlottableProtocol, only boost-histogram                                                         |
-| [uproot](https://github.com/scikit-hep/uproot)                   | ❌     | WIP: [uproot histo1d](examples/interface/uproot/histo1d.ipynb)                                                       |
-| [hist](https://github.com/scikit-hep/hist)                       | ❌     | WIP: Bidirectional conversion planned                                                                                |
-| [boost-histogram](https://github.com/scikit-hep/boost-histogram) | ❌     | WIP: Bidirectional conversion planned                                                                                |
+| [uproot](https://github.com/scikit-hep/uproot)                   | ❌     | WIP: [histo1d](examples/interface/uproot/histo1d.ipynb)                                                       |
+| [hist](https://github.com/scikit-hep/hist)                       | ✅     | [histo1d](examples/interface/hist/histo1d.ipynb), [histo2d](examples/interface/hist/histo2d.ipynb)                                                                                |
+| [boost-histogram](https://github.com/scikit-hep/boost-histogram) | ✅     | [histo1d](examples/interface/boost-histogram/histo1d.ipynb), [histo2d](examples/interface/boost-histogram/histo2d.ipynb)                                                                                |
 | [cuda-histogram](https://github.com/scikit-hep/cuda-histogram)   | ❔     |                                                                                                                      |
 | [ROOT](https://github.com/root-project/root)                     | ❔     |                                                                                                                      |
 

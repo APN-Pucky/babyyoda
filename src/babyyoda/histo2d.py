@@ -85,6 +85,44 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
     # BACKENDS
     #####
 
+    def to_boost_histogram(self) -> Any:
+        import boost_histogram as bh
+
+        h = bh.Histogram(
+            # TODO also carry over overflow and underflow?
+            bh.axis.Variable(
+                self.xEdges(), underflow=False, overflow=False
+            ),  # Regular float axis
+            bh.axis.Variable(
+                self.yEdges(), underflow=False, overflow=False
+            ),  # Regular float axis
+            storage=bh.storage.Weight(),  # Weighted storage
+        )
+        for i in range(len(self.xEdges()) - 1):
+            for j in range(len(self.yEdges()) - 1):
+                # we do not carry over numEntries nor sumWX...
+                h[i, j] = self[i, j].sumW(), self[i, j].sumW2()
+        return h
+
+    def to_hist(self) -> Any:
+        import hist
+
+        h = hist.Hist(
+            # TODO also carry over overflow and underflow?
+            hist.axis.Variable(
+                self.xEdges(), underflow=False, overflow=False
+            ),  # Regular float axis
+            hist.axis.Variable(
+                self.yEdges(), underflow=False, overflow=False
+            ),  # Regular float axis
+            storage=hist.storage.Weight(),  # Weighted storage
+        )
+        for i in range(len(self.xEdges()) - 1):
+            for j in range(len(self.yEdges()) - 1):
+                # we do not carry over numEntries nor sumWX...
+                h[i, j] = self[i, j].sumW(), self[i, j].sumW2()
+        return h
+
     def to_grogu_v2(self) -> Any:
         from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
 
