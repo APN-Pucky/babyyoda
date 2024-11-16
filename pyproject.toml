@@ -34,7 +34,6 @@ dependencies = [
   "numpy",
   "uhi",
   "mplhep>=0.3.55",
-  "histoprint",
 ]
 [project.optional-dependencies]
 lint = [
