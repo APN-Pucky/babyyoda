@@ -42,8 +42,8 @@ def set_bin2d(target: Any, source: Any) -> None:
                 [source.sumW2(), source.sumWX2(), source.sumWY2()],
                 [source.crossTerm(0, 1)],
             )
-        elif len(source) == 3:
-            target.set(source[0], source[1], source[2])
+        elif len(source) == 4:
+            target.set(source[0], source[1], source[2], source[3])
         else:
             err = "Invalid argument type"
             raise NotImplementedError(err)
