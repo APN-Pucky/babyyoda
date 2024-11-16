@@ -299,9 +299,6 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
         # YODA-2
         return sorted(self.d_bins, key=lambda b: (b.d_ymin, b.d_xmin))
 
-    def bin(self, index: int) -> Bin:
-        return self.bins()[index]
-
     def binAt(self, x: float, y: float) -> Optional[Bin]:
         for b in self.bins():
             if (

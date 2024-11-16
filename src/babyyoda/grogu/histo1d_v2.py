@@ -278,9 +278,6 @@ class GROGU_HISTO1D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         # TODO sorted needed here?
         return sorted(self.d_bins, key=lambda b: b.d_xmin or -float("inf"))
 
-    def bin(self, *indices: int) -> list[Bin]:
-        return [self.bins()[i] for i in indices]
-
     def binAt(self, x: float) -> Optional[Bin]:
         for b in self.bins():
             if b.contains(x):

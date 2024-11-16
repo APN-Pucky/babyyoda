@@ -4,8 +4,12 @@ from typing import Any, Optional, Union
 
 import mplhep as hep
 import numpy as np
+from uhi.typing.plottable import (
+    PlottableHistogram,
+)
 
 from babyyoda.analysisobject import UHIAnalysisObject
+from babyyoda.axis import UHIAxis
 from babyyoda.util import (
     loc,
     overflow,
@@ -23,12 +27,26 @@ def set_bin2d(target: Any, source: Any) -> None:
     # self.d_xmin = bin.xMin()
     # self.d_xmax = bin.xMax()
     if hasattr(target, "set"):
-        target.set(
-            source.numEntries(),
-            [source.sumW(), source.sumWX(), source.sumWY()],
-            [source.sumW2(), source.sumWX2(), source.sumWY2()],
-            [source.crossTerm(0, 1)],
-        )
+        if (
+            hasattr(source, "sumW")
+            and hasattr(source, "sumWX")
+            and hasattr(source, "sumWY")
+            and hasattr(source, "sumW2")
+            and hasattr(source, "sumWX2")
+            and hasattr(source, "sumWY2")
+            and hasattr(source, "crossTerm")
+        ):
+            target.set(
+                source.numEntries(),
+                [source.sumW(), source.sumWX(), source.sumWY()],
+                [source.sumW2(), source.sumWX2(), source.sumWY2()],
+                [source.crossTerm(0, 1)],
+            )
+        elif len(source) == 4:
+            target.set(source[0], source[1], source[2], source[3])
+        else:
+            err = "Invalid argument type"
+            raise NotImplementedError(err)
     else:
         err = "YODA1 backend can not set bin values"
         raise NotImplementedError(err)
@@ -48,13 +66,16 @@ def Histo2D(*args: list[Any], **kwargs: list[Any]) -> "UHIHisto2D":
         return grogu.Histo2D(*args, **kwargs)
 
 
-class UHIHisto2D(UHIAnalysisObject):
+class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
     ######
     # Minimum required functions
     ######
 
     def bins(self, includeOverflows: bool = False) -> list[Any]:
         raise NotImplementedError
+
+    def bin(self, i: int) -> Any:
+        return self.bins()[i]
 
     def xEdges(self) -> list[float]:
         raise NotImplementedError
@@ -80,6 +101,52 @@ class UHIHisto2D(UHIAnalysisObject):
     #####
     # BACKENDS
     #####
+
+    def to_boost_histogram(self) -> Any:
+        import boost_histogram as bh
+
+        h = bh.Histogram(
+            # TODO also carry over overflow and underflow?
+            bh.axis.Variable(
+                self.xEdges(), underflow=False, overflow=False
+            ),  # Regular float axis
+            bh.axis.Variable(
+                self.yEdges(), underflow=False, overflow=False
+            ),  # Regular float axis
+            storage=bh.storage.Weight(),  # Weighted storage
+        )
+        w = self.values()
+        w2 = self.variances()
+        h[:, :] = np.array(list(zip(w.ravel(), w2.ravel()))).reshape((*w.shape, 2))
+        # for i in range(len(self.xEdges()) - 1):
+        #    for j in range(len(self.yEdges()) - 1):
+        #        # we do not carry over numEntries nor sumWX...
+        #        b = self[i, j]
+        #        h[i, j] = b.sumW(), b.sumW2()
+        return h
+
+    def to_hist(self) -> Any:
+        import hist
+
+        h = hist.Hist(
+            # TODO also carry over overflow and underflow?
+            hist.axis.Variable(
+                self.xEdges(), underflow=False, overflow=False
+            ),  # Regular float axis
+            hist.axis.Variable(
+                self.yEdges(), underflow=False, overflow=False
+            ),  # Regular float axis
+            storage=hist.storage.Weight(),  # Weighted storage
+        )
+        w = self.values()
+        w2 = self.variances()
+        h[:, :] = np.array(list(zip(w.ravel(), w2.ravel()))).reshape((*w.shape, 2))
+        # for i in range(len(self.xEdges()) - 1):
+        #    for j in range(len(self.yEdges()) - 1):
+        #        # we do not carry over numEntries nor sumWX...
+        #        b = self[i, j]
+        #        h[i, j] = b.sumW(), b.sumW2()
+        return h
 
     def to_grogu_v2(self) -> Any:
         from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
@@ -235,10 +302,10 @@ class UHIHisto2D(UHIAnalysisObject):
     ########################################################
 
     @property
-    def axes(self) -> list[list[tuple[float, float]]]:
+    def axes(self) -> list[UHIAxis]:
         return [
-            list(zip(self.xMins(), self.xMaxs())),
-            list(zip(self.yMins(), self.yMaxs())),
+            UHIAxis(list(zip(self.xMins(), self.xMaxs()))),
+            UHIAxis(list(zip(self.yMins(), self.yMaxs()))),
         ]
 
     @property
@@ -246,17 +313,17 @@ class UHIHisto2D(UHIAnalysisObject):
         # TODO reeavaluate this
         return "COUNT"
 
-    def values(self) -> np.ndarray:
+    def values(self) -> np.typing.NDArray[Any]:
         return np.array(self.sumWs()).reshape((len(self.axes[1]), len(self.axes[0]))).T
 
-    def variances(self) -> np.ndarray:
+    def variances(self) -> np.typing.NDArray[Any]:
         return (
             np.array([b.sumW2() for b in self.bins()])
             .reshape((len(self.axes[1]), len(self.axes[0])))
             .T
         )
 
-    def counts(self) -> np.ndarray:
+    def counts(self) -> np.typing.NDArray[Any]:
         return (
             np.array([b.numEntries() for b in self.bins()])
             .reshape((len(self.axes[1]), len(self.axes[0])))
@@ -272,7 +339,9 @@ class UHIHisto2D(UHIAnalysisObject):
             self.__single_index(ix, iy)
         ]  # THIS is the fault with/without overflows!
 
-    def __get_index_by_loc(self, oloc: loc, bins: list[tuple[float, float]]) -> int:
+    def __get_index_by_loc(
+        self, oloc: loc, bins: Union[list[tuple[float, float]], UHIAxis]
+    ) -> int:
         # find the index in bin where loc is
         for a, b in bins:
             if a <= oloc.value and oloc.value < b:

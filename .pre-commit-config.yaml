@@ -34,6 +34,8 @@ repos:
     rev: 'v1.13.0'  # Use the sha / tag you want to point at
     hooks:
     -   id: mypy
+        files: src
+        additional_dependencies: [uhi, numpy]
 -   repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:

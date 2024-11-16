@@ -4,9 +4,13 @@ from typing import Any, Optional, Union
 
 import mplhep as hep
 import numpy as np
+from uhi.typing.plottable import (
+    PlottableHistogram,
+)
 
 import babyyoda
 from babyyoda.analysisobject import UHIAnalysisObject
+from babyyoda.axis import UHIAxis
 from babyyoda.util import loc, overflow, project, rebin, rebinBy_to_rebinTo, underflow
 
 
@@ -15,11 +19,24 @@ def set_bin1d(target: Any, source: Any) -> None:
     # self.d_xmin = bin.xMin()
     # self.d_xmax = bin.xMax()
     if hasattr(target, "set"):
-        target.set(
-            source.numEntries(),
-            [source.sumW(), source.sumWX()],
-            [source.sumW2(), source.sumWX2()],
-        )
+        if (
+            hasattr(source, "sumW")
+            and hasattr(source, "sumWX")
+            and hasattr(source, "sumW2")
+            and hasattr(source, "sumWX2")
+            and hasattr(source, "numEntries")
+        ):
+            target.set(
+                source.numEntries(),
+                [source.sumW(), source.sumWX()],
+                [source.sumW2(), source.sumWX2()],
+            )
+        # else if tuple with 3 elements
+        elif len(source) == 3:
+            target.set(source[0], source[1], source[2])
+        else:
+            err = "Invalid argument type"
+            raise NotImplementedError(err)
     else:
         err = "YODA1 backend can not set bin values"
         raise NotImplementedError(err)
@@ -40,13 +57,19 @@ def Histo1D(*args: Any, **kwargs: Any) -> "UHIHisto1D":
 
 
 # TODO make this implementation independent (no V2 or V3...)
-class UHIHisto1D(UHIAnalysisObject):
+class UHIHisto1D(
+    UHIAnalysisObject,
+    PlottableHistogram,
+):
     ######
     # Minimum required functions
     ######
 
     def bins(self, includeOverflows: bool = False) -> list[Any]:
         raise NotImplementedError
+
+    def bin(self, i: int) -> Any:
+        return self.bins()[i]
 
     def xEdges(self) -> list[float]:
         raise NotImplementedError
@@ -66,6 +89,40 @@ class UHIHisto1D(UHIAnalysisObject):
     ######
     # BACKENDS
     ######
+
+    def to_boost_histogram(self) -> Any:
+        import boost_histogram as bh
+
+        h = bh.Histogram(
+            # TODO also carry over overflow and underflow?
+            bh.axis.Variable(
+                self.xEdges(), underflow=False, overflow=False
+            ),  # Regular float axis
+            storage=bh.storage.Weight(),  # Weighted storage
+        )
+        h[:] = [(b.sumW(), b.sumW2()) for b in self.bins()]
+        # for i in range(len(self.xEdges()) - 1):
+        #    # we do not carry over numEntries nor sumWX...
+        #    b = self.bin(i)
+        #    h[i] = (b.sumW(), b.sumW2())
+        return h
+
+    def to_hist(self) -> Any:
+        import hist
+
+        h = hist.Hist(
+            # TODO also carry over overflow and underflow?
+            hist.axis.Variable(
+                self.xEdges(), underflow=False, overflow=False
+            ),  # Regular float axis
+            storage=hist.storage.Weight(),  # Weighted storage
+        )
+        h[:] = [(b.sumW(), b.sumW2()) for b in self.bins()]
+        # for i in range(len(self.xEdges()) - 1):
+        #    # we do not carry over numEntries nor sumWX...
+        #    b = self.bin(i)
+        #    h[i] = (b.sumW(), b.sumW2())
+        return h
 
     def to_grogu_v2(self) -> Any:
         from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
@@ -170,7 +227,7 @@ class UHIHisto1D(UHIAnalysisObject):
     def underflow(self) -> Any:
         return self.bins(includeOverflows=True)[0]
 
-    def errWs(self) -> np.ndarray:
+    def errWs(self) -> Any:
         return np.sqrt(np.array([b.sumW2() for b in self.bins()]))
 
     def xMins(self) -> list[float]:
@@ -207,26 +264,32 @@ class UHIHisto1D(UHIAnalysisObject):
     def rebinTo(self, *args: Any, **kwargs: Any) -> None:
         self.rebinXTo(*args, **kwargs)
 
+    def dVols(self) -> list[float]:
+        ret = []
+        for ix in range(len(self.xMins())):
+            ret.append(self.xMaxs()[ix] - self.xMins()[ix])
+        return ret
+
     ########################################################
     # Generic UHI code
     ########################################################
 
     @property
-    def axes(self) -> list[list[tuple[float, float]]]:
-        return [list(zip(self.xMins(), self.xMaxs()))]
+    def axes(self) -> list[UHIAxis]:
+        return [UHIAxis(list(zip(self.xMins(), self.xMaxs())))]
 
     @property
     def kind(self) -> str:
-        # TODO reeavaluate this
+        # TODO reevaluate this
         return "COUNT"
 
-    def counts(self) -> np.ndarray:
+    def counts(self) -> np.typing.NDArray[Any]:
         return np.array([b.numEntries() for b in self.bins()])
 
-    def values(self) -> np.ndarray:
+    def values(self) -> np.typing.NDArray[Any]:
         return np.array([b.sumW() for b in self.bins()])
 
-    def variances(self) -> np.ndarray:
+    def variances(self) -> np.typing.NDArray[Any]:
         return np.array([(b.sumW2()) for b in self.bins()])
 
     def __getitem__(
@@ -238,7 +301,7 @@ class UHIHisto1D(UHIAnalysisObject):
         index = self.__get_index(slices)
         # integer index
         if isinstance(index, int):  # loc and int
-            return self.bins()[index]
+            return self.bin(index)
         if slices is underflow:
             return self.underflow()
         if slices is overflow:
@@ -327,7 +390,7 @@ class UHIHisto1D(UHIAnalysisObject):
             set_bin1d(self.overflow(), value)
             return
         if isinstance(index, int):
-            set_bin1d(self.bins()[index], value)
+            set_bin1d(self.bin(index), value)
             return
         err = "Invalid argument type"
         raise TypeError(err)

@@ -54,6 +54,19 @@ or force yoda use with
 import babyyoda.yoda as yoda
 ```
 
+## Interfaces
+
+| Interface                                                        | Status | Examples and Notes                                                                                                       |
+| ---------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------ |
+| [histoprint](https://github.com/scikit-hep/histoprint)           | ✅     | [histo1d](examples/interface/histoprint/histo1d.ipynb)                                                                   |
+| [mplhep](https://github.com/scikit-hep/mplhep)                   | ✅     | [histo1d](examples/interface/mplhep/histo1d.ipynb), [histo2d](examples/interface/mplhep/histo2d.ipynb)                   |
+| [plothist](https://github.com/scikit-hep/plothist)               | ❌     | Does not support UHI/PlottableProtocol, only boost-histogram                                                             |
+| [uproot](https://github.com/scikit-hep/uproot)                   | ❌     | WIP: [histo1d](examples/interface/uproot/histo1d.ipynb)                                                                  |
+| [hist](https://github.com/scikit-hep/hist)                       | ✅     | [histo1d](examples/interface/hist/histo1d.ipynb), [histo2d](examples/interface/hist/histo2d.ipynb)                       |
+| [boost-histogram](https://github.com/scikit-hep/boost-histogram) | ✅     | [histo1d](examples/interface/boost-histogram/histo1d.ipynb), [histo2d](examples/interface/boost-histogram/histo2d.ipynb) |
+| [cuda-histogram](https://github.com/scikit-hep/cuda-histogram)   | ❔     |                                                                                                                          |
+| [ROOT](https://github.com/root-project/root)                     | ❔     |                                                                                                                          |
+
 ## License
 
-`babyyoda` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+`babyyoda` is distributed under the terms of the [BSD-3-Clause](https://spdx.org/licenses/BSD-3-Clause.html) license.

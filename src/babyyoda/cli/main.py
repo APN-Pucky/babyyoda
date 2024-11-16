@@ -2,14 +2,13 @@ import argparse
 import re
 
 import matplotlib as mpl
-from histoprint import print_hist
 
 import babyyoda
 from babyyoda.histo1d import UHIHisto1D
 from babyyoda.histo2d import UHIHisto2D
 
 
-def main():
+def main() -> None:
     # argument parsing
     parser = argparse.ArgumentParser(description="Printing tool for BabyYoda")
     # argument -m for matching
@@ -37,9 +36,11 @@ def main():
                 continue
 
             if isinstance(v, (UHIHisto1D, UHIHisto2D)):
-                if args.operation == "print":
+                if args.operation == "print" and isinstance(v, UHIHisto1D):
+                    from histoprint import print_hist
+
                     print(k)
-                    print_hist(v, summary=True, title=v.title())
+                    print_hist(v, summary=True, title=v.annotationsDict()["Title"])
                 if args.operation == "plot":
                     v.plot()
                     mpl.pyplot.show()

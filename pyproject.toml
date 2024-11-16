@@ -32,13 +32,16 @@ classifiers = [
 ]
 dependencies = [
   "numpy",
-  "mplhep>=0.3.35"
+  "uhi",
+  "mplhep>=0.3.55",
 ]
 [project.optional-dependencies]
 lint = [
     "ruff",
 ]
 test = [
+    "boost_histogram",
+    "hist",
     "uhi",
     "histoprint",
     "mplhep",
