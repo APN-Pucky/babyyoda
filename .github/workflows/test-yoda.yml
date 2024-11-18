@@ -47,7 +47,7 @@ jobs:
     - name: Report core project coverage with Codecov
       if: >-
         github.event_name != 'schedule'
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with:
         fail_ci_if_error: true
         files: ./coverage.xml
