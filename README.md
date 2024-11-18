@@ -60,8 +60,8 @@ import babyyoda.yoda as yoda
 | ---------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------ |
 | [histoprint](https://github.com/scikit-hep/histoprint)           | ✅     | [histo1d](examples/interface/histoprint/histo1d.ipynb)                                                                   |
 | [mplhep](https://github.com/scikit-hep/mplhep)                   | ✅     | [histo1d](examples/interface/mplhep/histo1d.ipynb), [histo2d](examples/interface/mplhep/histo2d.ipynb)                   |
-| [plothist](https://github.com/scikit-hep/plothist)               | ❌     | Does not support UHI/PlottableProtocol, only boost-histogram                                                             |
-| [uproot](https://github.com/scikit-hep/uproot)                   | ❌     | WIP: [histo1d](examples/interface/uproot/histo1d.ipynb)                                                                  |
+| [plothist](https://github.com/scikit-hep/plothist)               | ❌     | WIP: https://github.com/cyrraz/plothist/issues/98 Does not support UHI/PlottableProtocol, only boost-histogram()         |
+| [uproot](https://github.com/scikit-hep/uproot)                   | ❌     | WIP: https://github.com/scikit-hep/uproot5/issues/1339 [histo1d](examples/interface/uproot/histo1d.ipynb)                |
 | [hist](https://github.com/scikit-hep/hist)                       | ✅     | [histo1d](examples/interface/hist/histo1d.ipynb), [histo2d](examples/interface/hist/histo2d.ipynb)                       |
 | [boost-histogram](https://github.com/scikit-hep/boost-histogram) | ✅     | [histo1d](examples/interface/boost-histogram/histo1d.ipynb), [histo2d](examples/interface/boost-histogram/histo2d.ipynb) |
 | [cuda-histogram](https://github.com/scikit-hep/cuda-histogram)   | ❔     |                                                                                                                          |
