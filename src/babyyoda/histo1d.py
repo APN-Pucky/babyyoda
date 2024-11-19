@@ -90,6 +90,21 @@ class UHIHisto1D(
     # BACKENDS
     ######
 
+    def to_uncertainties(self, divide_by_volume: bool = True) -> Any:
+        from uncertainties import unumpy
+
+        # compute bin mid from edges
+        xe = self.xEdges()
+        mid = (np.array(xe[:-1]) + np.array(xe[1:])) / 2
+        width = np.diff(xe)
+
+        if divide_by_volume:
+            return unumpy.uarray(mid, width / 2), unumpy.uarray(
+                self.sumWs() / width, self.errWs() / width
+            )
+
+        return unumpy.uarray(mid, width / 2), unumpy.uarray(self.sumWs(), self.errWs())
+
     def to_boost_histogram(self) -> Any:
         import boost_histogram as bh
 
