@@ -2,6 +2,7 @@ import contextlib
 import sys
 from typing import Any, Optional, Union
 
+import matplotlib.pyplot as plt
 import mplhep as hep
 import numpy as np
 from uhi.typing.plottable import (
@@ -436,6 +437,7 @@ class UHIHisto1D(
             binwnorm=binwnorm,
             **kwargs,
         )
+        plt.title(self.path())
 
     def _ipython_display_(self) -> "UHIHisto1D":
         with contextlib.suppress(ImportError):

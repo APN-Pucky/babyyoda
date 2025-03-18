@@ -71,7 +71,7 @@ babyyoda = "babyyoda.cli.main:main"
 
 [project.urls]
 Documentation = "https://github.com/APN-Pucky/babyyoda#readme"
-Issues = "https://github.com/APN-Pucky/babyyoda//issues"
+Issues = "https://github.com/APN-Pucky/babyyoda/issues"
 Source = "https://github.com/APN-Pucky/babyyoda/"
 
 [tool.hatch.envs.types]
