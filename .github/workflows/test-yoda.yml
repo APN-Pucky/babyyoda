@@ -27,6 +27,8 @@ jobs:
       matrix:
         yoda-version: ['1.9.10',
           # '2.0.1',  # This version is faulty!!!
+          '2.0.2',
+          '2.1.0',
           '9999']
 
     steps:
