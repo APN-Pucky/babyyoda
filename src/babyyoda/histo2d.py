@@ -1,6 +1,6 @@
 import contextlib
 import sys
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, cast
 
 import mplhep as hep
 import numpy as np
@@ -375,17 +375,30 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
     ) -> None:
         set_bin2d(self.__getitem__(slices), value)
 
-    def __getitem__(
-        self, slices: tuple[Union[int, slice, loc], Union[int, slice, loc]]
-    ) -> Any:
-        # integer index
-        if slices is underflow:  # type: ignore[comparison-overlap]
+    def __rm_flow_indices(
+        self,
+        input: tuple[
+            Union[int, slice, loc, type[overflow], type[underflow]],
+            Union[int, slice, loc, type[overflow], type[underflow]],
+        ],
+    ) -> tuple[
+        Union[int, slice, loc],
+        Union[int, slice, loc],
+    ]:
+        if not all(isinstance(i, (int, slice, loc)) for i in input):
             err = "No underflow bin in 2D histogram"
             raise TypeError(err)
-        if slices is overflow:  # type: ignore[comparison-overlap]
-            err = "No overflow bin in 2D histogram"
-            raise TypeError(err)
-        if isinstance(slices, tuple) and len(slices) == 2:  # type: ignore[redundant-expr]
+        return cast(tuple[Union[int, slice, loc], Union[int, slice, loc]], input)
+
+    def __getitem__(
+        self,
+        islices: tuple[
+            Union[int, slice, loc, type[overflow], type[underflow]],
+            Union[int, slice, loc, type[overflow], type[underflow]],
+        ],
+    ) -> Any:
+        if isinstance(islices, tuple) and len(islices) == 2:  # type: ignore[redundant-expr]
+            slices = self.__rm_flow_indices(islices)
             ix, iy = self.__get_indices(slices)
             if isinstance(ix, int) and isinstance(iy, int):
                 return self.__get_by_indices(ix, iy)
