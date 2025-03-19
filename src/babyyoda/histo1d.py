@@ -2,6 +2,7 @@ import contextlib
 import sys
 from typing import Any, Optional, Union
 
+import matplotlib.pyplot as plt
 import mplhep as hep
 import numpy as np
 from uhi.typing.plottable import (
@@ -89,6 +90,21 @@ class UHIHisto1D(
     ######
     # BACKENDS
     ######
+
+    def to_uncertainties(self, divide_by_volume: bool = True) -> Any:
+        from uncertainties import unumpy
+
+        # compute bin mid from edges
+        xe = self.xEdges()
+        mid = (np.array(xe[:-1]) + np.array(xe[1:])) / 2
+        width = np.diff(xe)
+
+        if divide_by_volume:
+            return unumpy.uarray(mid, width / 2), unumpy.uarray(
+                self.sumWs() / width, self.errWs() / width
+            )
+
+        return unumpy.uarray(mid, width / 2), unumpy.uarray(self.sumWs(), self.errWs())
 
     def to_boost_histogram(self) -> Any:
         import boost_histogram as bh
@@ -421,6 +437,7 @@ class UHIHisto1D(
             binwnorm=binwnorm,
             **kwargs,
         )
+        plt.title(self.path())
 
     def _ipython_display_(self) -> "UHIHisto1D":
         with contextlib.suppress(ImportError):

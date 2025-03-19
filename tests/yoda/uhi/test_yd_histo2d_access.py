@@ -45,9 +45,9 @@ def test_access_loc():
 
     (
         assert_value2d(h[loc(3), loc(4)], h.binAt(3, 4)),
-        f"{h[loc(3),loc(4)]} != {h.binAt(3, 4)}",
+        f"{h[loc(3), loc(4)]} != {h.binAt(3, 4)}",
     )
     (
         assert_value2d(g[loc(3), loc(4)], g.binAt(3, 4)),
-        f"{g[loc(3),loc(4)]} != {g.binAt(3, 4)}",
+        f"{g[loc(3), loc(4)]} != {g.binAt(3, 4)}",
     )

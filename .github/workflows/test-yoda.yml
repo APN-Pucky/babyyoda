@@ -5,6 +5,8 @@ on:
     branches:
       - master
   pull_request:
+    branches:
+      - master
   # Run daily at 0:01 UTC
   schedule:
   - cron:  '1 0 * * *'
@@ -27,6 +29,8 @@ jobs:
       matrix:
         yoda-version: ['1.9.10',
           # '2.0.1',  # This version is faulty!!!
+          '2.0.2',
+          '2.1.0',
           '9999']
 
     steps:
