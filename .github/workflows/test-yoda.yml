@@ -27,26 +27,29 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        yoda-version: ['1.9.10',
+        yoda-version: [
+          '1.9.10',
           # '2.0.1',  # This version is faulty!!!
           '2.0.2',
           '2.1.0',
-          '9999']
+          '9999'
+        ]
 
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
+    - uses: astral-sh/setup-uv@v5
+
     - name: Install dependencies
       run: |
-        PYTHON_TARGETS="python3_12" emerge -q dev-python/pip
-        python3.12 -m pip install '.[test]' --break-system-packages
-        python3.12 -m pip list
+        uv pip install '.[test]' --break-system-packages
+        uv pip list
 
     - name: Test with pytest
       run: |
-        python3.12 -m pytest  --cov --cov-report=xml -r sx tests/
+        uvx pytest  --cov --cov-report=xml -r sx tests/
 
     - name: Report core project coverage with Codecov
       if: >-
