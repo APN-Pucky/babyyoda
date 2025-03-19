@@ -44,12 +44,12 @@ jobs:
 
     - name: Install dependencies
       run: |
-        uv pip install '.[test]' --break-system-packages
+        uv pip install --system '.[test]' --break-system-packages
         uv pip list
 
     - name: Test with pytest
       run: |
-        uvx pytest  --cov --cov-report=xml -r sx tests/
+        pytest  --cov --cov-report=xml -r sx tests/
 
     - name: Report core project coverage with Codecov
       if: >-
