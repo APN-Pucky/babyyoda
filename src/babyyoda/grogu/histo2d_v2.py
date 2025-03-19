@@ -291,8 +291,9 @@ class GROGU_HISTO2D_V2(GROGU_ANALYSIS_OBJECT, UHIHisto2D):
 
     def bins(self, includeOverflows: bool = False) -> list[Bin]:
         if includeOverflows:
-            err = "includeFlow=True not supported"
+            err = "includeFlow=True not supported in 2D v2 histograms"
             raise NotImplementedError(err)
+            # Possible padding implementation, but still in conflict with YODA1
         # sort the bins by xlow, then ylow
         # YODA-1
         # return sorted(self.d_bins, key=lambda b: (b.d_xmin, b.d_ymin))
