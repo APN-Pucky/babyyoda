@@ -60,6 +60,9 @@ docs = [
   "sphinx"
 ]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.envs.develop]
 features = [
   "develop",
