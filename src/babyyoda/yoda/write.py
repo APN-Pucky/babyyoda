@@ -24,9 +24,19 @@ def write(
 
     if isinstance(anyhistograms, dict):
         # replace every value of dict by value.target
-        anyhistograms = {k: v.target for k, v in anyhistograms.items()}
-        yd.write(anyhistograms, file_path, *args, **kwargs)
+        tmpanyhistograms = {}
+        for k,v in anyhistograms.items():
+            if hasattr(v,"target"):
+                tmpanyhistograms[k] = v.target
+            else:
+                tmpanyhistograms[k] = v
+        yd.write(tmpanyhistograms, file_path, *args, **kwargs)
     elif isinstance(anyhistograms, list):
         # replace every value of list by value.target
-        anyhistograms = [v.target for v in anyhistograms]
-        yd.write(anyhistograms, file_path, *args, **kwargs)
+        tmpanyhistograms = []
+        for v in anyhistograms:
+            if hasattr(v,"target"):
+                tmpanyhistograms.append(v.target)
+            else:
+                tmpanyhistograms.append(v)
+        yd.write(tmpanyhistograms, file_path, *args, **kwargs)
