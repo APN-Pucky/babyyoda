@@ -32,7 +32,7 @@ classifiers = [
 ]
 dependencies = [
   "numpy",
-  "uhi",
+  "uhi @ git+https://github.com/scikit-hep/uhi",
   "mplhep>=0.3.55",
   "smplr",
 ]
@@ -43,7 +43,6 @@ lint = [
 test = [
     "boost_histogram",
     "hist",
-    "uhi",
     "histoprint",
     "mplhep",
     "pydocstyle",
