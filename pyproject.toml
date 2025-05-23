@@ -35,7 +35,7 @@ dependencies = [
   "uhi",
   "mplhep>=0.3.55",
 ]
-[project.optional-dependencies]
+optional-dependencies = {
 lint = [
     "ruff",
 ]
@@ -59,6 +59,7 @@ develop = [
 docs = [
   "sphinx"
 ]
+}
 
 [tool.hatch.envs.develop]
 features = [
