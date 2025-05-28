@@ -308,8 +308,12 @@ class UHIHisto1D(
     def variances(self) -> np.typing.NDArray[Any]:
         return np.array([(b.sumW2()) for b in self.bins()])
 
-    def __eq__(self, other: Any) -> bool:
-        return self.counts().tolist() == other.counts().tolist() and self.xEdges() == other.xEdges() and self.variances().tolist() == other.variances().tolist()
+    def __eq__(self, other: object) -> bool:
+        return (
+            self.counts().tolist() == other.counts().tolist()
+            and self.xEdges() == other.xEdges()
+            and self.variances().tolist() == other.variances().tolist()
+        )
 
     def __getitem__(
         self,
@@ -463,7 +467,6 @@ class UHIHisto1D(
                 for i in d:
                     self.__set_by_index(i, value)
             else:
-                print(len(d), len(value))
                 # automagic inclusion of under and overflow depending on the value size...
                 if len(value) == len(d) - 1 and (
                     item.start is not None or item.stop is not None

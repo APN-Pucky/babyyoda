@@ -17,7 +17,6 @@ from babyyoda.util import (
     project,
     rebin,
     rebinBy_to_rebinTo,
-    shift_rebinby,
     shift_rebinto,
     underflow,
 )
@@ -324,6 +323,13 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
             .T
         )
 
+    def __eq__(self, other: object) -> bool:
+        return (
+            self.values().tolist() == other.values().tolist()
+            and self.variances().tolist() == other.variances().tolist()
+            and self.axes() == other.axes()
+        )
+
     def counts(self) -> np.typing.NDArray[Any]:
         return (
             np.array([b.numEntries() for b in self.bins()])
@@ -354,6 +360,8 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
         ix = None
         if isinstance(slices, int):
             ix = slices
+            while ix < 0:
+                ix += len(self.xEdges()) - 1
         if isinstance(slices, loc):
             ix = self.__get_index_by_loc(slices, self.axes[0])
         return ix
@@ -362,6 +370,8 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
         iy = None
         if isinstance(slices, int):
             iy = slices
+            while iy < 0:
+                iy += len(self.yEdges()) - 1
         if isinstance(slices, loc):
             iy = self.__get_index_by_loc(slices, self.axes[1])
         return iy
@@ -388,6 +398,12 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
             raise TypeError(err)
         if isinstance(slices, tuple) and len(slices) == 2:  # type: ignore[redundant-expr]
             ix, iy = self.__get_indices(slices)
+            if isinstance(ix, int) and ix > len(self.xEdges()) - 2:
+                err = f"X index {ix} is out of bounds for histogram with {len(self.xEdges()) - 1} bins"
+                raise IndexError(err)
+            if isinstance(iy, int) and iy > len(self.yEdges()) - 2:
+                err = f"Y index {iy} is out of bounds for histogram with {len(self.yEdges()) - 1} bins"
+                raise IndexError(err)
             if isinstance(ix, int) and isinstance(iy, int):
                 return self.__get_by_indices(ix, iy)
             if isinstance(slices[0], slice) and isinstance(iy, int):
@@ -409,8 +425,16 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
                 )
 
                 if isinstance(ystep, rebin):
-                    ystart, ystop = shift_rebinby(ystart, ystop)
-                    sc.rebinYBy(ystep.factor, ystart, ystop)
+                    # ystart, ystop = shift_rebinby(ystart, ystop)
+                    if ystart is None:
+                        ystart = 0
+                    if ystop is None:
+                        ystop = len(self.yEdges()) - 1
+                    closest_stop = (
+                        ystop - ystart
+                    ) // ystep.factor * ystep.factor + ystart
+                    sc = sc[:, ystart:closest_stop]
+                    sc.rebinYBy(ystep.factor, 1, sys.maxsize)
                 elif ystep is project:
                     ystart, ystop = shift_rebinto(ystart, ystop)
                     sc.rebinYTo(sc.yEdges()[ystart:ystop])
@@ -422,8 +446,16 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
 
                 if isinstance(xstep, rebin):
                     # weird yoda default
-                    xstart, xstop = shift_rebinby(xstart, xstop)
-                    sc.rebinXBy(xstep.factor, xstart, xstop)
+                    # xstart, xstop = shift_rebinby(xstart, xstop)
+                    if xstart is None:
+                        xstart = 0
+                    if xstop is None:
+                        xstop = len(self.xEdges()) - 1
+                    closest_stop = (
+                        xstop - xstart
+                    ) // xstep.factor * xstep.factor + xstart
+                    sc = sc[xstart:closest_stop, :]
+                    sc.rebinXBy(xstep.factor, 1, sys.maxsize)
                 elif xstep is project:
                     xstart, xstop = shift_rebinto(xstart, xstop)
                     sc.rebinXTo(sc.xEdges()[xstart:xstop])
