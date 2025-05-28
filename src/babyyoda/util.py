@@ -3,39 +3,41 @@ import inspect
 import sys
 from typing import Any, Optional, TextIO
 
-
-class loc:
-    "When used in the start or stop of a Histogram's slice, x is taken to be the position in data coordinates."
-
-    def __init__(self, x: float, offset: int = 0):
-        self.value = x
-        self.offset = offset
-
-    # add and subtract method
-    def __add__(self, other: int) -> "loc":
-        return loc(self.value, self.offset + other)
-
-    def __sub__(self, other: int) -> "loc":
-        return loc(self.value, self.offset - other)
-
-
-class rebin:
-    "When used in the step of a Histogram's slice, rebin(n) combines bins, scaling their widths by a factor of n. If the number of bins is not divisible by n, the remainder is added to the overflow bin."
-
-    def __init__(self, factor: int):
-        self.factor = factor
+# from uhi.tag import sum
+# class loc:
+#    "When used in the start or stop of a Histogram's slice, x is taken to be the position in data coordinates."
+#
+#    def __init__(self, x: float, offset: int = 0):
+#        self.value = x
+#        self.offset = offset
+#
+#    # add and subtract method
+#    def __add__(self, other: int) -> "loc":
+#        return loc(self.value, self.offset + other)
+#
+#    def __sub__(self, other: int) -> "loc":
+#        return loc(self.value, self.offset - other)
 
 
-class underflow:
-    pass
+# class rebin:
+#    "When used in the step of a Histogram's slice, rebin(n) combines bins, scaling their widths by a factor of n. If the number of bins is not divisible by n, the remainder is added to the overflow bin."
+#
+#    def __init__(self, factor: int):
+#        self.factor = factor
 
 
-class overflow:
-    pass
+# class underflow:
+#    pass
+#
+#
+# class overflow:
+#    pass
 
 
-class project:
-    pass
+# class project:
+#    pass
+
+project = sum
 
 
 def open_write_file(file_path: str, gz: bool = False) -> TextIO:
@@ -124,7 +126,7 @@ def rebinBy_to_rebinTo(
         new_edges.append(edges[j])
         new_edges.append(edges[j + 1])
     # no duplicates
-    return list(set(new_edges))
+    return sorted(list(set(new_edges)))
 
 
 def shift_rebinby(ystart: Optional[int], ystop: Optional[int]) -> tuple[int, int]:
