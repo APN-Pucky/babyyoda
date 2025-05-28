@@ -3,6 +3,14 @@ import inspect
 import sys
 from typing import Any, Optional, TextIO
 
+from uhi.tag import loc, overflow, rebin, underflow
+
+loc = loc  # for backwards compatibility
+
+rebin = rebin  # for backwards compatibility
+underflow = underflow  # for backwards compatibility
+overflow = overflow  # for backwards compatibility
+
 # from uhi.tag import sum
 # class loc:
 #    "When used in the start or stop of a Histogram's slice, x is taken to be the position in data coordinates."
