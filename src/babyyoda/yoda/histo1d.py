@@ -32,6 +32,10 @@ class Histo1D(babyyoda.UHIHisto1D):
 
     def clone(self) -> "Histo1D":
         return Histo1D(self.target.clone())
+    
+
+    def setAnnotation(self, key, value):
+        return self.target.setAnnotation(key, value)
 
     def get_projector(self) -> Any:
         return Counter

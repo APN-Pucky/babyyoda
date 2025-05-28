@@ -42,6 +42,9 @@ class Counter(babyyoda.UHICounter):
     def clone(self) -> "Counter":
         return Counter(self.target.clone())
 
+    def setAnnotation(self, key, value):
+        return self.target.setAnnotation(key, value)
+
     # Fix https://gitlab.com/hepcedar/yoda/-/issues/101
     def annotationsDict(self) -> dict[str, Optional[str]]:
         d = {}

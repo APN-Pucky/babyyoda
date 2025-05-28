@@ -308,6 +308,9 @@ class UHIHisto1D(
     def variances(self) -> np.typing.NDArray[Any]:
         return np.array([(b.sumW2()) for b in self.bins()])
 
+    def __eq__(self, other: Any) -> bool:
+        return self.counts().tolist() == other.counts().tolist() and self.xEdges() == other.xEdges() and self.variances().tolist() == other.variances().tolist()
+
     def __getitem__(
         self,
         slices: Union[

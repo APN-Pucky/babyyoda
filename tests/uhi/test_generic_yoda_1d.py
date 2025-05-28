@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import uhi.testing.indexing
 
+from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
 from babyyoda.histo1d import UHIHisto1D
 from babyyoda.test import init_yoda
 
@@ -11,6 +12,15 @@ yoda, yoda_available, yoda2 = init_yoda()
 class TestAccess1D(uhi.testing.indexing.Indexing1D[UHIHisto1D]):
     def get_value(self, bin):
         return bin.sumW()
+
+    def bin_to_value(self, bin):
+        return bin.sumW()
+
+    def sum_to_value(self, bin):
+        return bin.sumW()
+
+    def value_to_bin(self, value):
+        return GROGU_HISTO1D_V3.Bin(d_sumw=value)
 
     @staticmethod
     def make_histogram() -> UHIHisto1D:
