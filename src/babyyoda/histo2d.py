@@ -327,8 +327,8 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
         if not isinstance(other, UHIHisto2D):
             return False
         return (
-            self.values().tolist() == other.values().tolist()
-            and self.variances().tolist() == other.variances().tolist()
+            np.array_equal(self.values(), other.values())
+            and np.array_equal(self.variances(), other.variances())
             and self.axes == other.axes
         )
 

@@ -312,9 +312,9 @@ class UHIHisto1D(
         if not isinstance(other, UHIHisto1D):
             return False
         return (
-            self.counts().tolist() == other.counts().tolist()
-            and self.xEdges() == other.xEdges()
-            and self.variances().tolist() == other.variances().tolist()
+            np.array_equal(self.counts(), other.counts())
+            and self.axes == other.axes
+            and np.array_equal(self.variances(), other.variances())
         )
 
     def __getitem__(
