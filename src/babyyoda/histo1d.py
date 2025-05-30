@@ -309,6 +309,8 @@ class UHIHisto1D(
         return np.array([(b.sumW2()) for b in self.bins()])
 
     def __eq__(self, other: object) -> bool:
+        if not isinstance(other, UHIHisto1D):
+            return False
         return (
             self.counts().tolist() == other.counts().tolist()
             and self.xEdges() == other.xEdges()
@@ -317,11 +319,11 @@ class UHIHisto1D(
 
     def __getitem__(
         self,
-        slices: Union[
+        slices: Union[  # type: ignore[valid-type]
             int,
             loc,
             slice,
-            Ellipsis,
+            type[Ellipsis],
             type[babyyoda.util.underflow],
             type[babyyoda.util.overflow],
         ],
@@ -449,6 +451,11 @@ class UHIHisto1D(
                 self.__get_index(item.stop),
                 item.step,
             )
+            if not (start is None or isinstance(start, int)) or not (
+                stop is None or isinstance(stop, int)
+            ):
+                err = "Invalid argument type"
+                raise TypeError(err)
             a = []
             c = []
             if start is None:
@@ -459,10 +466,10 @@ class UHIHisto1D(
                 c += [overflow]
             if step is None:
                 step = 1
-            b = [i for i in range(start, stop, step)]
+            b = list(range(start, stop, step))
             d = a + b + c
 
-            # if value is not an array set everythin to the same value
+            # if value is not an array set everything to the same value
             if not isinstance(value, (list, np.ndarray)):
                 for i in d:
                     self.__set_by_index(i, value)
@@ -487,7 +494,9 @@ class UHIHisto1D(
                 for i, v in zip(d, value):
                     self.__set_by_index(i, v)
 
-    def project(self, includeUnderflow=False, includeOverflow=False) -> Any:
+    def project(
+        self, includeUnderflow: bool = False, includeOverflow: bool = False
+    ) -> Any:
         # sc = self.clone().rebinTo(self.xEdges()[0], self.xEdges()[-1])
         p = self.get_projector()()
         thebins = self.bins(includeOverflows=True)[

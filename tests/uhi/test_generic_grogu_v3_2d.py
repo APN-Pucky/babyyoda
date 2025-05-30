@@ -68,7 +68,6 @@ class TestAccess2D(uhi.testing.indexing.Indexing2D[UHIHisto2D]):
         # No
         pass
 
-
     def test_slicing_all(self):
         # TODO no clue why equality check fails
         pass

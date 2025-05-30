@@ -324,10 +324,12 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
         )
 
     def __eq__(self, other: object) -> bool:
+        if not isinstance(other, UHIHisto2D):
+            return False
         return (
             self.values().tolist() == other.values().tolist()
             and self.variances().tolist() == other.variances().tolist()
-            and self.axes() == other.axes()
+            and self.axes == other.axes
         )
 
     def counts(self) -> np.typing.NDArray[Any]:
@@ -352,7 +354,8 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
         # find the index in bin where loc is
         for a, b in bins:
             if a <= oloc.value and oloc.value < b:
-                return bins.index((a, b)) + oloc.offset
+                offset: int = oloc.offset
+                return bins.index((a, b)) + offset
         err = f"loc {oloc.value} is not in the range of {bins}"
         raise ValueError(err)
 
@@ -387,13 +390,17 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
         set_bin2d(self.__getitem__(slices), value)
 
     def __getitem__(
-        self, slices: tuple[Union[int, slice, loc], Union[int, slice, loc]]
+        self,
+        slices: tuple[
+            Union[int, slice, loc, underflow, overflow],
+            Union[int, slice, loc, underflow, overflow],
+        ],
     ) -> Any:
         # integer index
-        if slices is underflow:  # type: ignore[comparison-overlap]
+        if slices is underflow:
             err = "No underflow bin in 2D histogram"
             raise TypeError(err)
-        if slices is overflow:  # type: ignore[comparison-overlap]
+        if slices is overflow:
             err = "No overflow bin in 2D histogram"
             raise TypeError(err)
         if isinstance(slices, tuple) and len(slices) == 2:  # type: ignore[redundant-expr]

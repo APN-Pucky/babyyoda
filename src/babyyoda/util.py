@@ -5,11 +5,7 @@ from typing import Any, Optional, TextIO
 
 from uhi.tag import loc, overflow, rebin, underflow
 
-loc = loc  # for backwards compatibility
-
-rebin = rebin  # for backwards compatibility
-underflow = underflow  # for backwards compatibility
-overflow = overflow  # for backwards compatibility
+__all__ = ["loc", "overflow", "rebin", "underflow"]
 
 # from uhi.tag import sum
 # class loc:
@@ -134,7 +130,7 @@ def rebinBy_to_rebinTo(
         new_edges.append(edges[j])
         new_edges.append(edges[j + 1])
     # no duplicates
-    return sorted(list(set(new_edges)))
+    return sorted(set(new_edges))
 
 
 def shift_rebinby(ystart: Optional[int], ystop: Optional[int]) -> tuple[int, int]:
