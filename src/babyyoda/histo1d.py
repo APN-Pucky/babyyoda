@@ -308,19 +308,38 @@ class UHIHisto1D(
     def variances(self) -> np.typing.NDArray[Any]:
         return np.array([(b.sumW2()) for b in self.bins()])
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, UHIHisto1D):
+            return False
+        return (
+            np.array_equal(self.counts(), other.counts())
+            and self.axes == other.axes
+            and np.array_equal(self.variances(), other.variances())
+        )
+
     def __getitem__(
         self,
-        slices: Union[
-            int, loc, slice, type[babyyoda.util.underflow], type[babyyoda.util.overflow]
+        slices: Union[  # type: ignore[valid-type]
+            int,
+            loc,
+            slice,
+            type[Ellipsis],
+            type[babyyoda.util.underflow],
+            type[babyyoda.util.overflow],
         ],
     ) -> Any:
+        if slices is Ellipsis:
+            return self.clone()
         index = self.__get_index(slices)
         # integer index
         if isinstance(index, int):  # loc and int
+            if index >= len(self.bins()):
+                err = "Index out of bounds"
+                raise IndexError(err)
             return self.bin(index)
-        if slices is underflow:
+        if index is underflow:
             return self.underflow()
-        if slices is overflow:
+        if index is overflow:
             return self.overflow()
 
         if isinstance(slices, slice):
@@ -340,19 +359,21 @@ class UHIHisto1D(
 
             sc = self.clone()
             if isinstance(step, rebin):
-                # weird yoda default
+                # if stop - start is not divisible by step.factor we drop the last bins
+                # Compute closest stop = n * step.factor + start
                 if start is None:
-                    start = 1
-                else:
-                    start += 1
+                    start = 0
                 if stop is None:
-                    stop = sys.maxsize
-                else:
-                    stop += 1
-                sc.rebinBy(step.factor, start, stop)
+                    stop = len(self.bins())
+                closest_stop = (stop - start) // step.factor * step.factor + start
+                sc = sc[start:closest_stop]
+                sc.rebinBy(step.factor, 1, sys.maxsize)
             elif step is project:
                 # Get the subset and then project
-                sc = self[item.start : item.stop].project()
+                sc = self[item.start : item.stop].project(
+                    includeUnderflow=item.start is None,
+                    includeOverflow=item.stop is None,
+                )
             else:
                 if stop is not None:
                     stop += 1
@@ -388,6 +409,10 @@ class UHIHisto1D(
                     idx = i
             if idx is not None:
                 index = idx + slices.offset
+            elif slices.value < self.xEdges()[0]:
+                index = underflow
+            elif slices.value > self.xEdges()[-1]:
+                index = overflow
         if slices is underflow:
             index = underflow
         if slices is overflow:
@@ -417,13 +442,70 @@ class UHIHisto1D(
         if index is not None:
             self.__set_by_index(index, value)
 
-    def project(self) -> Any:
+        if isinstance(slices, slice):
+            # TODO handle ellipsis
+            item = slices
+            # print(f"slice {item}")
+            start, stop, step = (
+                self.__get_index(item.start),
+                self.__get_index(item.stop),
+                item.step,
+            )
+            if not (start is None or isinstance(start, int)) or not (
+                stop is None or isinstance(stop, int)
+            ):
+                err = "Invalid argument type"
+                raise TypeError(err)
+            a = []
+            c = []
+            if start is None:
+                start = 0
+                a += [underflow]
+            if stop is None:
+                stop = len(self.bins())
+                c += [overflow]
+            if step is None:
+                step = 1
+            b = list(range(start, stop, step))
+            d = a + b + c
+
+            # if value is not an array set everything to the same value
+            if not isinstance(value, (list, np.ndarray)):
+                for i in d:
+                    self.__set_by_index(i, value)
+            else:
+                # automagic inclusion of under and overflow depending on the value size...
+                if len(value) == len(d) - 1 and (
+                    item.start is not None or item.stop is not None
+                ):
+                    if item.start is None:
+                        d = d[1:]
+                    elif item.stop is None:
+                        d = d[:-1]
+                elif (
+                    len(value) == len(d) - 2
+                    and item.start is None
+                    and item.stop is None
+                ):
+                    d = d[1:-1]
+                if len(value) != len(d):
+                    err = "Value length does not match slice length"
+                    raise ValueError(err)
+                for i, v in zip(d, value):
+                    self.__set_by_index(i, v)
+
+    def project(
+        self, includeUnderflow: bool = False, includeOverflow: bool = False
+    ) -> Any:
         # sc = self.clone().rebinTo(self.xEdges()[0], self.xEdges()[-1])
         p = self.get_projector()()
+        thebins = self.bins(includeOverflows=True)[
+            0 if includeUnderflow else 1 : None if includeOverflow else -1
+        ]
         p.set(
-            sum([b.numEntries() for b in self.bins()]),
-            sum([b.sumW() for b in self.bins()]),
-            sum([b.sumW2() for b in self.bins()]),
+            sum([b.numEntries() for b in thebins]),
+            sum([b.sumW() for b in thebins]),
+            sum([b.sumW2() for b in thebins]),
         )
         p.setAnnotationsDict(self.annotationsDict())
         return p

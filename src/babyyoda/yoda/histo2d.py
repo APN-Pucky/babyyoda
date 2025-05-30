@@ -30,6 +30,9 @@ class Histo2D(babyyoda.UHIHisto2D):
     def clone(self) -> "Histo2D":
         return Histo2D(self.target.clone())
 
+    def setAnnotation(self, key: str, value: str) -> None:
+        self.target.setAnnotation(key, value)
+
     def path(self) -> str:
         return str(self.target.path())
 
