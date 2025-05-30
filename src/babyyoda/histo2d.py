@@ -4,6 +4,7 @@ from typing import Any, Optional, Union
 
 import mplhep as hep
 import numpy as np
+import smplr
 from uhi.typing.plottable import (
     PlottableHistogram,
 )
@@ -472,7 +473,13 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
     def to_string(self) -> str:
         return str(self.to_grogu_v3().to_string())
 
-    def plot(self, *args: Any, binwnorm: float = 1.0, **kwargs: Any) -> None:
+    def plot(
+        self,
+        *args: Any,
+        binwnorm: float = 1.0,
+        title: Optional[str] = None,
+        **kwargs: Any,
+    ) -> None:
         # # TODO should use histplot?
         # import mplhep as hep
 
@@ -485,6 +492,8 @@ class UHIHisto2D(UHIAnalysisObject, PlottableHistogram):
         #    **kwargs,
         # )
         hep.hist2dplot(self, *args, binwnorm=binwnorm, **kwargs)
+        title = title if title is not None else self.path()
+        smplr.style_plot2d(title=title, **kwargs)
 
     def _ipython_display_(self) -> "UHIHisto2D":
         with contextlib.suppress(ImportError):

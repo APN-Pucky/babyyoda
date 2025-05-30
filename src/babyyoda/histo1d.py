@@ -2,9 +2,9 @@ import contextlib
 import sys
 from typing import Any, Optional, Union
 
-import matplotlib.pyplot as plt
 import mplhep as hep
 import numpy as np
+import smplr
 from uhi.typing.plottable import (
     PlottableHistogram,
 )
@@ -428,7 +428,13 @@ class UHIHisto1D(
         p.setAnnotationsDict(self.annotationsDict())
         return p
 
-    def plot(self, *args: Any, binwnorm: float = 1.0, **kwargs: Any) -> None:
+    def plot(
+        self,
+        *args: Any,
+        binwnorm: float = 1.0,
+        title: Optional[str] = None,
+        **kwargs: Any,
+    ) -> None:
         hep.histplot(
             self,
             *args,
@@ -437,7 +443,8 @@ class UHIHisto1D(
             binwnorm=binwnorm,
             **kwargs,
         )
-        plt.title(self.path())
+        title = title if title is not None else self.path()
+        smplr.style_plot1d(title=title, **kwargs)
 
     def _ipython_display_(self) -> "UHIHisto1D":
         with contextlib.suppress(ImportError):
