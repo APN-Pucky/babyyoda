@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import unittest
+
 import uhi.testing.indexing
 
 from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
@@ -9,6 +11,7 @@ from babyyoda.test import init_yoda
 yoda, yoda_available, yoda2 = init_yoda()
 
 
+@unittest.skipIf(not yoda2, "yoda >= 2.0.0 is required, since yoda1 can not set values")
 class TestAccess1D(uhi.testing.indexing.Indexing1D[UHIHisto1D]):
     def get_value(self, bin):
         return bin.sumW()
