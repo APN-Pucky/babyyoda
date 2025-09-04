@@ -32,8 +32,7 @@ classifiers = [
 ]
 dependencies = [
   "numpy",
-  #"uhi",
-  "uhi @ git+https://github.com/scikit-hep/uhi",
+  "uhi>=1.0.0",
   "mplhep>=0.3.55",
   "smplr",
 ]
