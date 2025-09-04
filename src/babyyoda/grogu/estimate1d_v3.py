@@ -1,4 +1,5 @@
 import re
+import warnings
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -238,8 +239,12 @@ class GROGU_ESTIMATE1D_V3(GROGU_ANALYSIS_OBJECT, UHIAnalysisObject):
                     bin_obj = cls.Bin.from_string(line, error_labels)
                     bins.append(bin_obj)
                 except (ValueError, IndexError) as e:
-                    # Skip malformed lines
-                    print(f"Warning: Could not parse line '{line}': {e}")
+                    # Skip malformed lines with a proper warning
+                    warnings.warn(
+                        f"Could not parse line '{line}': {e}. Skipping malformed line.",
+                        UserWarning,
+                        stacklevel=2,
+                    )
                     continue
 
         return cls(
@@ -269,9 +274,7 @@ class GROGU_ESTIMATE1D_V3(GROGU_ANALYSIS_OBJECT, UHIAnalysisObject):
         # Format column headers
         column_headers = ["# value"]
         for i, _ in enumerate(self.d_error_labels, start=1):
-            column_headers.extend(
-                [f"errDn({i})", f"errUp({i})"]
-            )
+            column_headers.extend([f"errDn({i})", f"errUp({i})"])
         header_line = "\t".join(column_headers) + "\t\n"
 
         # Format bin data
