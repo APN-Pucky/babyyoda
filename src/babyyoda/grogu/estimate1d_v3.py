@@ -264,9 +264,9 @@ class GROGU_ESTIMATE1D_V3(GROGU_ANALYSIS_OBJECT, UHIAnalysisObject):
 
         # Format column headers
         column_headers = ["# value"]
-        for _ in self.d_error_labels:
+        for i, _ in enumerate(self.d_error_labels, start=1):
             column_headers.extend(
-                [f"errDn({len(column_headers)//2})", f"errUp({len(column_headers)//2})"]
+                [f"errDn({i})", f"errUp({i})"]
             )
         header_line = "\t".join(column_headers) + "\t\n"
 
