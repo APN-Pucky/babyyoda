@@ -1,5 +1,6 @@
 import gzip
 import re
+import warnings
 from io import BufferedReader
 from typing import Union
 
@@ -87,6 +88,10 @@ def read(
             histograms[name] = GROGU_ESTIMATE2D_V3.from_string(full_match)
         else:
             # Add other parsing logic for different types if necessary
-            print(f"Unknown type: {hist_type}, skipping...")
+            warnings.warn(
+                f"Unknown histogram type: {hist_type}, skipping...",
+                UserWarning,
+                stacklevel=2,
+            )
 
     return histograms
