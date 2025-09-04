@@ -241,7 +241,8 @@ class GROGU_ESTIMATE1D_V3(GROGU_ANALYSIS_OBJECT, UHIAnalysisObject):
                 except (ValueError, IndexError) as e:
                     # Skip malformed lines with a proper warning
                     warnings.warn(
-                        f"Could not parse line '{line}': {e}. Skipping malformed line.",
+                        f"Could not parse bin data line in YODA_ESTIMATE1D_V3 '{key}': '{line}'. "
+                        f"Error: {e}. Skipping malformed line.",
                         UserWarning,
                         stacklevel=2,
                     )
