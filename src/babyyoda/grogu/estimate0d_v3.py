@@ -170,8 +170,7 @@ class GROGU_ESTIMATE0D_V3(GROGU_ANALYSIS_OBJECT, UHIAnalysisObject):
                     value_parsed = True
                 except (ValueError, IndexError) as e:
                     # Skip malformed lines with a proper warning
-                    warnings.warn(
-                        f"Could not parse line '{line}': {e}. Skipping malformed line.",
+                        f"Could not parse line '{line}' in Estimate0D V3 object with key '{key}': {e}. Skipping malformed line.",
                         UserWarning,
                         stacklevel=2,
                     )
