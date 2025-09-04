@@ -150,18 +150,22 @@ class GROGU_ESTIMATE1D_V3(GROGU_ANALYSIS_OBJECT, UHIAnalysisObject):
     def errors_dn(self, label_idx: int = 0) -> list[float]:
         """Get downward errors for a specific error source."""
         return [
-            bin.errors_dn()[label_idx]
-            if label_idx < len(bin.errors_dn())
-            else float("nan")
+            (
+                bin.errors_dn()[label_idx]
+                if label_idx < len(bin.errors_dn())
+                else float("nan")
+            )
             for bin in self.d_bins
         ]
 
     def errors_up(self, label_idx: int = 0) -> list[float]:
         """Get upward errors for a specific error source."""
         return [
-            bin.errors_up()[label_idx]
-            if label_idx < len(bin.errors_up())
-            else float("nan")
+            (
+                bin.errors_up()[label_idx]
+                if label_idx < len(bin.errors_up())
+                else float("nan")
+            )
             for bin in self.d_bins
         ]
 
