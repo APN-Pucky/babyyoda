@@ -5,6 +5,7 @@ from typing import Union
 
 from babyyoda.grogu.counter_v2 import GROGU_COUNTER_V2
 from babyyoda.grogu.counter_v3 import GROGU_COUNTER_V3
+from babyyoda.grogu.estimate1d_v3 import GROGU_ESTIMATE1D_V3
 from babyyoda.grogu.histo1d_v2 import GROGU_HISTO1D_V2
 from babyyoda.grogu.histo1d_v3 import GROGU_HISTO1D_V3
 from babyyoda.grogu.histo2d_v2 import GROGU_HISTO2D_V2
@@ -41,6 +42,7 @@ Histograms = Union[
     GROGU_HISTO1D_V3,
     GROGU_HISTO2D_V2,
     GROGU_HISTO2D_V3,
+    GROGU_ESTIMATE1D_V3,
 ]
 
 
@@ -73,6 +75,8 @@ def read(
             histograms[name] = GROGU_HISTO2D_V2.from_string(full_match)
         elif hist_type == "YODA_HISTO2D_V3":
             histograms[name] = GROGU_HISTO2D_V3.from_string(full_match)
+        elif hist_type == "YODA_ESTIMATE1D_V3":
+            histograms[name] = GROGU_ESTIMATE1D_V3.from_string(full_match)
         else:
             # Add other parsing logic for different types if necessary
             print(f"Unknown type: {hist_type}, skipping...")
