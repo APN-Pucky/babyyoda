@@ -4,6 +4,7 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/babyyoda.svg)](https://pypi.org/project/babyyoda)
 [![CI/CD](https://github.com/APN-Pucky/babyyoda/actions/workflows/ci.yml/badge.svg)](https://github.com/APN-Pucky/babyyoda/actions/workflows/ci.yml)
 [![Code Coverage](https://codecov.io/gh/APN-Pucky/babyyoda/graph/badge.svg?branch=master)](https://codecov.io/gh/APN-Pucky/babyyoda?branch=master)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19353784.svg)](https://doi.org/10.5281/zenodo.19353784)
 
 ______________________________________________________________________
 
