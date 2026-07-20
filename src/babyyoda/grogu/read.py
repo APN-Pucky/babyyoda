@@ -89,7 +89,7 @@ def read(
         else:
             # Add other parsing logic for different types if necessary
             warnings.warn(
-                f"Unknown histogram type: {hist_type}, skipping...",
+                f"Unknown histogram type: {hist_type} named '{name}', skipping...",
                 UserWarning,
                 stacklevel=2,
             )
