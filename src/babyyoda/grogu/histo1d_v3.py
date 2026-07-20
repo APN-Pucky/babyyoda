@@ -233,7 +233,6 @@ class GROGU_HISTO1D_V3(GROGU_ANALYSIS_OBJECT, UHIHisto1D):
         return (self.xEdges()[i] + self.xEdges()[i + 1]) / 2
 
     def rebinXTo(self, edges: list[float]) -> None:
-        print(f"Rebinning {self} to edges {edges}")
         own_edges = self.xEdges()
         for e in edges:
             assert e in own_edges, f"Edge {e} not found in own edges {own_edges}"
